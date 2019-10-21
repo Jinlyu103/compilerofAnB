@@ -38,26 +38,44 @@ let compileAct (seq,r1,r2,n,m) roleName =
   else if roleName = r2 then Some (Minus,m)
   else None
 
-let rec output_action outc = function
+let rec output_action_A outc = function
   | `Null -> output_string outc "null"  
   | `Actlist arr -> print_actlist outc arr
   | `Act (seq, r1, r2, n, m) ->
-  match compileAct (seq, r1, r2, n, m) "A" with
-    | Some (Plus, m)  -> printf "+"
-    | Some (Minus, m) -> printf "-"
-    | None -> printf "Empty"
+	match compileAct (seq, r1, r2, n, m) "A" with
+    	| Some (Plus, m)  -> printf "+"
+    	| Some (Minus, m) -> printf "-"
+    	| None -> printf "Empty"
+
 and print_actlist outc arr =
   output_string outc "Actions{\n";
   List.iteri ~f:(fun i v -> 
   if i > 0 then
      output_string outc "\n-------\n";
-  output_action outc v) arr;
+  output_action_A outc v) arr;
+  output_string outc "\n}"
+
+let rec output_action_B outc = function
+  | `Null -> output_string outc "null"  
+  | `Actlist arr -> print_actlist outc arr
+  | `Act (seq, r1, r2, n, m) ->
+	match compileAct (seq, r1, r2, n, m) "B" with
+    	| Some (Plus, m)  -> printf "+"
+    	| Some (Minus, m) -> printf "-"
+    	| None -> printf "Empty"
+
+and print_actlist outc arr =
+  output_string outc "Actions{\n";
+  List.iteri ~f:(fun i v -> 
+  if i > 0 then
+     output_string outc "\n-------\n";
+  output_action_B outc v) arr;
   output_string outc "\n}"
   
 let output_act outc = function
   | `Null  	-> output_string outc "null"
-  | `Actlist arr as a  -> printf "Actions: \n------\n%a\nEND" output_action a
-  | `Act (seq,r1,r2,n,m) as a -> printf "Actions: \n------\n%a\nEND" output_action a
+  | `Actlist arr as a  -> printf "------\nA:\n%a\n-------\nB:\n%a\nEND" output_action_A a output_action_B a
+  | `Act (seq,r1,r2,n,m) as a -> printf "------\nA:\n%a\n-------\nB:\n%a\nEND" output_action_A a output_action_B a
 
 
 
