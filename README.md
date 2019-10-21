@@ -4,4 +4,5 @@
  终端输入：  
  $ corebuild -use-menhir test.native   
  $ ./test.native  test1.msg  
+
  
