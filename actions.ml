@@ -75,35 +75,8 @@ and print_actlist outc arr =
   output_string outc "\n}"
 
 (*------------------------------------------------*)
-let rec output_action1 outc acts rolename = 
-  match acts with
-  | `Null -> output_string outc "null"  
-  | `Actlist arr -> print_actlist outc arr rolename
-  | `Act (seq, r1, r2, n, m) ->
-	match compileAct (seq, r1, r2, n, m) rolename with
-    	| Some (Plus, m)  -> printf " (+, m) "
-    	| Some (Minus, m) -> printf " (-, m) "
-    	| None -> printf "Empty"
-
-and print_actlist outc arr rolename =
-  output_string outc "Actions{\n";
-  List.iteri ~f:(fun i v -> 
-  if i > 0 then
-     output_string outc "\n-------\n";
-  output_action1 outc v rolename) arr;
-  output_string outc "\n}"
-
 (**print_roles_acts takes three arguments: outc, actlist, rolelist,
    then print the strand of each role in rolelist *)
-
-  
-(**output_string outc "Actions:\n";
-  List.iter ~f:(fun i rolename -> 
-  if i>0 then
-	output_string outc "Actions:\n";
-  output_action outc acts rolename) rolelist;
-  output_string outc "End\n" 
-  *)
 
 let rec print_roles_acts outc acts rolelist =
   match acts with
