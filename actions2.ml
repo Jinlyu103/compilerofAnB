@@ -110,16 +110,41 @@ let get_strand actlist =
   List.map ~f:(fun rolename -> compileSq actlist rolename) rolelist
 ;;
 
-(* part 5*)
+(** part 5
+    print message
+*)
+let rec output_msg outc msg =
+  match msg with 
+  | `Null -> output_string outc "null"
+  | `Var id -> printf "%s" id
+  | `Nonce n -> printf "Nonce(%d) " n
+  | `Str s -> printf "%s" s
+  | `Concat msgs -> print_msglist outc msgs
+  | `Hash m -> printf "hash (%a) " output_msg m  
+  | `Aenc (m1,m2) -> printf "aenc{ < %a > }%a" output_msg m1 output_msg m2
+  | `Senc (m1,m2) -> printf "senc{ < %a > }%a" output_msg m1 output_msg m2
+  | `Pk rolename -> printf "pk(%s)" rolename
+  | `Sk rolename -> printf "sk(%s)" rolename
+  | `K (r1,r2) -> printf "k(%s,%s)" r1 r2
 
-let actlist = [("seq1","A","B","n1",(1));("seq2","B","A","n2",(2));("seq3","A","B","n3",(3))];;
+and print_msglist outc msgs =
+  output_string outc "message list:( ";
+  List.iteri ~f:(fun i m ->
+	output_msg outc m;
+	if i < ((List.length msgs)-1) then output_string outc "." else output_string outc "" ;) msgs;
+  output_string outc ")"
+;;
+
+(* part 6  *)
+
+let actlist = [ ("seq1","A","B","n1",`Aenc(`Concat([`Nonce(10);`Str("A")]),`Pk("B")));("seq2","B","A","n2",`Aenc(`Concat([`Nonce(10);`Nonce(5)]),`Pk("A")));("seq3","A","B","n3",`Aenc(`Nonce(5),`Pk("B")))];;
 let rolelist = getroles_from_actlist actlist ;;
 (*List.iter ~f:(printf "%s\n") rolelist*)
 let str_list = List.map ~f:(fun rolename -> compileSq actlist rolename) rolelist;;
 List.iteri ~f:(fun i str -> printf "-------\n";
 			    List.iter ~f:(fun v -> match v with
-			    | Some(Plus,m) -> printf "%d: (+,m)\n" i
-		    	    | Some(Minus,m) -> printf "%d: (-,m)\n" i
+			    | Some(Plus,m) -> printf "%d: (+,%a )\n" i output_msg m
+		    	    | Some(Minus,m) -> printf "%d: (-,%a )\n" i output_msg m
 		  	    | None -> printf "%d: empty\n" i) str
 ) str_list
 ;;
