@@ -4,12 +4,10 @@ open Core.Std;;
 type label = string;;
 type roleName = string;;
 type identifier = string;;
-type nonce = int;;
 
 type message = [
   | `Null
   | `Var of identifier
-  | `Nonce of nonce
   | `Str of roleName
   | `Concat of message list
   | `Aenc of message*message   (* Asymmetric encryption *)
@@ -117,7 +115,6 @@ let rec output_msg outc msg =
   match msg with 
   | `Null -> output_string outc "null"
   | `Var id -> printf "%s" id
-  | `Nonce n -> printf "Nonce(%d) " n
   | `Str s -> printf "%s" s
   | `Concat msgs -> print_msglist outc msgs
   | `Hash m -> printf "hash (%a) " output_msg m  
@@ -128,24 +125,31 @@ let rec output_msg outc msg =
   | `K (r1,r2) -> printf "k(%s,%s)" r1 r2
 
 and print_msglist outc msgs =
-  output_string outc "message list:( ";
   List.iteri ~f:(fun i m ->
 	output_msg outc m;
 	if i < ((List.length msgs)-1) then output_string outc "." else output_string outc "" ;) msgs;
-  output_string outc ")"
 ;;
 
 (* part 6  *)
 
-let actlist = [ ("seq1","A","B","n1",`Aenc(`Concat([`Nonce(10);`Str("A")]),`Pk("B")));("seq2","B","A","n2",`Aenc(`Concat([`Nonce(10);`Nonce(5)]),`Pk("A")));("seq3","A","B","n3",`Aenc(`Nonce(5),`Pk("B")))];;
-let rolelist = getroles_from_actlist actlist ;;
-(*List.iter ~f:(printf "%s\n") rolelist*)
-let str_list = List.map ~f:(fun rolename -> compileSq actlist rolename) rolelist;;
-List.iteri ~f:(fun i str -> printf "-------\n";
-			    List.iter ~f:(fun v -> match v with
-			    | Some(Plus,m) -> printf "%d: (+,%a )\n" i output_msg m
-		    	    | Some(Minus,m) -> printf "%d: (-,%a )\n" i output_msg m
-		  	    | None -> printf "%d: empty\n" i) str
+let actlist = [ ("seq1","A","B","n1",`Aenc(`Concat([`Var("nonce(a)");`Str("A")]),`Pk("B")));
+		("seq2","B","A","n2",`Aenc(`Concat([`Var("nonce(a)");`Var("nonce(b)")]),`Pk("A")));
+		("seq3","A","B","n3",`Aenc(`Var("nonce(b)"),`Pk("B")))];;
+
+let () =
+  let rolelist = getroles_from_actlist actlist in
+  let str_list = List.map ~f:(fun rolename -> compileSq actlist rolename) rolelist in
+  List.iteri ~f:(fun i str -> 
+		printf "-------\nrole"; 
+		match List.nth rolelist i with
+ 		| None -> ()
+		| Some r -> printf "%s" r
+		; 
+		printf ":\n";
+		List.iter ~f:(fun v -> match v with
+	        | Some(Plus,m) -> printf " (+,%a )\n" output_msg m
+		| Some(Minus,m) -> printf " (-,%a )\n" output_msg m
+		| None -> printf "%d: empty\n" i) str
 ) str_list
 ;;
 

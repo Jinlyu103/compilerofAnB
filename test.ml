@@ -8,7 +8,7 @@ let print_position outx lexbuf =
     pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)
 
 let parse_with_error lexbuf =
-  try Parser.prog Lexer.read lexbuf with   (** there happened some problem *)
+  try Parser.prog Lexer.read lexbuf with  
   | SyntaxError msg -> 
     fprintf stderr "%a: %s\n" print_position lexbuf msg;
     None
@@ -31,7 +31,7 @@ let loop filename () =
   In_channel.close inx
 
 let ()=
-  Command.basic ~summary:"Parse and display Actions"
+  Command.basic ~summary:"Parse and display"
     Command.Spec.(empty +> anon ("filename" %: string))
     loop
   |> Command.run

@@ -33,7 +33,7 @@
 %token ON
 %token EOF
 
-%start <Actions.action option> prog
+%start <Actions.actions option> prog
 %%
 
 (* part 1 *)
@@ -42,11 +42,10 @@ prog:
   | EOF		     { None };
 
 actions:
-  | ACTIONS;actlist = action; { actlist };
+  | ACTIONS;LEFT_BRACE;actlist = action_list;RIGHT_BRACE { actlist };
 
 action:
-  | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE;r1=IDENT; SENDTO ; r2=IDENT;LEFT_BRACK;n=IDENT;RIGHT_BRACK;COLON;m=message { `Act (seq,r1,r2,n,m) }
-  | LEFT_BRACE; acts = action_list;RIGHT_BRACE { `Actlist acts };
+  | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE;r1=IDENT; SENDTO ; r2=IDENT;LEFT_BRACK;n=IDENT;RIGHT_BRACK;COLON;m=message { (seq,r1,r2,n,m) };
 
 action_list:
   acts = separated_list(SEMICOLON, action)  { acts } ;
