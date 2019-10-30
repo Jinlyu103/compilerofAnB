@@ -13,6 +13,8 @@ NS协议compiler，可以编译协议的动作，并输出Alice和Bob的串自�
  使用命令：  
   $ corebuild -use-menhir test.native   
   $ ./test.native  test1.msg   
-  来运行
+  来运行  
+  2019-10-39  
+  实现了trans (act,m,i,rolename)
 
  
