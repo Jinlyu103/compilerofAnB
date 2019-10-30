@@ -130,8 +130,123 @@ and print_msglist outc msgs =
 	if i < ((List.length msgs)-1) then output_string outc "." else output_string outc "" ;) msgs;
 ;;
 
-(* part 6  *)
+(* part 6 : Transforming the i-th action into murphy rule *)
+let rec getAtoms msg =
+  match msg with
+  |`Null   	-> [`Null]
+  |`Var id 	-> [`Var id]
+  |`Str s 	-> [`Str s]
+  |`Concat msgs -> getEachAtoms msgs
+  |`Hash m 	-> getAtoms m
+  |`Aenc (m1,m2)-> List.concat (List.map ~f:getAtoms [m1;m2])
+  |`Senc (m1,m2)-> List.concat (List.map ~f:getAtoms [m1;m2])
+  |`Pk rolename -> [`Var rolename]
+  |`Sk rolename -> [`Var rolename]
+  |`K (r1,r2)	-> [`Var r1;`Var r2]
 
+and getEachAtoms msgs =
+  remove (List.concat (List.map ~f:getAtoms msgs)) `Null
+;;
+
+let sign act =
+  match act with
+  | (Plus,_) -> Plus 
+  | (Minus,_)-> Minus
+;;
+
+let genRuleName rolename i =
+  printf "rule \" role%s%d \"\n" rolename i
+;;
+
+let genSendGuard rolename i =
+  printf "role%s[i].st = st%s[%d] & ch[%d].empty = true \n==>" rolename rolename i i
+;;
+
+let genRecvGuard rolename i =
+  printf "role%s[i].st = st%s[%d] & ch[%d].empty = false & ch[%d].receiver = role%s[i].%s\n==>" rolename rolename i i i rolename rolename
+;;
+
+let print_atom a =
+  match a with
+  |`Var id -> printf "%s" id
+  |`Str s  -> printf "%s" s
+  |`Null   -> printf " "
+;;
+
+let print_cons_atoms rolename i atoms =
+  List.iteri ~f:(fun j a -> 
+		printf "role%s[i]." rolename;
+		print_atom a;
+		printf ","
+		 ) atoms
+;;
+
+let genSendAct rolename i atoms =
+  printf "
+var msg:Message;
+msgNo:IndexType;
+begin
+   clear msg;
+   cons%d(" i;
+  print_cons_atoms rolename i atoms;
+  printf "msg,msgNo);\n";
+  printf "   ch[%d].empty := false;\n" i;
+  printf "   ch[%d].msg := msg;\n" i;
+  printf "   ch[%d].sender := role%s[i].%s;\n" i rolename rolename;
+  printf "   ch[%d].receiver := IndexTyperuder_;\n" i;
+  printf "   role%s[i].st := st%s[%d];\nend;\n" rolename rolename (i+1);
+;;
+
+let geti_th_atom atoms i =
+  match List.nth atoms i with
+  | None -> `Null
+  | Some x -> x
+;;
+
+let genRecvAct rolename i atoms =
+  printf "
+var loc_A loc_B:AgentIdType;
+loc_Na,loc_Nb:NonceType;
+msgNo:IndexType;
+begin
+   clear msg;
+   msg := ch[%d].msg;
+   destruct%d(msg,loc_Na,loc_Nb,loc_A);\n" i i;
+  printf "   if (loc_A=role%s[i]." rolename;
+  print_atom (geti_th_atom atoms 1);
+  printf " & loc_na=role%s[i]." rolename;
+  print_atom (geti_th_atom atoms 0);
+  printf ") then
+	   ch[%d].empty:=true;\nendif;\nend;\n" i;
+;;
+
+let trans act m i rolename =
+  let atoms = getAtoms m in
+  match (sign act) with
+  | Plus -> begin 
+		genRuleName rolename i;
+		genSendGuard rolename i;
+		genSendAct rolename i atoms;
+	    end
+  | Minus -> begin
+		genRuleName rolename i;
+		genRecvGuard rolename i;
+		genRecvAct rolename i atoms;
+	     end
+;;
+(* part 7 *)
+let msg1 = `Aenc (`Concat [`Var "nonce(a)"; `Str "A"],`Pk "B");;
+let msg2 = `Aenc(`Concat([`Var("nonce(a)");`Var("nonce(b)")]),`Pk "A");;
+
+let actA1 = (Plus,msg2);;
+let actA2 = (Minus,msg2);;
+
+let () = 
+  trans actA1 msg1 1 "A";
+  trans actA2 msg2 2 "A";
+;;
+
+(*
 let actlist = [ ("seq1","A","B","n1",`Aenc(`Concat([`Var("nonce(a)");`Str("A")]),`Pk("B")));
 		("seq2","B","A","n2",`Aenc(`Concat([`Var("nonce(a)");`Var("nonce(b)")]),`Pk("A")));
 		("seq3","A","B","n3",`Aenc(`Var("nonce(b)"),`Pk("B")))];;
@@ -152,7 +267,6 @@ let () =
 		| None -> printf "%d: empty\n" i) str
 ) str_list
 ;;
-
-
+*)
 
 
