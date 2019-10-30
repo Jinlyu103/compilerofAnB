@@ -15,6 +15,6 @@ NS协议compiler，可以编译协议的动作，并输出Alice和Bob的串自�
   $ ./test.native  test1.msg   
   来运行  
   2019-10-39  
-  实现了trans (act,m,i,rolename)
+  actions2.ml中实现了trans (act,m,i,rolename)
 
  
