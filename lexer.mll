@@ -8,13 +8,12 @@ let next_line lexbuf =
   let pos = lexbuf.lex_curr_p in
   lexbuf.lex_curr_p <-
     { pos with pos_bol = lexbuf.lex_curr_pos;
-	       pos_lnum = pos.pos_lnum + 1
+               pos_lnum = pos.pos_lnum + 1
     }
 }
 
-
 (* part 1 *)
-let int = '-'?['0'-'9']['0'-'9']*
+let int = '-'? ['0'-'9'] ['0'-'9']*
 
 (* part 2 *)
 let digit = ['0'-'9']
@@ -25,37 +24,44 @@ let float = digit* frac? exp?
 (* part 3 *)
 let white = [' ' '\t']+
 let newline = '\r' | '\n' | "\r\n"
-let id = ['a'-'z' 'A'-'Z' '_']['a'-'z' 'A'-'Z' '0'-'9' '_']*
+let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
 let str = "'" id "'"
 
 (* part 4 *)
-
 rule read =
   parse
-  | white 	{ read lexbuf }
-  | newline	{ next_line lexbuf; read lexbuf }
-  | '"'		{ read_string (Buffer.create 17) lexbuf }
-  | '{'		{ LEFT_BRACE }
-  | '}' 	{ RIGHT_BRACE }
-  | '(' 	{ LEFT_BRACK }
-  | ')' 	{ RIGHT_BRACK }
-  | '[' 	{ LEFT_MIDBRACE }
-  | ']' 	{ RIGHT_MIDBRACE }
-  | ':' 	{ COLON }
-  | ';' 	{ SEMICOLON }
-  | ',' 	{ COMMA } 
-  | '.' 	{ PERIOD } 
-  | "->"     { SENDTO }
+  | white    { read lexbuf  }
+  | newline  { next_line lexbuf; read lexbuf }
+  | '"'      { read_string (Buffer.create 17) lexbuf }
+  | '{'      { LEFT_BRACE }
+  | '}'      { RIGHT_BRACE }
+  | '('      { LEFT_BRACK }
+  | ')'      { RIGHT_BRACK }
+  | '['      { LEFT_MIDBRACE}
+  | ']'      { RIGHT_MIDBRACE}
+  | ':'      { COLON }
+  | ';'      { SEMICOLON }
+  | ','      { COMMA }
+  | '.'      { PERIOD }
+  | "->"     { SENDTO}
   | "pk" {PK}
   | "sk" {SK}
   | 'k' {K}
-  | '<' {LEFT_ANGLEBRACK}
-  | '>' {RIGHT_ANGLEBRACK}
+  | '<' {LEFT_ANGLEBARCK}
+  | '>' {RIGHT_ANGLEBARCK}
   | 'h' {HASHCON}
   | "nonce" {NONCE}
   | "aenc" {AENC}
   | "senc" {SENC}
   | "Actions:" {ACTIONS}
+  | "Goals:" {GOALS}
+  | "Knowledges:" {KNOWLEDGES}
+  | "Protocol" {PROTOCOL}
+  | "end" {END}
+  | "secret of" {SECRETOF}
+  | "non-injectively agrees with" {NINJ}
+  | "injectively agrees with" {INJ}
+  | "on" {ON}
   | id { IDENT (Lexing.lexeme lexbuf) }
   | _ { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
   | eof      { EOF }
