@@ -30,13 +30,6 @@ type action = [
   | `Act_list of action list
   | `Null
 ];;
-(*
-type action = [
-  | `Act of label * roleName * roleName * identifier * message
-  | `Null
-];;
-type actions = action list;;
-*)
 
 type knowledge = [
   | `Knowledge of roleName*message
@@ -75,62 +68,28 @@ let rec listwithout l e =  (* If e is in list l? *)
   | hd::tl -> if hd = e then false else listwithout tl e
 ;; 
 (* Transpose function *)
-let taillist f l =
-  match f l with
-  | Some tl -> tl
-  | None -> []
-;;
-let rec transpose list = match list with
-| []             -> []
-| []   :: xss    -> transpose xss
-| (x::xs) :: xss ->
-    (x :: List.map ~f:(fun xs -> taillist List.hd xs) xss) :: transpose (xs :: List.map ~f:(fun xs -> taillist List.tl xs) xss)
+let rec tail xlist =
+  match xlist with 
+  | hd::tl -> tl
+  | e::[] -> []
+  | []    -> failwith "no element"
 ;;
 
-(*let rec getroles acts rl =
-  match acts with
-  | `Null -> rl
-  | `Act (seq,r1,r2,n,m) -> get2roles (seq,r1,r2,n,m) rl
-  | `Act_list arr -> getallroles arr rl
-
-and getallroles arr rl =
-  List.concat (List.map ~f:(fun a -> getroles a rl) arr)
-and get2roles (seq,ra,rb,n,m) rl = (* Get 2 roles of an action. *)
-  if listwithout rl ra && listwithout rl rb then ra :: rb :: rl
-  else if listwithout rl ra then ra :: rl
-  else if listwithout rl rb then rb::rl
-  else rl 
-;;*)
-(*
-let getroles acts rl =
-  match acts with
-  | [] -> rl
-  | hd :: tl as al -> 
-	List.concat (List.map ~f:(fun a -> get2roles a rl) al)
-*)
-(* remove sequential duplicates from a list *)
-(*
-let rec destutter ls =
-  match ls with
-  | [] -> []
-  | [hd] -> [hd]
-  | hd::hd'::tl -> if hd = hd' then destutter (hd' :: tl)
-                   else hd :: destutter (hd' :: tl)
-;;*)
-(*-------sort a list in ascending order --------*)
-(*let rec sort lst =  
-  match lst with
-  | [] -> []
-  | hd :: tl -> insert hd (sort tl)
-and insert elt lst =
-  match lst with
-  | [] -> [elt]
-  | hd :: tl -> if elt <= hd then elt::lst else hd::insert elt tl
+let head xlist =
+  match xlist with
+  | x::tl -> x
+  | [] -> failwith "no element"
 ;;
-let getroles_from_actlist actlist =
-  destutter (sort (getroles actlist []))
-;;*)
-(** get roles from knowledge list *)
+
+let rec transpose list = 
+  match list with
+  | []             -> []
+  | []   :: xss    -> transpose xss
+  | (x::xs) :: xss ->
+    (x :: List.map ~f:head xss) :: transpose (xs :: List.map ~f:tail xss)
+;;
+
+(* get roles from knowledge list *)
 let rec getRolesFromKnws knws rl =
   match knws with
   | `Null -> rl
@@ -192,7 +151,29 @@ let rec output_action outc actions knws =
 			) roleStr
 
 and print_actionlist outc arr knws =
-  List.iter ~f:(fun a -> output_action outc a knws) arr
+  output_string outc "Actions:{\n";
+  let rolelist = getRolesFromKnws knws [] in
+  let roleStrlist = List.map ~f:(fun a -> getRoleStr outc a knws) arr in (* get role strand from each action *)
+  let transRlStrList = transpose roleStrlist in   (* Transpose the List from each action strand *)
+  let strOfEachRoleNoEmpty = List.map ~f:(fun str -> remove str None) transRlStrList in (* remove Empty act *)
+  List.iteri ~f:(fun i roleStr ->   		  (* output the strand of each role *)
+		match List.nth rolelist i with
+		| None -> ()
+		| Some r -> printf "role%s:\n" r
+		;
+		List.iter ~f:(fun s -> match s with
+			    | Some(Plus,m) -> printf "(+,%a)\n" output_msg m
+			    | Some(Minus,m) -> printf "(-,%a)\n" output_msg m
+			    | None -> output_string outc "Empty" ) roleStr) strOfEachRoleNoEmpty;
+  output_string outc "}"
+
+and getRoleStr outc a knws = 
+  let rolelist = getRolesFromKnws knws [] in
+  match a with
+  | `Null -> []  (* The input action here is absolutly the only act, not actlist nor `Null. So these patterns return [] is ok. *)
+  | `Act_list arr -> []
+  | `Act (seq,r1,r2,n,m) -> List.map ~f:(fun rolename ->
+			    compileAct ((seq,r1,r2,n,m)) rolename) rolelist
 ;;
 
 (* print knowledges *)
@@ -206,7 +187,7 @@ and print_knowledgelist outc arr =
   output_string outc "Knowledges{\n";
   List.iteri ~f:(fun i v ->
   if i > 0 then
-    output_string outc "\n-------\n";
+    output_string outc "\n";
   output_knowledge outc v) arr;
   output_string outc "\n}"
 ;;
@@ -215,15 +196,16 @@ and print_knowledgelist outc arr =
 let output_pocolcontext outc pocol = 
   match pocol with
   | `Null       -> output_string outc "null"
-  | `Pocol (k,a)-> printf "%a \n----\n" output_knowledge k; (output_action outc a k)
+  | `Pocol (k,a)-> printf "%a \n" output_knowledge k; (output_action outc a k)
 ;;
 
 (* part 3 *)
 let output_pocol outc value = 
   match value with
   | `Null       -> output_string outc "null"
-  | `Protocol (n,p)  -> printf "Protocol %s:\n----\n%a\nEND" n output_pocolcontext p
+  | `Protocol (n,p)  -> printf "Protocol %s:\n%a\nEND" n output_pocolcontext p
 ;;
+
 
 
 
