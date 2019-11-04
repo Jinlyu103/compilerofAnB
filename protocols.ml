@@ -200,7 +200,7 @@ let output_pocolcontext outc pocol =
   | `Pocol (k,a)-> printf "%a \n" output_knowledge k; (output_action outc a k)
 ;;
 
-(* part 3 *)
+(* part 3 output_protocol *)
 let output_pocol outc value = 
   match value with
   | `Null       -> output_string outc "null"
