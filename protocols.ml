@@ -105,6 +105,7 @@ let rec remove ls e =
   | [] -> []
   | hd::tl -> if hd = e then remove tl e else hd::(remove tl e)
 ;;
+(*
 let compileSq actlist rolename =
  let str_list = List.map ~f:(fun a -> compileAct a rolename) actlist in
  remove str_list None
@@ -112,6 +113,7 @@ let compileSq actlist rolename =
 let get_strand actlist rolelist =
   List.map ~f:(fun rolename -> compileSq actlist rolename) rolelist
 ;;
+*)
 (* Print msgs *)
 let rec output_msg outc msg =
   match msg with 

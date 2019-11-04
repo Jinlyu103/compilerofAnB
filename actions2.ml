@@ -181,7 +181,7 @@ let print_cons_atoms rolename i atoms =
 		 ) atoms
 ;;
 
-let genSendAct rolename i atoms =
+let genSendAct rolename i atoms length =
   printf "
 var msg:Message;
 msgNo:IndexType;
@@ -194,7 +194,7 @@ begin
   printf "   ch[%d].msg := msg;\n" i;
   printf "   ch[%d].sender := role%s[i].%s;\n" i rolename rolename;
   printf "   ch[%d].receiver := IndexTyperuder_;\n" i;
-  printf "   role%s[i].st := st%s[%d];\nend;\n" rolename rolename (i+1);
+  printf "   role%s[i].st := st%s[%d];\nend;\n" rolename rolename ((i mod length) +1); (* (i+1) should be (i+1) % length of the strand list *)
 ;;
 
 let geti_th_atom atoms i =
@@ -203,7 +203,7 @@ let geti_th_atom atoms i =
   | Some x -> x
 ;;
 
-let genRecvAct rolename i atoms =
+let genRecvAct rolename i atoms length=
   printf "
 var loc_A loc_B:AgentIdType;
 loc_Na,loc_Nb:NonceType;
@@ -213,37 +213,68 @@ begin
    msg := ch[%d].msg;
    destruct%d(msg,loc_Na,loc_Nb,loc_A);\n" i i;
   printf "   if (loc_A=role%s[i]." rolename;
-  print_atom (geti_th_atom atoms 1);
+  print_atom (geti_th_atom atoms 2);  (* loc_A = roleA[i].A(which comes from initial knws of roleA, the same of Na of roleA[i].Na) *)
   printf " & loc_na=role%s[i]." rolename;
   print_atom (geti_th_atom atoms 0);
-  printf ") then
-	   ch[%d].empty:=true;\nendif;\nend;\n" i;
+  printf ") th
+   ch[%d].empty:=true;\n" i;
+  printf "   role%s[i].st := st%s[%d];\nend;\nendif;\nend;\n" rolename rolename ((i mod length)+1);
 ;;
 
-let trans act m i rolename =
+let trans act m i rolename length =
   let atoms = getAtoms m in
   match (sign act) with
   | Plus -> begin 
 		genRuleName rolename i;
 		genSendGuard rolename i;
-		genSendAct rolename i atoms;
+		genSendAct rolename i atoms length;
 	    end
   | Minus -> begin
 		genRuleName rolename i;
 		genRecvGuard rolename i;
-		genRecvAct rolename i atoms;
+		genRecvAct rolename i atoms length;
 	     end
 ;;
-(* part 7 *)
+(* part 7 Extracting msg patterns from actions and its sub-patterns *)
+let extractMsg (seq,r1,r2,n,m) = m;;
+
+let extractSq actlist =
+  List.map ~f:(extractMsg) actlist
+;;
+
+let rec isSamePattern m1 m2 =
+  match m1 with
+  | Crypt(k1,m1') -> match m2 with
+		      | Crypt(k1,m2') -> if (isSameKey k1 k2) and isSamePattern m1' m2'
+					 then true else false
+		      | _ -> false
+  | Key(k1) -> match m2 with
+		| Key(k2) -> if isSameKey k1 k2 then true else false
+		| _ -> false
+  | Nonce(n1) -> match m2 with
+  		| Nonce(n1) -> true
+		| _ -> false
+;;
+
+(* part 8 *)
 let msg1 = `Aenc (`Concat [`Var "nonce(a)"; `Str "A"],`Pk "B");;
 let msg2 = `Aenc(`Concat([`Var("nonce(a)");`Var("nonce(b)")]),`Pk "A");;
+let msg3 = `Aenc(`Var("nonce(b)"),`Pk("B"));;
 
 let actA1 = (Plus,msg2);;
 let actA2 = (Minus,msg2);;
+let actA3 = (Plus,msg3);;
 
+let acts = [actA1;actA2;actA3];;
+
+let getMsg act = 
+  match act with
+  | (Plus, m) | (Minus,m) -> m
+;;
 let () = 
-  trans actA1 msg1 1 "A";
-  trans actA2 msg2 2 "A";
+  let actlength = List.length acts in
+  List.iteri ~f:(fun i act -> trans act (getMsg act) (i+1) "A" actlength) acts 
+
 ;;
 
 (*
@@ -267,6 +298,6 @@ let () =
 		| None -> printf "%d: empty\n" i) str
 ) str_list
 ;;
-*)
 
+*)
 
