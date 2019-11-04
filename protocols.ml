@@ -1,4 +1,3 @@
-
 open Core.Std;;
 (* part 1 type definition *)
 type label = string;;
