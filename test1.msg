@@ -1,6 +1,6 @@
 Protocol CR:
 Knowledges:{
-    A : <B.nonce(Na)>;
+    A : <A.B.nonce(Na)>;
     B : nonce(Nb)
 }
 Actions:{

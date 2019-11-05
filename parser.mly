@@ -81,7 +81,7 @@ actions:
 
 action:
   | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE ; r1=IDENT; SENDTO ; r2=IDENT;LEFT_BRACK;n=IDENT; RIGHT_BRACK;COLON;m=message {`Act (seq,r1,r2,n,m) }
-  | LEFT_BRACE;acts = action_list; RIGHT_BRACE { `Act_list acts};
+  | LEFT_BRACE;acts = action_list; RIGHT_BRACE { `Actlist acts};
 
 action_list:
    acts = separated_list(SEMICOLON, action)    { acts } ;

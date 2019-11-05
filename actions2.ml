@@ -175,8 +175,13 @@ let print_atom a =
 
 let print_cons_atoms rolename i atoms =
   List.iteri ~f:(fun j a -> 
-		printf "role%s[i]." rolename;
-		print_atom a;
+		if (i = 1 && j = 0)|| j <> 0 then 
+			begin
+			printf "role%s[i]." rolename;
+			print_atom a;
+			end
+		else 
+			printf "loc_Nb";
 		printf ","
 		 ) atoms
 ;;
@@ -216,9 +221,9 @@ begin
   print_atom (geti_th_atom atoms 2);  (* loc_A = roleA[i].A(which comes from initial knws of roleA, the same of Na of roleA[i].Na) *)
   printf " & loc_na=role%s[i]." rolename;
   print_atom (geti_th_atom atoms 0);
-  printf ") th
+  printf ") then
    ch[%d].empty:=true;\n" i;
-  printf "   role%s[i].st := st%s[%d];\nend;\nendif;\nend;\n" rolename rolename ((i mod length)+1);
+  printf "   role%s[i].st := I_%d;\nend;\nendif;\nend;\n" rolename ((i mod length)+1);
 ;;
 
 let trans act m i rolename length =
@@ -235,7 +240,7 @@ let trans act m i rolename length =
 		genRecvAct rolename i atoms length;
 	     end
 ;;
-(* part 7 Extracting msg patterns from actions and its sub-patterns *)
+(* part 7 Extracting msg patterns from actions and its sub-patterns 
 let extractMsg (seq,r1,r2,n,m) = m;;
 
 let extractSq actlist =
@@ -255,13 +260,13 @@ let rec isSamePattern m1 m2 =
   		| Nonce(n1) -> true
 		| _ -> false
 ;;
-
+*)
 (* part 8 *)
 let msg1 = `Aenc (`Concat [`Var "nonce(a)"; `Str "A"],`Pk "B");;
 let msg2 = `Aenc(`Concat([`Var("nonce(a)");`Var("nonce(b)")]),`Pk "A");;
 let msg3 = `Aenc(`Var("nonce(b)"),`Pk("B"));;
 
-let actA1 = (Plus,msg2);;
+let actA1 = (Plus,msg1);;
 let actA2 = (Minus,msg2);;
 let actA3 = (Plus,msg3);;
 
