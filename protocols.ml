@@ -327,8 +327,9 @@ begin
    msg := ch[%d].msg;
    destruct%d(msg,loc_Na,loc_Nb,loc_A);\n" i i;
   printf "   if (loc_A=role%s[i]." rolename;
-  print_atom (geti_th_atom knws_ofRl 0);  (* loc_A = roleA[i].A(which comes from initial knws of roleA, the same of Na of roleA[i].Na) *)
-  printf " & loc_na=role%s[i]." rolename;
+  print_atom (geti_th_atom knws_ofRl 0); 
+  (* loc_A = roleA[i].A(which comes from initial knws of roleA, the same of Na of roleA[i].Na) *)
+  printf " & loc_Na=role%s[i]." rolename;
   print_atom (geti_th_atom knws_ofRl 2);
   printf ") then
    ch[%d].empty:=true;\n" i;
