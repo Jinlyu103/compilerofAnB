@@ -240,29 +240,19 @@ let trans act m i rolename length =
 		genRecvAct rolename i atoms length;
 	     end
 ;;
-(* part 7 Extracting msg patterns from actions and its sub-patterns 
+(* part 7 Extracting msg patterns from actions and its sub-patterns *)
 let extractMsg (seq,r1,r2,n,m) = m;;
 
 let extractSq actlist =
   List.map ~f:(extractMsg) actlist
 ;;
-
-let rec isSamePattern m1 m2 =
-  match m1 with
-  | Crypt(k1,m1') -> match m2 with
-		      | Crypt(k1,m2') -> if (isSameKey k1 k2) and isSamePattern m1' m2'
-					 then true else false
-		      | _ -> false
-  | Key(k1) -> match m2 with
-		| Key(k2) -> if isSameKey k1 k2 then true else false
-		| _ -> false
-  | Nonce(n1) -> match m2 with
-  		| Nonce(n1) -> true
-		| _ -> false
+(* Is legal pattern ? input msg ,output true or false. flag records the msg is or isn't raw msg *)
+let isLegalPat msg flag =
+   printf "msg flag"
 ;;
-*)
+
 (* part 8 *)
-let msg1 = `Aenc (`Concat [`Var "nonce(a)"; `Str "A"],`Pk "B");;
+let msg1 = `Aenc(`Concat [`Var "nonce(a)"; `Str "A"],`Pk "B");;
 let msg2 = `Aenc(`Concat([`Var("nonce(a)");`Var("nonce(b)")]),`Pk "A");;
 let msg3 = `Aenc(`Var("nonce(b)"),`Pk("B"));;
 

@@ -3,10 +3,14 @@ open Core.Std;;
 type label = string;;
 type roleName = string;;
 type identifier = string;;
+
+type nonce = string;;
+
 type identifier_list=[
   | `Identifier of identifier
   | `Identifier_list of identifier list
 ];;
+
 type roleName_list=[
   | `RoleName of roleName
   | `roleName_list of roleName_list list
@@ -15,6 +19,7 @@ type message = [
   | `Null
   | `Var of identifier
   | `Str of roleName
+  | `Nonce of nonce
   | `Concat of message list
   | `Aenc of message*message   (* Asymmetric encryption *)
   | `Senc of message*message   (* Symmetric encryption *)
@@ -104,6 +109,7 @@ let rec remove ls e =
   | [] -> []
   | hd::tl -> if hd = e then remove tl e else hd::(remove tl e)
 ;;
+
 (*
 let compileSq actlist rolename =
  let str_list = List.map ~f:(fun a -> compileAct a rolename) actlist in
@@ -113,6 +119,7 @@ let get_strand actlist rolelist =
   List.map ~f:(fun rolename -> compileSq actlist rolename) rolelist
 ;;
 *)
+
 (* Print msgs *)
 let rec output_msg outc msg =
   match msg with 
@@ -207,7 +214,7 @@ let output_pocol outc value =
   | `Protocol (n,p)  -> printf "Protocol %s:\n%a\nEND" n output_pocolcontext p
 ;;
 
-(* part 4 print murphi code *)
+(* part 4 print murphi rule *)
 let rec getActsList actions rolelist = 
   match actions with
   | `Null -> []
@@ -234,6 +241,7 @@ let rec getAtoms msg =
   |`Null   	-> [`Null]
   |`Var id 	-> [`Var id]
   |`Str s 	-> [`Str s]
+  |`Nonce na    -> [`Nonce na]
   |`Concat msgs -> getEachAtoms msgs
   |`Hash m 	-> getAtoms m
   |`Aenc (m1,m2)-> List.concat (List.map ~f:getAtoms [m1;m2])
@@ -268,6 +276,7 @@ let print_atom a =
   match a with
   |`Var id -> printf "%s" id
   |`Str s  -> printf "%s" s
+  |`Nonce na-> printf "%s" na
   |`Null   -> printf " "
 ;;
 
@@ -332,8 +341,8 @@ begin
   printf " & loc_Na=role%s[i]." rolename;
   print_atom (geti_th_atom knws_ofRl 2);
   printf ") then
-   ch[%d].empty:=true;\n" i;
-  printf "   role%s[i].st := st%s[%d];\nend;\nendif;\nend;\n" rolename rolename ((i+1) mod length);
+   ch[%d].empty:=true;\n   endif;\n" i;
+  printf "   role%s[i].st := st%s[%d];\nend;\n" rolename rolename ((i+1) mod length);
 ;;
 
 let trans act m i rolename length knws =
@@ -356,10 +365,11 @@ let genMsg act =
   | (Plus, m) | (Minus,m) -> m
 ;;
 
-let print_murphiCode outc actions knws =  (*printf "murphi code"*)
+let print_murphiRule outc actions knws =  (*printf "murphi code"*)
   let rolelist = getRolesFromKnws knws [] in (* Get role list:[A;B;...] *)
   let actsOfAllRls = getActsList actions rolelist in  (* Get act list: [(sign,msg);(sign,msg);...] *)
-  List.iteri ~f:(fun i r -> let acts = match List.nth actsOfAllRls i with
+  List.iteri ~f:(fun i r -> if i = 0 then
+			    let acts = match List.nth actsOfAllRls i with
 				       | None -> []
 				       | Some a -> a
      	   		     in
@@ -368,12 +378,64 @@ let print_murphiCode outc actions knws =  (*printf "murphi code"*)
 					| None -> output_string outc "null"
 					| Some a -> trans a (genMsg a) j r lenActs knws) acts ) rolelist
 ;;
+(* generation code to encode each msg pattern *)
+(* Extracting msg patterns from actions and its sub-patterns *)
+let rec encodeBody m i =
+  match m with
+  |`Var na ->printf " clear msg;
+ msg.magType := Nonce;
+ msg.noncePart = %s ;
+ lookAdd (msg,num%d);\n" na i
+  |`Concat msgs -> List.iteri ~f:(fun i msg -> encodeBody msg (i+1)) msgs;
+		   printf " clear msg;
+ msg.msgType := Concat;";
+ 		   List.iteri ~f:(fun j msg -> printf "msg.mPart%d := num%d_%d" j i j) msgs;
+ 		   printf "lookAdd(msg,num%d);\n" i
+  |`Aenc (m,k) -> encodeBody m 1;encodeBody k 2; 
+		  printf " clear msg;
+ msg.msgType := Aenc;
+ msg.AencKey := num2;
+ msg.AencMsg := num1;
+ lookAdd(msg,num%d);\n" i
+  |`Senc (m,k) -> encodeBody m 1;encodeBody k 2; 
+		  printf " clear msg;
+ msg.msgType := Senc;
+ msg.SencKey := num2;
+ msg.SencMsg := num1;
+ lookAdd(msg,num%d);\n" i
+;;
+let outConsPara m =
+  match m with
+  | `Var id -> id
+  | `Str s  -> s
+;;
+let consMsg m i =
+  printf "
+procedure consMsg%d(%s
+var msg: Message;
+    num: indexType;
+    num1,num2: indexType;
+begin "i (outConsPara m); 
+  encodeBody m 1;   (* default 1*)
+  printf " end;" 
+;;
+
+let extractMsg (seq,r1,r2,n,m) = m ;;
+
+let print_murphiEncodeMsg outc actions knws = 
+  match actions with
+  | `Null -> output_string outc "null"
+  | `Actlist arr -> printf "msg list of actions"
+  | `Act (seq,r1,r2,n,m) -> printf "msg from one action "
+;;
 
 let trActionsToMurphi outc actions knws =
   match actions with
   |`Null -> output_string outc "null"
-  |`Act(seq,r1,r2,n,m) -> print_murphiCode outc actions knws
-  |`Actlist arr -> print_murphiCode outc actions knws
+  |`Act(seq,r1,r2,n,m) -> print_murphiRule outc actions knws
+  |`Actlist arr -> print_murphiRule outc actions knws; 
+		   printf "\nTo genetate each message pattern:\n";
+   		   print_murphiEncodeMsg outc actions knws;  (* print_murphiMsgPat: generation code to encode each msg pattern *)
 ;;
 let output_murphiCode outc pocol =
   match pocol with
