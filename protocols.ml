@@ -428,14 +428,13 @@ let print_murphiEncodeMsg outc actions knws =
   | `Actlist arr -> printf "msg list of actions"
   | `Act (seq,r1,r2,n,m) -> printf "msg from one action "
 ;;
-
 let trActionsToMurphi outc actions knws =
   match actions with
   |`Null -> output_string outc "null"
   |`Act(seq,r1,r2,n,m) -> print_murphiRule outc actions knws
   |`Actlist arr -> print_murphiRule outc actions knws; 
 		   printf "\nTo genetate each message pattern:\n";
-   		   print_murphiEncodeMsg outc actions knws;  (* print_murphiMsgPat: generation code to encode each msg pattern *)
+   		   print_murphiEncodeMsg outc actions knws;(* print_murphiMsgPat: generation code to encode each msg pattern *)
 ;;
 let output_murphiCode outc pocol =
   match pocol with

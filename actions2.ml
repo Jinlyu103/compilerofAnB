@@ -246,15 +246,73 @@ let extractMsg (seq,r1,r2,n,m) = m;;
 let extractSq actlist =
   List.map ~f:(extractMsg) actlist
 ;;
-(* Is legal pattern ? input msg ,output true or false. flag records the msg is or isn't raw msg *)
-let isLegalPat msg flag =
-   printf "msg flag"
+(* To determine whether two msgs are the same. *)
+let rec allTrue boolList =
+  match boolList with 
+  | [] -> false
+  | [b] -> if b = true then true else false
+  | hd :: tl -> if hd = false then false else allTrue tl
+;;
+
+let rec isSamePat m1 m2 =
+  match m1 with 
+  |`Aecn(m1',k1) -> match m2 with
+		    |`Aenc(m2',k2) -> if (isSamePat k1 k2) && (isSamePat m1' m2') then true else false
+		    | _ -> false
+  |`Secn(m1',k1) -> match m2 with
+		    |`Senc(m2',k2) -> if (isSamePat k1 k2) && (isSamePat m1' m2') then true else false
+		    | _ -> false
+  |`Pk r1 	 -> match m2 with 
+		    |`Pk r2 -> if r1=r2 then true else false
+		    | _ -> false
+  |`Sk r1 	 -> match m2 with 
+		    |`Sk r2 -> if r1=r2 then true else false
+		    | _ -> false
+  |`K (r11,r12)	 -> match m2 with 
+		    |`K (r21,r22) -> if (r11=r21) && (r12=r22) then true else false
+		    | _ -> false
+  |`Var n1	 -> match m2 with
+		    |`Var n2 -> if n1 = n2 then true else false
+		    | _ -> false
+  |`Concat msgs1 -> match m2 with
+		    |`Concat msgs2 -> if isSameList msgs1 msgs2 then true else false
+  		    | _ -> false
+  |`Hash m1'	 -> match m2 with
+		    |`Hash m2' -> if m1' = m2' then true else false
+		    | _ -> false 
+  |`Str s1	 -> match m2 with
+		    |`Str s2 -> if s1 = s2 then true else false
+		    | _ -> false
+
+and isSameList msgs1 msgs2 =
+  let len1 = List.length msgs1 in
+  let len2 = List.length msgs2 in
+  if len1 <> len2 then false 
+  else let boolList = List.concat (List.map ~f:(fun msg1 ->
+				 List.map ~f:(fun msg2 -> if msg1 = msg2 then true else false) msgs2) msgs1) in
+	if allTrue boolList then true else false
+;;
+
+(* To get pats from msg list. *)
+let rec patListwithout patList pat =
+  match patList with
+  | [] -> true
+  | hd :: tl -> if hd = pat then false else patListwithout tl pat
+;;
+
+let rec getPat msgList patList =
+  match msgList with 
+  | [] -> patList
+  | hd :: tl -> let newPatList = getPat tl patList in
+		if patListwithout newPatList hd then hd :: newPatList else newPatList
 ;;
 
 (* part 8 *)
 let msg1 = `Aenc(`Concat [`Var "nonce(a)"; `Str "A"],`Pk "B");;
-let msg2 = `Aenc(`Concat([`Var("nonce(a)");`Var("nonce(b)")]),`Pk "A");;
+let msg2 = `Senc(`Concat([`Var("nonce(a)");`Var("nonce(b)")]),`Sk "A");;
 let msg3 = `Aenc(`Var("nonce(b)"),`Pk("B"));;
+let msg4 = `Aenc(`Concat [`Var "nonce(a)"; `Str "A"],`Pk "B");;
+let msg5 = `Senc(`Concat([`Var("nonce(a)");`Var("nonce(b)")]),`Sk "A");;
 
 let actA1 = (Plus,msg1);;
 let actA2 = (Minus,msg2);;
@@ -266,13 +324,21 @@ let getMsg act =
   match act with
   | (Plus, m) | (Minus,m) -> m
 ;;
-let () = 
-  let actlength = List.length acts in
-  List.iteri ~f:(fun i act -> trans act (getMsg act) (i+1) "A" actlength) acts 
 
+let () = 
+  (*let actlength = List.length acts in
+  List.iteri ~f:(fun i act -> trans act (getMsg act) (i+1) "A" actlength) acts
+*)
+  let msgList = [msg1;msg2;msg3;msg4;msg5] in
+  let patList = getPat msgList [] in
+  List.iteri ~f:(fun i pat -> match pat with
+			      |`Aenc (m1,k1) -> printf "pat%d:Aenc (%a)\n" i output_msg m1
+			      |`Senc (m1,k1) -> printf "pat%d:Senc (%a)\n" i output_msg m1
+			      |`Var n -> printf "pat%d:Nonce\n" i ) patList
 ;;
 
 (*
+
 let actlist = [ ("seq1","A","B","n1",`Aenc(`Concat([`Var("nonce(a)");`Str("A")]),`Pk("B")));
 		("seq2","B","A","n2",`Aenc(`Concat([`Var("nonce(a)");`Var("nonce(b)")]),`Pk("A")));
 		("seq3","A","B","n3",`Aenc(`Var("nonce(b)"),`Pk("B")))];;
@@ -293,6 +359,23 @@ let () =
 		| None -> printf "%d: empty\n" i) str
 ) str_list
 ;;
+
+let rec printMsgTree msg =
+  match msg with
+  |`Null -> printf "Null"
+  |`Var id -> printf "Var:\n  nonce(%s)\n" id
+  |`Str s -> printf "Str:\n  rolename(%s)\n" s
+  |`Concat msgs ->printf "Concat:\n  msgs("; List.iter (fun msg -> printf "   ";printMsgTree msg) msgs; printf ")\n"
+  |`Hash m -> printf "Hash:\n  msg("; printMsgTree m; printf ")\n"
+  |`Aenc (m1,m2) -> printf "Aenc:\n  m1("; printMsgTree m1;printf")\n";
+                    printf "  m2("; printMsgTree m2 ; printf")\n"
+  |`Senc  (m1,m2) -> printf "Senc:\n  m1("; printMsgTree m1;printf")\n";
+                     printf "  m2("; printMsgTree m2;printf")\n";
+  |`Pk rolename -> printf "Pk:\n  rolename(%s)\n" rolename
+  |`Sk rolename -> printf "Sk:\n  rolename(%s)\n" rolename
+  |`K (r1,r2)   -> printf "K:\n  r1(%s)\n   r2(%s)\n" r1 r2  
+;;
+
 
 *)
 
