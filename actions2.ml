@@ -307,7 +307,40 @@ let rec getPat msgList patList =
 		if patListwithout newPatList hd then hd :: newPatList else newPatList
 ;;
 
+let rec getsubPat patList subpatlist =
+  match patList with 
+  | [] -> subpatlist
+  | plist -> let allsubs = List.concat (List.map ~f:(fun p -> match p with
+						|`Aenc (m,k) -> begin 
+								match m with
+								|`Concat msgs -> List.map ~f:(fun m -> m) msgs 
+								|`Var n -> [`Var n]
+								|`Str s -> [`Str s]
+								end
+						|`Senc (m,k) -> begin
+								match m with
+								|`Concat msgs -> List.map ~f:(fun m -> m) msgs 
+								|`Var n -> [`Var n]
+								|`Str s -> [`Str s] 
+								end) plist)
+	     in
+	     del_duplicate allsubs
+and del_duplicate allsubs =
+   let len = List.length allsubs in
+   let non_duplicate = ref [] in
+   for i = 0 to len do
+	match List.nth allsubs i with
+	| None -> ()
+	| Some x -> if listwithout !non_duplicate x then non_duplicate := x::!non_duplicate
+   done;
+   !non_duplicate     
+;;
+
 (* part 8 *)
+let actlist = [ ("seq1","A","B","n1",`Aenc(`Concat([`Var("nonce(a)");`Str("A")]),`Pk("B")));
+		("seq2","B","A","n2",`Aenc(`Concat([`Var("nonce(a)");`Var("nonce(b)")]),`Pk("A")));
+		("seq3","A","B","n3",`Aenc(`Var("nonce(b)"),`Pk("B")))];;
+
 let msg1 = `Aenc(`Concat [`Var "nonce(a)"; `Str "A"],`Pk "B");;
 let msg2 = `Senc(`Concat([`Var("nonce(a)");`Var("nonce(b)")]),`Sk "A");;
 let msg3 = `Aenc(`Var("nonce(b)"),`Pk("B"));;
@@ -329,16 +362,19 @@ let () =
   (*let actlength = List.length acts in
   List.iteri ~f:(fun i act -> trans act (getMsg act) (i+1) "A" actlength) acts
 *)
-  let msgList = [msg1;msg2;msg3;msg4;msg5] in
+  let msgList = extractSq actlist in
   let patList = getPat msgList [] in
+ (* let patList = patList @ [`Var "na" ;`Str "A";`Var "nonce(b)"] in*)
+  let subPatlist = getsubPat patList [] in
+  let newpatlist = patList @ subPatlist in
   List.iteri ~f:(fun i pat -> match pat with
-			      |`Aenc (m1,k1) -> printf "pat%d:Aenc (%a)\n" i output_msg m1
-			      |`Senc (m1,k1) -> printf "pat%d:Senc (%a)\n" i output_msg m1
-			      |`Var n -> printf "pat%d:Nonce\n" i ) patList
+			      |`Aenc (m1,k1) -> printf "pat%d: Aenc(%a,key)\n" i output_msg m1
+			      |`Senc (m1,k1) -> printf "pat%d: Senc(%a,key)\n" i output_msg m1
+			      |`Var n -> printf "pat%d: Nonce(%a)\n" i output_msg (`Var n)
+			      |`Str s -> printf "pat%d: Agent(%a)\n" i output_msg (`Str s) ) newpatlist
 ;;
 
 (*
-
 let actlist = [ ("seq1","A","B","n1",`Aenc(`Concat([`Var("nonce(a)");`Str("A")]),`Pk("B")));
 		("seq2","B","A","n2",`Aenc(`Concat([`Var("nonce(a)");`Var("nonce(b)")]),`Pk("A")));
 		("seq3","A","B","n3",`Aenc(`Var("nonce(b)"),`Pk("B")))];;
@@ -375,7 +411,5 @@ let rec printMsgTree msg =
   |`Sk rolename -> printf "Sk:\n  rolename(%s)\n" rolename
   |`K (r1,r2)   -> printf "K:\n  r1(%s)\n   r2(%s)\n" r1 r2  
 ;;
-
-
 *)
 
