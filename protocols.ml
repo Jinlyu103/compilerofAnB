@@ -430,6 +430,40 @@ let extractSq actlist =
   | `Actlist arr -> List.map ~f:extractMsg arr
 ;;
 
+let rec getSubMsg msg =
+  match msg with
+  |`Null -> []
+  |`Var nonce -> [`Var nonce]
+  |`Str role  -> [`Str role]
+  |`Concat msgs -> let submsgs = List.concat (List.map ~f:getSubMsg msgs) in
+		   [msg]@msgs@submsgs
+  |`Hash m -> [msg]@(getSubMsg m)
+  |`Aenc (m,k) -> [msg]@[m;k]@(getSubMsg m)
+  |`Senc (m,k) -> [msg]@[m;k]@(getSubMsg m)
+  |`Pk role -> [`Pk role]
+  |`Sk role -> [`Sk role]
+  |`K (r1,r2) -> [`K (r1,r2)]
+;;
+
+let del_duplicate org_list =
+  match org_list with
+  | [] -> []
+  | l -> let len = List.length l in
+	 let non_duplicate = ref [] in
+	 for i = 0 to len do
+		match List.nth l i with
+		| None -> ()
+		| Some x -> if listwithout !non_duplicate x then non_duplicate := x::!non_duplicate
+	 done;
+	!non_duplicate
+;;
+
+let getSubPatterns actlist =
+  let msglist = extractSq actlist in
+  let msgpats = List.concat (List.map ~f:getSubMsg msglist) in
+  del_duplicate msgpats
+;;
+
 let print_murphiEncodeMsg outc actions knws = 
   match actions with
   | `Null -> output_string outc "null"

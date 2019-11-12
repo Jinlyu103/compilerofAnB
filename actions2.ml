@@ -118,8 +118,8 @@ let rec output_msg outc msg =
   | `Str s -> printf "%s" s
   | `Concat msgs -> print_msglist outc msgs
   | `Hash m -> printf "hash (%a) " output_msg m  
-  | `Aenc (m1,m2) -> printf "aenc{ < %a > }%a" output_msg m1 output_msg m2
-  | `Senc (m1,m2) -> printf "senc{ < %a > }%a" output_msg m1 output_msg m2
+  | `Aenc (m,k) -> printf "aenc{ < %a > }%a" output_msg m output_msg k
+  | `Senc (m,k) -> printf "senc{ < %a > }%a" output_msg m output_msg k
   | `Pk rolename -> printf "pk(%s)" rolename
   | `Sk rolename -> printf "sk(%s)" rolename
   | `K (r1,r2) -> printf "k(%s,%s)" r1 r2
@@ -138,8 +138,8 @@ let rec getAtoms msg =
   |`Str s 	-> [`Str s]
   |`Concat msgs -> getEachAtoms msgs
   |`Hash m 	-> getAtoms m
-  |`Aenc (m1,m2)-> List.concat (List.map ~f:getAtoms [m1;m2])
-  |`Senc (m1,m2)-> List.concat (List.map ~f:getAtoms [m1;m2])
+  |`Aenc (m,k)-> List.concat (List.map ~f:getAtoms [m;k])
+  |`Senc (m,k)-> List.concat (List.map ~f:getAtoms [m;k])
   |`Pk rolename -> [`Var rolename]
   |`Sk rolename -> [`Var rolename]
   |`K (r1,r2)	-> [`Var r1;`Var r2]
@@ -253,8 +253,8 @@ let rec allTrue boolList =
   | [b] -> if b = true then true else false
   | hd :: tl -> if hd = false then false else allTrue tl
 ;;
-
-let rec isSamePat m1 m2 =
+(*
+let rec isSamePat1 m1 m2 =
   match m1 with 
   |`Aecn(m1',k1) -> match m2 with
 		    |`Aenc(m2',k2) -> if (isSamePat k1 k2) && (isSamePat m1' m2') then true else false
@@ -292,60 +292,139 @@ and isSameList msgs1 msgs2 =
 				 List.map ~f:(fun msg2 -> if msg1 = msg2 then true else false) msgs2) msgs1) in
 	if allTrue boolList then true else false
 ;;
+*)
+(* To determine whether two msgs are equivalent? *)
+let rec isSamePat m1 m2 =
+  match m1 with 
+  |`Aenc(m1',k1) -> begin 
+		    match m2 with
+		    |`Aenc(m2',k2) -> if (isSamePat k1 k2) && (isSamePat m1' m2') then true else false
+		    | _ -> false
+		    end
+  |`Senc(m1',k1) -> begin 
+		    match m2 with
+		    |`Senc(m2',k2) -> if (isSamePat k1 k2) && (isSamePat m1' m2') then true else false
+		    | _ -> false
+		    end
+  |`Pk r1 	 -> begin 
+		    match m2 with 
+		    |`Pk r2 ->  true
+		    | _ -> false
+		    end
+  |`Sk r1 	 -> begin 
+		    match m2 with 
+		    |`Sk r2 -> true 
+		    | _ -> false
+		    end
+  |`K (r11,r12)	 -> begin 
+		    match m2 with 
+		    |`K (r21,r22) -> true 
+		    | _ -> false
+		    end
+  |`Var n1	 -> begin 
+		    match m2 with
+		    |`Var n2 -> true 
+		    | _ -> false
+		    end
+  |`Concat msgs1 -> begin
+		    match m2 with
+		    |`Concat msgs2 -> isSameList msgs1 msgs2
+  		    | _ -> false
+		    end
+  |`Hash m1'	 -> begin
+		    match m2 with
+		    |`Hash m2' -> if isSamePat m1' m2' then true else false
+		    | _ -> false 
+		    end
+  |`Str s1	 -> begin 
+		    match m2 with
+		    |`Str s2 -> true
+		    | _ -> false
+		    end
+ | _ -> false
 
-(* To get pats from msg list. *)
-let rec patListwithout patList pat =
-  match patList with
-  | [] -> true
-  | hd :: tl -> if hd = pat then false else patListwithout tl pat
+and isSameList msgs1 msgs2 =
+  let len1 = List.length msgs1 in
+  let len2 = List.length msgs2 in
+  if len1 <> len2 then false 
+  else let boolList = List.map2_exn ~f:isSamePat msgs1 msgs2 in
+	if allTrue boolList then true else false
 ;;
 
-let rec getPat msgList patList =
-  match msgList with 
-  | [] -> patList
-  | hd :: tl -> let newPatList = getPat tl patList in
-		if patListwithout newPatList hd then hd :: newPatList else newPatList
+(* To get pats from actlist. *)
+let extractMsg (seq,r1,r2,n,m) = m ;;
+
+let extractSq actlist =
+  match actlist with
+  | `Null -> []
+  | `Act (seq,r1,r2,n,m) -> extractMsg (seq,r1,r2,n,m)
+  | `Actlist arr -> List.map ~f:extractMsg arr
 ;;
 
-let rec getsubPat patList subpatlist =
-  match patList with 
-  | [] -> subpatlist
-  | plist -> let allsubs = List.concat (List.map ~f:(fun p -> match p with
-						|`Aenc (m,k) -> begin 
-								match m with
-								|`Concat msgs -> List.map ~f:(fun m -> m) msgs 
-								|`Var n -> [`Var n]
-								|`Str s -> [`Str s]
-								end
-						|`Senc (m,k) -> begin
-								match m with
-								|`Concat msgs -> List.map ~f:(fun m -> m) msgs 
-								|`Var n -> [`Var n]
-								|`Str s -> [`Str s] 
-								end) plist)
-	     in
-	     del_duplicate allsubs
-and del_duplicate allsubs =
-   let len = List.length allsubs in
-   let non_duplicate = ref [] in
-   for i = 0 to len do
-	match List.nth allsubs i with
+let rec getSubMsg msg =
+  match msg with
+  |`Null -> []
+  |`Var nonce -> [`Var nonce]
+  |`Str role  -> [`Str role]
+  |`Concat msgs -> let submsgs = List.concat (List.map ~f:getSubMsg msgs) in
+		   [msg]@msgs@submsgs
+  |`Hash m -> [msg]@(getSubMsg m)
+  |`Aenc (m,k) -> [msg]@[m;k]@(getSubMsg m)
+  |`Senc (m,k) -> [msg]@[m;k]@(getSubMsg m)
+  |`Pk role -> [`Pk role]
+  |`Sk role -> [`Sk role]
+  |`K (r1,r2) -> [`K (r1,r2)]
+;;
+
+let del_duplicate org_list =
+  match org_list with
+  | [] -> []
+  | l -> let len = List.length l in
+	 let non_duplicate = ref [] in
+	 for i = 0 to len do
+		match List.nth l i with
+		| None -> ()
+		| Some x -> if listwithout !non_duplicate x then non_duplicate := x::!non_duplicate
+	 done;
+	!non_duplicate
+;;
+
+(* To get equivalent msg pattern from patlist. *)
+let rec existSamePat eqvlPats pat =
+  match eqvlPats with
+  | [] -> false
+  | hd::tl -> if isSamePat hd pat then true else existSamePat tl pat
+;;
+
+let getEqvlMsgPattern patlist =
+  let non_eqvlPat = ref [] in 
+  let len = List.length patlist in
+  for i = 0 to len do
+	match List.nth patlist i with
 	| None -> ()
-	| Some x -> if listwithout !non_duplicate x then non_duplicate := x::!non_duplicate
-   done;
-   !non_duplicate     
+ 	| Some x -> if existSamePat !non_eqvlPat x then () else non_eqvlPat := x :: !non_eqvlPat
+  done;
+  !non_eqvlPat
+;;
+
+let getSubPatterns actlist =
+  let msglist = extractSq actlist in
+  let msgpats = List.concat (List.map ~f:getSubMsg msglist) in
+  let non_dup_msgpats = del_duplicate msgpats in
+  getEqvlMsgPattern non_dup_msgpats
 ;;
 
 (* part 8 *)
-let actlist = [ ("seq1","A","B","n1",`Aenc(`Concat([`Var("nonce(a)");`Str("A")]),`Pk("B")));
+let actlist = `Actlist[("seq1","A","B","n1",`Aenc(`Concat([`Var("nonce(a)");`Str("A")]),`Pk("B")));
 		("seq2","B","A","n2",`Aenc(`Concat([`Var("nonce(a)");`Var("nonce(b)")]),`Pk("A")));
 		("seq3","A","B","n3",`Aenc(`Var("nonce(b)"),`Pk("B")))];;
 
 let msg1 = `Aenc(`Concat [`Var "nonce(a)"; `Str "A"],`Pk "B");;
-let msg2 = `Senc(`Concat([`Var("nonce(a)");`Var("nonce(b)")]),`Sk "A");;
+let msg2 = `Aenc(`Concat([`Var("nonce(b)");`Str "B"]),`Pk "A");;
 let msg3 = `Aenc(`Var("nonce(b)"),`Pk("B"));;
 let msg4 = `Aenc(`Concat [`Var "nonce(a)"; `Str "A"],`Pk "B");;
 let msg5 = `Senc(`Concat([`Var("nonce(a)");`Var("nonce(b)")]),`Sk "A");;
+let msg6 = `Sk "A";;
 
 let actA1 = (Plus,msg1);;
 let actA2 = (Minus,msg2);;
@@ -362,15 +441,21 @@ let () =
   (*let actlength = List.length acts in
   List.iteri ~f:(fun i act -> trans act (getMsg act) (i+1) "A" actlength) acts
 *)
-  let msgList = extractSq actlist in
-  let patList = getPat msgList [] in
-  let subPatlist = getsubPat patList [] in
-  let newpatlist = patList @ subPatlist in
+  (*let msgList = extractSq actlist in
+  let patList = getPat msgList [] in*)
+  let subPatlist = getSubPatterns actlist in
+  (*let newpatlist = patList @ subPatlist in*)
   List.iteri ~f:(fun i pat -> match pat with
+			      |`Null -> printf "null"
 			      |`Aenc (m1,k1) -> printf "pat%d: Aenc(%a,key)\n" i output_msg m1
 			      |`Senc (m1,k1) -> printf "pat%d: Senc(%a,key)\n" i output_msg m1
+			      |`Hash m -> printf "pat%d: Hash(%a)\n" i output_msg m
+			      |`Concat msgs -> printf "pat%d: Concat\n" i; List.iteri ~f:(fun j m -> printf "   (%d: %a\n" j output_msg m) msgs
 			      |`Var n -> printf "pat%d: Nonce(%a)\n" i output_msg (`Var n)
-			      |`Str s -> printf "pat%d: Agent(%a)\n" i output_msg (`Str s) ) newpatlist
+			      |`Str s -> printf "pat%d: Agent(%a)\n" i output_msg (`Str s)
+			      |`Pk role ->printf "pat%d: %a\n" i output_msg (`Pk role) 
+			      |`Sk role ->printf "pat%d: %a\n" i output_msg (`Sk role) ) subPatlist
+  if isSamePat msg1 msg2 then printf "true\n" else printf "false\n"
 ;;
 
 (*
