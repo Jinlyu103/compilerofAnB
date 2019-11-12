@@ -364,7 +364,6 @@ let () =
 *)
   let msgList = extractSq actlist in
   let patList = getPat msgList [] in
- (* let patList = patList @ [`Var "na" ;`Str "A";`Var "nonce(b)"] in*)
   let subPatlist = getsubPat patList [] in
   let newpatlist = patList @ subPatlist in
   List.iteri ~f:(fun i pat -> match pat with
@@ -375,10 +374,6 @@ let () =
 ;;
 
 (*
-let actlist = [ ("seq1","A","B","n1",`Aenc(`Concat([`Var("nonce(a)");`Str("A")]),`Pk("B")));
-		("seq2","B","A","n2",`Aenc(`Concat([`Var("nonce(a)");`Var("nonce(b)")]),`Pk("A")));
-		("seq3","A","B","n3",`Aenc(`Var("nonce(b)"),`Pk("B")))];;
-
 let () =
   let rolelist = getroles_from_actlist actlist in
   let str_list = List.map ~f:(fun rolename -> compileSq actlist rolename) rolelist in

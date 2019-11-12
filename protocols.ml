@@ -420,7 +420,15 @@ begin "i (outConsPara m);
   printf " end;" 
 ;;
 
+(* Extract msg from action *)
 let extractMsg (seq,r1,r2,n,m) = m ;;
+
+let extractSq actlist =
+  match actlist with
+  | `Null -> []
+  | `Act (seq,r1,r2,n,m) -> extractMsg (seq,r1,r2,n,m)
+  | `Actlist arr -> List.map ~f:extractMsg arr
+;;
 
 let print_murphiEncodeMsg outc actions knws = 
   match actions with
@@ -428,6 +436,8 @@ let print_murphiEncodeMsg outc actions knws =
   | `Actlist arr -> printf "msg list of actions"
   | `Act (seq,r1,r2,n,m) -> printf "msg from one action "
 ;;
+
+(*-----------------------------------------------*)
 let trActionsToMurphi outc actions knws =
   match actions with
   |`Null -> output_string outc "null"
