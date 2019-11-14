@@ -555,7 +555,20 @@ let print_murphiEncodeMsg outc actions knws =
 			      |`Str s -> printf "pat%d: Agent(%a)\n" i output_msg (`Str s)
 			      |`Pk role ->printf "pat%d: %a\n" i output_msg (`Pk role) 
 			      |`Sk role ->printf "pat%d: %a\n" i output_msg (`Sk role) ) non_equivalent
-  | `Act (seq,r1,r2,n,m) -> printf "msg from one action "
+  | `Act (seq,r1,r2,n,m) -> let patlist = getPatList actions in    (* get all patterns from actions *)
+		    	    let non_dup = del_duplicate patlist in (* delete duplicate *)
+			    let non_equivalent = getEqvlMsgPattern non_dup in (* delete equivalent class *) 
+			    printf "Patterns:\n";
+			    List.iteri ~f:(fun i pat -> match pat with
+				      |`Null -> printf "null"
+				      |`Aenc (m1,k1) -> printf "pat%d: Aenc(%a,key)\n" i output_msg m1
+				      |`Senc (m1,k1) -> printf "pat%d: Senc(%a,key)\n" i output_msg m1
+				      |`Hash m -> printf "pat%d: Hash(%a)\n" i output_msg m
+				      |`Concat msgs -> printf "pat%d: Concat\n" i; List.iteri ~f:(fun j m -> printf "   (%d: %a\n" j output_msg m) msgs
+				      |`Var n -> printf "pat%d: Nonce(%a)\n" i output_msg (`Var n)
+				      |`Str s -> printf "pat%d: Agent(%a)\n" i output_msg (`Str s)
+				      |`Pk role ->printf "pat%d: %a\n" i output_msg (`Pk role) 
+				      |`Sk role ->printf "pat%d: %a\n" i output_msg (`Sk role) ) non_equivalent
 ;;
 (*-----------------------------------------------*)
 let trActionsToMurphi outc actions knws =
