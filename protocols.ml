@@ -4,7 +4,7 @@ type label = string;;
 type roleName = string;;
 type identifier = string;;
 
-type nonce = string;;
+(*type nonce = string;;*)
 
 type identifier_list=[
   | `Identifier of identifier
@@ -19,7 +19,7 @@ type message = [
   | `Null
   | `Var of identifier
   | `Str of roleName
-  | `Nonce of nonce
+  (*| `Nonce of nonce*)
   | `Concat of message list
   | `Aenc of message*message   (* Asymmetric encryption *)
   | `Senc of message*message   (* Symmetric encryption *)
@@ -110,21 +110,12 @@ let rec remove ls e =
   | hd::tl -> if hd = e then remove tl e else hd::(remove tl e)
 ;;
 
-(*
-let compileSq actlist rolename =
- let str_list = List.map ~f:(fun a -> compileAct a rolename) actlist in
- remove str_list None
-;;
-let get_strand actlist rolelist =
-  List.map ~f:(fun rolename -> compileSq actlist rolename) rolelist
-;;
-*)
-
 (* Print msgs *)
 let rec output_msg outc msg =
   match msg with 
   | `Null -> output_string outc "null"
   | `Var id -> printf "%s" id
+ (* | `Nonce na    -> printf "%s" na*)
   | `Str s -> printf "%s" s
   | `Concat msgs -> print_msglist outc msgs
   | `Hash m -> printf "hash (%a) " output_msg m  
@@ -241,7 +232,7 @@ let rec getAtoms msg =
   |`Null   	-> [`Null]
   |`Var id 	-> [`Var id]
   |`Str s 	-> [`Str s]
-  |`Nonce na    -> [`Nonce na]
+  (*|`Nonce na    -> [`Nonce na]*)
   |`Concat msgs -> getEachAtoms msgs
   |`Hash m 	-> getAtoms m
   |`Aenc (m1,m2)-> List.concat (List.map ~f:getAtoms [m1;m2])
@@ -276,7 +267,7 @@ let print_atom a =
   match a with
   |`Var id -> printf "%s" id
   |`Str s  -> printf "%s" s
-  |`Nonce na-> printf "%s" na
+ (* |`Nonce na-> printf "%s" na*)
   |`Null   -> printf " "
 ;;
 
@@ -420,26 +411,90 @@ begin "i (outConsPara m);
   printf " end;" 
 ;;
 
-(* Extract msg from action *)
-let extractMsg (seq,r1,r2,n,m) = m ;;
-
-let extractSq actlist =
-  match actlist with
-  | `Null -> []
-  | `Act (seq,r1,r2,n,m) -> extractMsg (seq,r1,r2,n,m)
-  | `Actlist arr -> List.map ~f:extractMsg arr
+(* To determine whether two msgs are equivalent? *)
+let rec allTrue boolList =
+  match boolList with 
+  | [] -> false
+  | [b] -> if b = true then true else false
+  | hd :: tl -> if hd = false then false else allTrue tl
 ;;
+
+let rec isSamePat m1 m2 =
+  match m1 with 
+  |`Aenc(m1',k1) -> begin 
+		    match m2 with
+		    |`Aenc(m2',k2) -> if (isSamePat k1 k2) && (isSamePat m1' m2') then true else false
+		    | _ -> false
+		    end
+  |`Senc(m1',k1) -> begin 
+		    match m2 with
+		    |`Senc(m2',k2) -> if (isSamePat k1 k2) && (isSamePat m1' m2') then true else false
+		    | _ -> false
+		    end
+  |`Pk r1 	 -> begin 
+		    match m2 with 
+		    |`Pk r2 ->  true
+		    | _ -> false
+		    end
+  |`Sk r1 	 -> begin 
+		    match m2 with 
+		    |`Sk r2 -> true 
+		    | _ -> false
+		    end
+  |`K (r11,r12)	 -> begin 
+		    match m2 with 
+		    |`K (r21,r22) -> true 
+		    | _ -> false
+		    end
+  |`Var n1	 -> begin 
+		    match m2 with
+		    |`Var n2 -> true 
+		    | _ -> false
+		    end
+(*  |`Nonce n1	 -> begin 
+		    match m2 with
+		    |`Nonce n2 -> true 
+		    | _ -> false
+		    end*)
+  |`Concat msgs1 -> begin
+		    match m2 with
+		    |`Concat msgs2 -> isSameList msgs1 msgs2
+  		    | _ -> false
+		    end
+  |`Hash m1'	 -> begin
+		    match m2 with
+		    |`Hash m2' -> if isSamePat m1' m2' then true else false
+		    | _ -> false 
+		    end
+  |`Str s1	 -> begin 
+		    match m2 with
+		    |`Str s2 -> true
+		    | _ -> false
+		    end
+ | _ -> false
+
+and isSameList msgs1 msgs2 =
+  let len1 = List.length msgs1 in
+  let len2 = List.length msgs2 in
+  if len1 <> len2 then false 
+  else let boolList = List.map2_exn ~f:isSamePat msgs1 msgs2 in
+	if allTrue boolList then true else false
+;;
+
+(* Extract msg from action *)
+(*let extractMsg (seq,r1,r2,n,m) = m ;;*)
 
 let rec getSubMsg msg =
   match msg with
   |`Null -> []
   |`Var nonce -> [`Var nonce]
   |`Str role  -> [`Str role]
+  (*|`Nonce na    -> [`Nonce na]*)
   |`Concat msgs -> let submsgs = List.concat (List.map ~f:getSubMsg msgs) in
 		   [msg]@msgs@submsgs
-  |`Hash m -> [msg]@(getSubMsg m)
   |`Aenc (m,k) -> [msg]@[m;k]@(getSubMsg m)
   |`Senc (m,k) -> [msg]@[m;k]@(getSubMsg m)
+  |`Hash m -> [msg]@(getSubMsg m)
   |`Pk role -> [`Pk role]
   |`Sk role -> [`Sk role]
   |`K (r1,r2) -> [`K (r1,r2)]
@@ -458,24 +513,55 @@ let del_duplicate org_list =
 	!non_duplicate
 ;;
 
-let getSubPatterns actlist =
-  let msglist = extractSq actlist in
-  let msgpats = List.concat (List.map ~f:getSubMsg msglist) in
-  del_duplicate msgpats
+(* To get equivalent msg pattern from patlist. *)
+let rec existSamePat eqvlPats pat =
+  match eqvlPats with
+  | [] -> false
+  | hd::tl -> if isSamePat hd pat then true else existSamePat tl pat
+;;
+
+let getEqvlMsgPattern patlist =
+  let non_eqvlPat = ref [] in 
+  let len = List.length patlist in
+  for i = 0 to len do
+	match List.nth patlist i with
+	| None -> ()
+ 	| Some x -> if existSamePat !non_eqvlPat x then () else non_eqvlPat := x :: !non_eqvlPat
+  done;
+  !non_eqvlPat
+;;
+
+let rec getPatList actions =
+  match actions with
+  | `Null -> []
+  | `Act (seq,r1,r2,n,m) -> [m] @ (getSubMsg m)
+  | `Actlist arr -> List.concat (List.map ~f:getPatList arr)
 ;;
 
 let print_murphiEncodeMsg outc actions knws = 
   match actions with
   | `Null -> output_string outc "null"
-  | `Actlist arr -> printf "msg list of actions"
+  | `Actlist arr -> let patlist = getPatList actions in    (* get all patterns from actions *)
+		    let non_dup = del_duplicate patlist in (* delete duplicate *)
+		    let non_equivalent = getEqvlMsgPattern non_dup in (* delete equivalent class *) 
+		    printf "Patterns:\n";
+		    List.iteri ~f:(fun i pat -> match pat with
+			      |`Null -> printf "null"
+			      |`Aenc (m1,k1) -> printf "pat%d: Aenc(%a,key)\n" i output_msg m1
+			      |`Senc (m1,k1) -> printf "pat%d: Senc(%a,key)\n" i output_msg m1
+			      |`Hash m -> printf "pat%d: Hash(%a)\n" i output_msg m
+			      |`Concat msgs -> printf "pat%d: Concat\n" i; List.iteri ~f:(fun j m -> printf "   (%d: %a\n" j output_msg m) msgs
+			      |`Var n -> printf "pat%d: Nonce(%a)\n" i output_msg (`Var n)
+			      |`Str s -> printf "pat%d: Agent(%a)\n" i output_msg (`Str s)
+			      |`Pk role ->printf "pat%d: %a\n" i output_msg (`Pk role) 
+			      |`Sk role ->printf "pat%d: %a\n" i output_msg (`Sk role) ) non_equivalent
   | `Act (seq,r1,r2,n,m) -> printf "msg from one action "
 ;;
-
 (*-----------------------------------------------*)
 let trActionsToMurphi outc actions knws =
   match actions with
   |`Null -> output_string outc "null"
-  |`Act(seq,r1,r2,n,m) -> print_murphiRule outc actions knws
+  |`Act (seq,r1,r2,n,m) -> print_murphiRule outc actions knws
   |`Actlist arr -> print_murphiRule outc actions knws; 
 		   printf "\nTo genetate each message pattern:\n";
    		   print_murphiEncodeMsg outc actions knws;(* print_murphiMsgPat: generation code to encode each msg pattern *)

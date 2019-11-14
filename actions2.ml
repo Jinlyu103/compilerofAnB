@@ -20,9 +20,9 @@ type message = [
 
 type action = [
   | `Act of label * roleName * roleName * identifier * message
+  | `Actlist of action list
   | `Null
 ];;
-type actions = action list;;
 
 type sign = 
   | Plus
@@ -241,11 +241,7 @@ let trans act m i rolename length =
 	     end
 ;;
 (* part 7 Extracting msg patterns from actions and its sub-patterns *)
-let extractMsg (seq,r1,r2,n,m) = m;;
 
-let extractSq actlist =
-  List.map ~f:(extractMsg) actlist
-;;
 (* To determine whether two msgs are the same. *)
 let rec allTrue boolList =
   match boolList with 
@@ -253,46 +249,7 @@ let rec allTrue boolList =
   | [b] -> if b = true then true else false
   | hd :: tl -> if hd = false then false else allTrue tl
 ;;
-(*
-let rec isSamePat1 m1 m2 =
-  match m1 with 
-  |`Aecn(m1',k1) -> match m2 with
-		    |`Aenc(m2',k2) -> if (isSamePat k1 k2) && (isSamePat m1' m2') then true else false
-		    | _ -> false
-  |`Secn(m1',k1) -> match m2 with
-		    |`Senc(m2',k2) -> if (isSamePat k1 k2) && (isSamePat m1' m2') then true else false
-		    | _ -> false
-  |`Pk r1 	 -> match m2 with 
-		    |`Pk r2 -> if r1=r2 then true else false
-		    | _ -> false
-  |`Sk r1 	 -> match m2 with 
-		    |`Sk r2 -> if r1=r2 then true else false
-		    | _ -> false
-  |`K (r11,r12)	 -> match m2 with 
-		    |`K (r21,r22) -> if (r11=r21) && (r12=r22) then true else false
-		    | _ -> false
-  |`Var n1	 -> match m2 with
-		    |`Var n2 -> if n1 = n2 then true else false
-		    | _ -> false
-  |`Concat msgs1 -> match m2 with
-		    |`Concat msgs2 -> if isSameList msgs1 msgs2 then true else false
-  		    | _ -> false
-  |`Hash m1'	 -> match m2 with
-		    |`Hash m2' -> if m1' = m2' then true else false
-		    | _ -> false 
-  |`Str s1	 -> match m2 with
-		    |`Str s2 -> if s1 = s2 then true else false
-		    | _ -> false
 
-and isSameList msgs1 msgs2 =
-  let len1 = List.length msgs1 in
-  let len2 = List.length msgs2 in
-  if len1 <> len2 then false 
-  else let boolList = List.concat (List.map ~f:(fun msg1 ->
-				 List.map ~f:(fun msg2 -> if msg1 = msg2 then true else false) msgs2) msgs1) in
-	if allTrue boolList then true else false
-;;
-*)
 (* To determine whether two msgs are equivalent? *)
 let rec isSamePat m1 m2 =
   match m1 with 
@@ -352,14 +309,14 @@ and isSameList msgs1 msgs2 =
 ;;
 
 (* To get pats from actlist. *)
-let extractMsg (seq,r1,r2,n,m) = m ;;
+(*let extractMsg (seq,r1,r2,n,m) = m ;;
 
 let extractSq actlist =
   match actlist with
   | `Null -> []
   | `Act (seq,r1,r2,n,m) -> extractMsg (seq,r1,r2,n,m)
   | `Actlist arr -> List.map ~f:extractMsg arr
-;;
+;;*)
 
 let rec getSubMsg msg =
   match msg with
@@ -407,17 +364,23 @@ let getEqvlMsgPattern patlist =
   !non_eqvlPat
 ;;
 
+let rec getPatList actions =
+  match actions with
+  | `Null -> []
+  | `Act (seq,r1,r2,n,m) -> [m] @ (getSubMsg m)
+  | `Actlist arr -> List.concat (List.map ~f:getPatList arr)
+;;
+
 let getSubPatterns actlist =
-  let msglist = extractSq actlist in
-  let msgpats = List.concat (List.map ~f:getSubMsg msglist) in
+  let msgpats = getPatList actlist  in
   let non_dup_msgpats = del_duplicate msgpats in
   getEqvlMsgPattern non_dup_msgpats
 ;;
 
 (* part 8 *)
-let actlist = `Actlist[("seq1","A","B","n1",`Aenc(`Concat([`Var("nonce(a)");`Str("A")]),`Pk("B")));
-		("seq2","B","A","n2",`Aenc(`Concat([`Var("nonce(a)");`Var("nonce(b)")]),`Pk("A")));
-		("seq3","A","B","n3",`Aenc(`Var("nonce(b)"),`Pk("B")))];;
+let actlist = `Actlist[ `Act("seq1","A","B","n1",`Aenc(`Concat([`Var("nonce(a)");`Str("A")]),`Pk("B")));
+			`Act("seq2","B","A","n2",`Aenc(`Concat([`Var("nonce(a)");`Var("nonce(b)")]),`Pk("A")));
+			`Act("seq3","A","B","n3",`Aenc(`Var("nonce(b)"),`Pk("B")))];;
 
 let msg1 = `Aenc(`Concat [`Var "nonce(a)"; `Str "A"],`Pk "B");;
 let msg2 = `Aenc(`Concat([`Var("nonce(b)");`Str "B"]),`Pk "A");;
@@ -455,7 +418,6 @@ let () =
 			      |`Str s -> printf "pat%d: Agent(%a)\n" i output_msg (`Str s)
 			      |`Pk role ->printf "pat%d: %a\n" i output_msg (`Pk role) 
 			      |`Sk role ->printf "pat%d: %a\n" i output_msg (`Sk role) ) subPatlist
-  if isSamePat msg1 msg2 then printf "true\n" else printf "false\n"
 ;;
 
 (*
