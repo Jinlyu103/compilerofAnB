@@ -373,44 +373,27 @@ let print_murphiRule outc actions knws =  (*printf "murphi code"*)
 (* Extracting msg patterns from actions and its sub-patterns *)
 let rec encodeBody m i =
   match m with
-  |`Var na ->printf " clear msg;
- msg.magType := Nonce;
- msg.noncePart := %s ;
- lookAdd (msg,num%d);\n" na i
-  |`Str
+  |`Var na ->printf " clear msg;\n msg.magType := Nonce;\n msg.noncePart := %s ;\n lookAdd (msg,num%d);\n" na i
+  |`Str role -> printf " clear msg;\n msg.msgType := Agent;\n msg.agentPart := %s;\n lookAdd (msg,num%d);\n" role i
   |`Concat msgs -> List.iteri ~f:(fun i msg -> encodeBody msg (i+1)) msgs;
-		   printf " clear msg;
- msg.msgType := Concat;";
- 		   List.iteri ~f:(fun j msg -> printf "msg.mPart%d := num%d_%d\n" j i j) msgs;
- 		   printf "lookAdd(msg,num%d);\n" i
+                   printf " clear msg;\n msg.msgType := Concat;\n";
+                   List.iteri ~f:(fun j msg -> printf " msg.mPart%d := num%d_%d\n" j i j) msgs;
+                   printf " lookAdd(msg,num%d);\n" i
   |`Aenc (m,k) -> encodeBody m 1;encodeBody k 2; 
-		  printf " clear msg;
- msg.msgType := Aenc;
- msg.AencKey := num2;
- msg.AencMsg := num1;
- lookAdd(msg,num%d);\n" i
+		              printf " clear msg;\n msg.msgType := Aenc;\n msg.AencKey := num2;\n msg.AencMsg := num1;\n lookAdd(msg,num%d);\n" i
   |`Senc (m,k) -> encodeBody m 1;encodeBody k 2; 
-		  printf " clear msg;
- msg.msgType := Senc;
- msg.SencKey := num2;
- msg.SencMsg := num1;
- lookAdd(msg,num%d);\n" i
+		              printf " clear msg;\n msg.msgType := Senc;\n msg.SencKey := num2;\n msg.SencMsg := num1;\n lookAdd(msg,num%d);\n" i
+ |`Pk role -> printf " clear msg;\n msg.msgType := PubKey;\n msg.keyPart := %s;\n lookAdd (msg,num%d);\n" role i
+ | _ -> printf "others\n"
 ;;
+(*
 let outConsPara m =
   match m with
-  | `Var id -> id
-  | `Str s  -> s
+  | `Var na -> na
+  | `Str role  -> role
 ;;
-(** 
 let consMsg m i =
-  printf "
-procedure consMsg%d(%s
-var msg: Message;
-    num: indexType;
-    num1,num2: indexType;
-begin "i (outConsPara m); 
-  encodeBody m 1;   (* default 1*)
-  printf " end;" 
+  printf "procedure consMsg%d(%a\n   var msg: Message;\n    num: indexType;\n    num1,num2: indexType;\nbegin %a end" i (outConsPara m) encodeBody m 1;   (* default 1*)
 ;;
 *)
 (* To determine whether two msgs are equivalent? *)
@@ -545,7 +528,7 @@ let print_murphiEncodeMsg outc actions knws =
                     let non_dup = del_duplicate patlist in (* delete duplicate *)
                     let non_equivalent = getEqvlMsgPattern non_dup in (* delete equivalent class *) 
                     printf "Patterns:\n";
-                    List.iteri ~f:(fun i pat -> encodeBody pat i ) non_equivalent
+                    List.iteri ~f:(fun i pat -> encodeBody pat i ; printf "\n" ) non_equivalent
   | `Act (seq,r1,r2,n,m) -> let patlist = getPatList actions in    (* get all patterns from actions *)
 		    	    let non_dup = del_duplicate patlist in (* delete duplicate *)
 			    let non_equivalent = getEqvlMsgPattern non_dup in (* delete equivalent class *) 
