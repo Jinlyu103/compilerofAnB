@@ -375,12 +375,13 @@ let rec encodeBody m i =
   match m with
   |`Var na ->printf " clear msg;
  msg.magType := Nonce;
- msg.noncePart = %s ;
+ msg.noncePart := %s ;
  lookAdd (msg,num%d);\n" na i
+  |`Str
   |`Concat msgs -> List.iteri ~f:(fun i msg -> encodeBody msg (i+1)) msgs;
 		   printf " clear msg;
  msg.msgType := Concat;";
- 		   List.iteri ~f:(fun j msg -> printf "msg.mPart%d := num%d_%d" j i j) msgs;
+ 		   List.iteri ~f:(fun j msg -> printf "msg.mPart%d := num%d_%d\n" j i j) msgs;
  		   printf "lookAdd(msg,num%d);\n" i
   |`Aenc (m,k) -> encodeBody m 1;encodeBody k 2; 
 		  printf " clear msg;
@@ -400,6 +401,7 @@ let outConsPara m =
   | `Var id -> id
   | `Str s  -> s
 ;;
+(** 
 let consMsg m i =
   printf "
 procedure consMsg%d(%s
@@ -410,7 +412,7 @@ begin "i (outConsPara m);
   encodeBody m 1;   (* default 1*)
   printf " end;" 
 ;;
-
+*)
 (* To determine whether two msgs are equivalent? *)
 let rec allTrue boolList =
   match boolList with 
@@ -418,7 +420,6 @@ let rec allTrue boolList =
   | [b] -> if b = true then true else false
   | hd :: tl -> if hd = false then false else allTrue tl
 ;;
-
 let rec isSamePat m1 m2 =
   match m1 with 
   |`Aenc(m1',k1) -> begin 
@@ -483,7 +484,6 @@ and isSameList msgs1 msgs2 =
 
 (* Extract msg from action *)
 (*let extractMsg (seq,r1,r2,n,m) = m ;;*)
-
 let rec getSubMsg msg =
   match msg with
   |`Null -> []
@@ -542,19 +542,10 @@ let print_murphiEncodeMsg outc actions knws =
   match actions with
   | `Null -> output_string outc "null"
   | `Actlist arr -> let patlist = getPatList actions in    (* get all patterns from actions *)
-		    let non_dup = del_duplicate patlist in (* delete duplicate *)
-		    let non_equivalent = getEqvlMsgPattern non_dup in (* delete equivalent class *) 
-		    printf "Patterns:\n";
-		    List.iteri ~f:(fun i pat -> match pat with
-			      |`Null -> printf "null"
-			      |`Aenc (m1,k1) -> printf "pat%d: Aenc(%a,key)\n" i output_msg m1
-			      |`Senc (m1,k1) -> printf "pat%d: Senc(%a,key)\n" i output_msg m1
-			      |`Hash m -> printf "pat%d: Hash(%a)\n" i output_msg m
-			      |`Concat msgs -> printf "pat%d: Concat\n" i; List.iteri ~f:(fun j m -> printf "   (%d: %a\n" j output_msg m) msgs
-			      |`Var n -> printf "pat%d: Nonce(%a)\n" i output_msg (`Var n)
-			      |`Str s -> printf "pat%d: Agent(%a)\n" i output_msg (`Str s)
-			      |`Pk role ->printf "pat%d: %a\n" i output_msg (`Pk role) 
-			      |`Sk role ->printf "pat%d: %a\n" i output_msg (`Sk role) ) non_equivalent
+                    let non_dup = del_duplicate patlist in (* delete duplicate *)
+                    let non_equivalent = getEqvlMsgPattern non_dup in (* delete equivalent class *) 
+                    printf "Patterns:\n";
+                    List.iteri ~f:(fun i pat -> encodeBody pat i ) non_equivalent
   | `Act (seq,r1,r2,n,m) -> let patlist = getPatList actions in    (* get all patterns from actions *)
 		    	    let non_dup = del_duplicate patlist in (* delete duplicate *)
 			    let non_equivalent = getEqvlMsgPattern non_dup in (* delete equivalent class *) 
