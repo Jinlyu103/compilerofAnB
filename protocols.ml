@@ -387,13 +387,8 @@ let rec encodeBody m i =
  | _ -> printf "others\n"
 ;;
 (*
-let outConsPara m =
-  match m with
-  | `Var na -> na
-  | `Str role  -> role
-;;
 let consMsg m i =
-  printf "procedure consMsg%d(%a\n   var msg: Message;\n    num: indexType;\n    num1,num2: indexType;\nbegin %a end" i (outConsPara m) encodeBody m 1;   (* default 1*)
+  printf " procedure consMsg%d(%a\n   var msg: Message;\n    num: indexType;\n    num1,num2: indexType;\nbegin %a end" i (outConsPara m) encodeBody m 1;   (* default 1*)
 ;;
 *)
 (* To determine whether two msgs are equivalent? *)
