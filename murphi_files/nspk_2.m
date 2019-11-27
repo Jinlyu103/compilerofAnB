@@ -38,9 +38,9 @@ type
   MsgType: enum{null,agent,nonce,key,aenc,senc,concat,hash};
   Message: record
     msgType : MsgType;
-    ag	: AgentType;
+    ag    	: AgentType;
     noncePart: NonceType;
-    k	: KeyType;
+    k	      : KeyType;
     aencMsg : indexType;
     aencKey	: indexType;
     sencMsg : indexType;
@@ -90,23 +90,24 @@ type
   end;
 
   msgSet: record
-    content: 
+    content: Array[msgLen] of indexType;
+    length : msgLen;
 
 var
-  ch		    : Array[msgpassingNums] of Channel;
+  ch		      : Array[msgpassingNums] of Channel;
   alices 	    : Array[aliceNums] of RoleInit;
   bobs		    : Array[bobNums] of RoleResp;
-  intruder      : RoleIntruder; 
+  intruder    : RoleIntruder; 
 
   msgs		    : Array[indexType] of Message;
-  msgsOfPat1    : Array[indexType] of Message;   ---Pat1: Na
-  msgsOfPat2    : Array[indexType] of Message;   ---Pat2: A
-  msgsOfPat3    : Array[indexType] of Message;   ---Pat3: {Na,A} 
-  msgsOfPat4    : Array[indexType] of Message;   ---Pat4: Pk(B)
-  msgsOfPat5    : Array[indexType] of Message;   ---Pat5: {Na,A}Pk(B)
-  msgsOfPat6    : Array[indexType] of Message;   ---Pat6: {Na,Nb}
-  msgsOfPat7    : Array[indexType] of Message;   ---Pat7: {Na,Nb}Pk(A)
-  msgsOfPat8    : Array[indexType] of Message;   ---Pat8: {Nb}Pk(B)
+  pat1Set     : msgSet;   ---Pat1: Na
+  pat2Set     : msgSet;   ---Pat2: A
+  pat3Set     : msgSet;   ---Pat3: {Na,A} 
+  pat4Set     : msgSet;   ---Pat4: Pk(B)
+  pat5Set     : msgSet;   ---Pat5: {Na,A}Pk(B)
+  pat6Set     : msgSet;   ---Pat6: {Na,Nb}
+  pat7Set     : msgSet;   ---Pat7: {Na,Nb}Pk(A)
+  pat8Set     : msgSet;   ---Pat8: {Nb}Pk(B)
 
   msg_end       : indexType;
   ded_end       : DeductionsNums;
@@ -116,21 +117,14 @@ var
   Spy_known     : Array[indexType] of boolean;
   emit          : Array[indexType] of boolean;
 ---  KEY           : KeyType;
-  msg           : Message;
-  msgNo         : indexType; --- for intruder gets msg
+  msg           : Message;   ---
+  msgNo         : indexType; --- for intruder gets msg 
   eve           : Event;
   endn          : indexType;
   end1          : indexType;
   end2          : indexType;
   Deductions    : Array[DeductionsNums] of TDeduction;
   allMsgs       : array[msgLen] of indexType;
----  allMsg1s      : array[msgLen] of indexType;
----  allMsg2s      : array[msgLen] of indexType;
----  allMsg3s      : array[msgLen] of indexType;
----  allMsg4s      : array[msgLen] of indexType;
----  allMsgnum1    : indexType;
----  allMsgnum2    : indexType;
----  allMsgnum3    : indexType;
 ---  systemEvent   : array[eventNums] of Event;
 
 --- Pat1 Na
@@ -425,8 +419,8 @@ begin
     flag_part1:=false;
     flag_part2:=false;
     if(msg.msgType=aenc) then
-        isPat6(msgs[msg.aencMsg],flag_part1);
-        isPat4(msgs[msg.aencKey],flag_part2);
+        isPat6(msgs[msg.aencMsg],flag_part1);  ---pat6: {Na,Nb}
+        isPat4(msgs[msg.aencKey],flag_part2);  ---pat4: Pk(A)
         if (flag_part1 & flag_part2) then
             flag1:=true;
         endif;
@@ -611,24 +605,37 @@ end;
 rule "intruderGetMsg1"
   intruder.st = wait & ch[1].empty = false & ch[1].receiver = intruderType
   ==>
+  Var flag_pat5:boolean
   ---Var msgNo:indexType;
   begin
     clear msg;
     clear msgNo;
     msg := ch[1].msg;
-    ---get_mes(msg, msgNo);
+    get_mesNo(msg, msgNo);
+    isPat5(msg,flag_pat5);  ---pat5: {Na,A}Pk(B)
+    if (flag_pat5) then     ---put this msg into pat5Set
+      pat5Set.length:=pat5Set.length+1;
+      pat5Set.content[pat5Set.length] := msgNo; 
+    endif;
     ch[1].empty := true;
     intruder.st := gotmsg1;  ---the state of intruder
-  ---  if (!Spy_known[msgNo]) then
-  ---  addKnowledge(msgNo);
-  ---  endif;
   end;
 
   rule "intruderGetMsg2"
     intruder.st = emitted1 & ch[2].empty=false & ch[2].receiver=intruderType
     ==>
+    Var flag_Pat7:boolean;
     begin
-        --- some operations...
+        clear msg;
+        clear msgNo;
+        msg:=ch[2].msg;
+        get_msgNo(msg, msgNo);
+        isPat7(msg,flag_Pat7); ---pat7:{Na,Nb}pk(A)
+        if (flag_Pat7) then    ---put this msg into pat7Set
+          pat7Set.length:=pat7Set.length+1;
+          pat7Set.content[pat7Set.length] := msgNo;
+        endif;
+        ch[2].empty := true;
         intruder.st:=gotmsg2;
     end;
 
