@@ -92,6 +92,7 @@ type
   msgSet: record
     content: Array[msgLen] of indexType;
     length : msgLen;
+  end;
 
 var
   ch		      : Array[msgpassingNums] of Channel;
@@ -504,6 +505,25 @@ procedure destruct3(msg:Message; Var Nb:NonceType; Var B:AgentType);
     Nb:=msg1.noncePart;
   end;
 
+procedure get_msgNo(msg:Message; Var num:indexType);
+var index:indexType;
+begin
+  index:=0;
+  for i: msgLen do 
+    if (msgs[i].msgType = msg.msgType) then
+      if ( (msg.msgType=agent & msgs[i].ag=msg.ag)
+         | (msg.msgType=nonce & msgs[i].noncePart=msg.noncePart)
+         | (msg.msgType=key & (msgs[i].k.encTyp=msg.k.encTyp & msgs[i].k.ag=msg.k.ag))
+         | (msg.msgType=aenc & (msgs[i].aencMsg=msg.aencMsg & msgs[i].aencKey=msg.aencKey))
+         | (msg.msgType=senc & (msgs[i].sencMsg=msg.sencMsg & msgs[i].sencKey=msg.sencKey))
+         ) then
+        index:=i;
+      endif;
+    endif;
+  endfor;
+  num:=index;
+end;
+
 --- rule for Alice
 ruleset i:aliceNums do
   rule "roleA1"
@@ -605,13 +625,13 @@ end;
 rule "intruderGetMsg1"
   intruder.st = wait & ch[1].empty = false & ch[1].receiver = intruderType
   ==>
-  Var flag_pat5:boolean
+  Var flag_pat5:boolean;
   ---Var msgNo:indexType;
   begin
     clear msg;
     clear msgNo;
     msg := ch[1].msg;
-    get_mesNo(msg, msgNo);
+    get_msgNo(msg, msgNo);
     isPat5(msg,flag_pat5);  ---pat5: {Na,A}Pk(B)
     if (flag_pat5) then     ---put this msg into pat5Set
       pat5Set.length:=pat5Set.length+1;
@@ -624,14 +644,14 @@ rule "intruderGetMsg1"
   rule "intruderGetMsg2"
     intruder.st = emitted1 & ch[2].empty=false & ch[2].receiver=intruderType
     ==>
-    Var flag_Pat7:boolean;
+    Var flag_pat7:boolean;
     begin
         clear msg;
         clear msgNo;
         msg:=ch[2].msg;
         get_msgNo(msg, msgNo);
-        isPat7(msg,flag_Pat7); ---pat7:{Na,Nb}pk(A)
-        if (flag_Pat7) then    ---put this msg into pat7Set
+        isPat7(msg,flag_pat7); ---pat7:{Na,Nb}pk(A)
+        if (flag_pat7) then    ---put this msg into pat7Set
           pat7Set.length:=pat7Set.length+1;
           pat7Set.content[pat7Set.length] := msgNo;
         endif;
@@ -640,10 +660,20 @@ rule "intruderGetMsg1"
     end;
 
   rule "intruderGetMsg3"
-    intruder.st = emitted2 & ch[2].empty=false & ch[2].receiver=intruderType
+    intruder.st = emitted2 & ch[3].empty=false & ch[3].receiver=intruderType
     ==>
+    Var flag_pat8: boolean;
     begin
-        --- some operations...
+        clear msg;
+        clear msgNo;
+        msg:=ch[3].msg;
+        get_msgNo(msg,msgNo);
+        isPat8(msg,flag_pat8);  ---pat8: {Nb}pk(B)
+        if (flag_pat8) then
+          pat8Set.length := pat8Set.length+1;
+          pat8Set.content[pat8Set.length] := msgNo;
+        endif;
+        ch[3].empty := true;
         intruder.st:=gotmsg3;
     end;
 
@@ -676,16 +706,16 @@ rule "intruderGetMsg1"
 ruleset i: msgLen do
   ruleset j: bobNums do
     rule "intruderEmitMsg1" 
-    	intruder.st=deducted1 & ch[1].empty=true & allMsgs[i]>0
+    	intruder.st=deducted1 & ch[1].empty=true 
     	==>
         begin 
-        if (Spy_known[allMsgs[i]] & emit[allMsgs[i]]=false) then
+        if (emit[msgNo]=false) then
           clear ch[1].msg;
           ch[1].empty:=false;
-          ch[1].msg:=msgs[allMsgs[i]];
+          ch[1].msg:=msgs[msgNo];
           ch[1].sender:=intruderType;
           ch[1].receiver:=bobs[j].B;
-          emit[allMsgs[i]]:=true;
+          emit[msgNo]:=true;
           intruder.st:=emitted1;
           put "   1'I->B\n";
           put ch[1].msg;
@@ -698,16 +728,16 @@ ruleset i: msgLen do
 ruleset i:msgLen do
   ruleset j:aliceNums do
     rule "intruderEmitMsg2" 
-    	intruder.st=deducted2 & ch[1].empty=true & allMsgs[i]>0
+    	intruder.st=deducted2 & ch[1].empty=true 
     	==>
         begin 
-        if (Spy_known[allMsgs[i]] & emit[allMsgs[i]]=false) then
+        if (emit[msgNo]=false) then
           clear ch[1].msg;
           ch[1].empty:=false;
-          ch[1].msg:=msgs[allMsgs[i]];
+          ch[1].msg:=msgs[msgNo];
           ch[1].sender:=intruderType;
           ch[1].receiver:=bobs[j].B;
-          emit[allMsgs[i]]:=true;
+          emit[msgNo]:=true;
           intruder.st:=emitted2;
           put "   1'I->B\n";
           put ch[1].msg;
@@ -719,16 +749,16 @@ ruleset i:msgLen do
 ruleset i: msgLen do
   ruleset j: bobNums do
     rule "intruderEmitMsg3" 
-    	intruder.st=deducted3 & ch[3].empty=true & allMsgs[i]>0
+    	intruder.st=deducted3 & ch[3].empty=true 
     	==>
       begin
-        if (Spy_known[allMsgs[i]] & emit[allMsgs[i]]=false)  then	
+        if (emit[msgNo]=false)  then	
           clear ch[3];
           ch[3].empty:=false;
-          ch[3].msg:=msgs[allMsgs[i]];
+          ch[3].msg:=msgs[msgNo];
           ch[3].sender:=intruderType;
           ch[3].receiver:=bobs[j].B;
-          emit[allMsgs[i]]:=true;
+          emit[msgNo]:=true;
           intruder.st:=emitted3;
           put "   3'I->B\n";
           put ch[3].msg;
