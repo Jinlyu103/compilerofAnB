@@ -19,7 +19,6 @@ type message = [
   | `Null
   | `Var of identifier
   | `Str of roleName
-  (*| `Nonce of nonce*)
   | `Concat of message list
   | `Aenc of message*message   (* Asymmetric encryption *)
   | `Senc of message*message   (* Symmetric encryption *)

@@ -1,4 +1,4 @@
-Protocol CR:
+Protocol NSPK:
 Knowledges:{
     A : <A.B.nonce(Na)>;
     B : nonce(Nb)
