@@ -1,0 +1,148 @@
+rule " roleA0 "
+roleA[i].st = stA[0] & ch[0].empty = true 
+==>
+var msg:Message;
+msgNo:IndexType;
+begin
+   clear msg;
+   cons0(roleA[i].Na,roleA[i].A,roleA[i].B,msg,msgNo);
+   ch[0].empty := false;
+   ch[0].msg := msg;
+   ch[0].sender := roleA[i].A;
+   ch[0].receiver := IndexTyperuder_;
+   roleA[i].st := stA[1];
+end;
+rule " roleA1 "
+roleA[i].st = stA[1] & ch[1].empty = false & ch[1].receiver = roleA[i].A
+==>
+var loc_A loc_B:AgentIdType;
+loc_Na,loc_Nb:NonceType;
+msgNo:IndexType;
+begin
+   clear msg;
+   msg := ch[1].msg;
+   destruct1(msg,loc_Na,loc_Nb,loc_A);
+   if (loc_A=roleA[i].A & loc_Na=roleA[i].Na) then
+   ch[1].empty:=true;
+   endif;
+   roleA[i].st := stA[2];
+end;
+rule " roleA2 "
+roleA[i].st = stA[2] & ch[2].empty = true 
+==>
+var msg:Message;
+msgNo:IndexType;
+begin
+   clear msg;
+   cons2(loc_Nb,roleA[i].B,msg,msgNo);
+   ch[2].empty := false;
+   ch[2].msg := msg;
+   ch[2].sender := roleA[i].A;
+   ch[2].receiver := IndexTyperuder_;
+   roleA[i].st := stA[0];
+end;
+
+To genetate each message pattern:
+Patterns:
+ clear msg;
+ msg.magType := Nonce;
+ msg.noncePart := Na ;
+ lookAdd (msg,num1);
+ clear msg;
+ msg.msgType := Agent;
+ msg.agentPart := A;
+ lookAdd (msg,num2);
+ clear msg;
+ msg.msgType := Concat;
+ msg.mPart0 := num1_0
+ msg.mPart1 := num1_1
+ lookAdd(msg,num1);
+ clear msg;
+ msg.msgType := PubKey;
+ msg.keyPart := B;
+ lookAdd (msg,num2);
+ clear msg;
+ msg.msgType := Aenc;
+ msg.AencKey := num2;
+ msg.AencMsg := num1;
+ lookAdd(msg,num0);
+
+ clear msg;
+ msg.magType := Nonce;
+ msg.noncePart := Na ;
+ lookAdd (msg,num1);
+ clear msg;
+ msg.msgType := Agent;
+ msg.agentPart := A;
+ lookAdd (msg,num2);
+ clear msg;
+ msg.msgType := Concat;
+ msg.mPart0 := num1_0
+ msg.mPart1 := num1_1
+ lookAdd(msg,num1);
+
+ clear msg;
+ msg.msgType := Agent;
+ msg.agentPart := A;
+ lookAdd (msg,num2);
+
+ clear msg;
+ msg.magType := Nonce;
+ msg.noncePart := Na ;
+ lookAdd (msg,num1);
+ clear msg;
+ msg.magType := Nonce;
+ msg.noncePart := Nb ;
+ lookAdd (msg,num2);
+ clear msg;
+ msg.msgType := Concat;
+ msg.mPart0 := num1_0
+ msg.mPart1 := num1_1
+ lookAdd(msg,num1);
+ clear msg;
+ msg.msgType := PubKey;
+ msg.keyPart := A;
+ lookAdd (msg,num2);
+ clear msg;
+ msg.msgType := Aenc;
+ msg.AencKey := num2;
+ msg.AencMsg := num1;
+ lookAdd(msg,num3);
+
+ clear msg;
+ msg.magType := Nonce;
+ msg.noncePart := Na ;
+ lookAdd (msg,num1);
+ clear msg;
+ msg.magType := Nonce;
+ msg.noncePart := Nb ;
+ lookAdd (msg,num2);
+ clear msg;
+ msg.msgType := Concat;
+ msg.mPart0 := num4_0
+ msg.mPart1 := num4_1
+ lookAdd(msg,num4);
+
+ clear msg;
+ msg.msgType := PubKey;
+ msg.keyPart := A;
+ lookAdd (msg,num5);
+
+ clear msg;
+ msg.magType := Nonce;
+ msg.noncePart := Nb ;
+ lookAdd (msg,num6);
+
+ clear msg;
+ msg.magType := Nonce;
+ msg.noncePart := Nb ;
+ lookAdd (msg,num1);
+ clear msg;
+ msg.msgType := PubKey;
+ msg.keyPart := B;
+ lookAdd (msg,num2);
+ clear msg;
+ msg.msgType := Aenc;
+ msg.AencKey := num2;
+ msg.AencMsg := num1;
+ lookAdd(msg,num7);
