@@ -596,6 +596,20 @@ function construct5By34(msgNo3,msgNo4:indexType):indexType;
     return index;
   end;
 
+---Pat1:Na; Pat1: Nb; Pat6: concat(Na,Nb)
+function construct6By11(msgNo1,msgNo2:indexType):indexType;
+  var index : indexType;
+      locNa : NonceType;
+      locNb : NonceType;
+      msg   : Message;
+  begin
+    index := 0;
+    locNa := msgs[msgNo1].noncePart;
+    locNb  := msgs[msgNo2].noncePart;
+    lookAddPat6(locNa,locNb,msg,index);
+    return index;
+  end;
+
 --- pat6:concat(Na,Nb); pat4:key(PK, B); pat7: aenc({Na,Nb},pk(A))
 function construct7By64(msgNo6,msgNo4:indexType):indexType;
   var index : indexType;
@@ -867,7 +881,7 @@ ruleset i:indexType do    --- pat6size
 endruleset;
 
 --- pat8: {Nb}Pk(B)
-ruleset i:indexType do  --- pat8size means the capacity of pat7Set, that is indexType
+ruleset i:indexType do  --- pat8size means the capacity of pat8Set, that is indexType
   rule "decrypty8" 
     i < pat8Set.length & Spy_known[pat8Set.content[i]] &
     !Spy_known[msgs[pat8Set.content[i]].aencMsg] 
@@ -918,7 +932,7 @@ ruleset i:indexType do    --- pat1size
   ruleset j:indexType do  --- pat2size
     rule "enconcat3" 
       i<pat1Set.length & Spy_known[pat1Set.content[i]]&
-      j<pat4Set.length & Spy_known[pat4Set.content[j]]&
+      j<pat2Set.length & Spy_known[pat3Set.content[j]]&
       !Spy_known[construct3By12(pat1Set.content[i],pat2Set.content[j])]
       ==>
       Spy_known[construct3By12(pat1Set.content[i],pat2Set.content[j])]:=true;
@@ -942,6 +956,19 @@ ruleset i:indexType do  --- pat6size means the capacity of pat6Set, that is inde
     end;
 endruleset;
 
+---Pat1: Na
+---Pat1: Nb 
+ruleset i:indexType do    --- pat1size
+  ruleset j:indexType do  --- pat1size
+    rule "enconcat6" 
+      i<pat1Set.length & Spy_known[pat1Set.content[i]]&
+      j<pat1Set.length & Spy_known[pat1Set.content[j]]&
+      !Spy_known[construct6By11(pat1Set.content[i],pat1Set.content[j])]
+      ==>
+      Spy_known[construct6By11(pat1Set.content[i],pat1Set.content[j])]:=true;
+    endrule
+  endruleset;
+endruleset;
 --- intruder emit msg 1
 ruleset i: msgLen do
   ruleset j: bobNums do
