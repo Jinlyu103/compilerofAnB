@@ -130,26 +130,26 @@ var
 
 --- Pat1 Na
 procedure lookAddPat1( Na:NonceType; Var msg:Message; Var num: indexType);  
- Var index : indexType;
- begin
-  index:=0;
-  for i: msgLen do  --- lookup(msg)
-    if (msgs[i].msgType=nonce) then 
-      if (msgs[i].noncePart=msg.noncePart ) then   --- why not (msgs[i].noncePart = Na )?
-      	index:=i;	
+  Var index : indexType;
+  begin
+    index:=0;
+    for i: msgLen do  --- lookup(msg)
+      if (msgs[i].msgType=nonce) then 
+        if (msgs[i].noncePart=msg.noncePart ) then   --- why not (msgs[i].noncePart = Na )?
+          index:=i;	
+        endif;
       endif;
-    endif;
-  endfor;
+    endfor;
 
-  if (index=0) then  --- lookAdd(msg)
-    msg_end := msg_end + 1 ; 
-    index:=msg_end;  
-    msgs[index].msgType := nonce; 
-    msgs[index].noncePart:=Na; 
-  endif;
-  num:=index;	  
-  msg := msgs[index];
-end;
+    if (index=0) then  --- lookAdd(msg)
+      msg_end := msg_end + 1 ; 
+      index:=msg_end;  
+      msgs[index].msgType := nonce; 
+      msgs[index].noncePart:=Na; 
+    endif;
+    num:=index;	  
+    msg := msgs[index];
+  end;
 
 ---Pat2: A
 procedure lookAddPat2( A:AgentType; Var msg:Message; Var num: indexType); 
@@ -280,190 +280,190 @@ procedure lookAddPat6(Na: NonceType; Nb: NonceType; Var msg: Message; Var num: i
 
 --- Pat7: {Na,Nb}Pk(A) aenc({Na, Nb},Pk(A))
 procedure lookAddPat7(Na: NonceType; Nb: NonceType; A:AgentType; Var msg:Message; Var num : indexType);
-Var msg1, msg2 : Message;
-    index, i1, i2: indexType;
-begin
-  index := 0;
-  lookAddPat6(Na, Nb, msg1, i1);
-  lookAddPat4(A,msg2,i2);
-  for i : msgLen do
-    if (msgs[i].msgType = aenc) then
-      if (msgs[i].aencMsg = i1 & msgs[i].aencKey = i2) then
-        index := i;
+  Var msg1, msg2 : Message;
+      index, i1, i2: indexType;
+  begin
+    index := 0;
+    lookAddPat6(Na, Nb, msg1, i1);
+    lookAddPat4(A,msg2,i2);
+    for i : msgLen do
+      if (msgs[i].msgType = aenc) then
+        if (msgs[i].aencMsg = i1 & msgs[i].aencKey = i2) then
+          index := i;
+        endif;
       endif;
-    endif;
-  endfor;
+    endfor;
 
-  if (index = 0) then
-    msg_end := msg_end+1;
-    index := msg_end;
-    msgs[index].msgType := aenc;
-    msgs[index].aencMsg := i1;
-    msgs[index].aencKey := i2;
-  endif;
-  num := index;
-  msg := msgs[index];
-end;
+    if (index = 0) then
+      msg_end := msg_end+1;
+      index := msg_end;
+      msgs[index].msgType := aenc;
+      msgs[index].aencMsg := i1;
+      msgs[index].aencKey := i2;
+    endif;
+    num := index;
+    msg := msgs[index];
+  end;
 
 ---Pat:8 {Nb}Pk(B) aenc({Nb},pk(B))
 procedure lookAddPat8(Nb: NonceType; B: AgentType; Var msg:Message; Var num: indexType);
-Var msg1, msg2: Message;
-    index, i1, i2: indexType;
-begin
-  index := 0;
-  lookAddPat1(Nb,msg1,i1);
-  lookAddPat4(B,msg2,i2);
-  for i:msgLen do
-    if (msgs[i].msgType=aenc) then
-      if (msgs[i].aencMsg = i1 & msgs[i].aencKey=i2) then
-        index := i;
+  Var msg1, msg2: Message;
+      index, i1, i2: indexType;
+  begin
+    index := 0;
+    lookAddPat1(Nb,msg1,i1);
+    lookAddPat4(B,msg2,i2);
+    for i:msgLen do
+      if (msgs[i].msgType=aenc) then
+        if (msgs[i].aencMsg = i1 & msgs[i].aencKey=i2) then
+          index := i;
+        endif;
       endif;
-    endif;
-  endfor;
+    endfor;
 
-  if (index = 0) then
-    msg_end := msg_end + 1;
-    index := msg_end;
-    msgs[index].msgType := aenc;
-    msgs[index].aencMsg := i1;
-    msgs[index].aencKey := i2;
-  endif;
-  num := index;
-  msg := msgs[index];
-end;
+    if (index = 0) then
+      msg_end := msg_end + 1;
+      index := msg_end;
+      msgs[index].msgType := aenc;
+      msgs[index].aencMsg := i1;
+      msgs[index].aencKey := i2;
+    endif;
+    num := index;
+    msg := msgs[index];
+  end;
 
 --- decide whether msg is of a certain form:
 --- Na,A,{Na,A},PK(B),{Na,A}pk(B),{Na,Nb},{Na,Nb}pk(A),{Nb}pk(B)
 --- is form {Na},flag=true means yes
 procedure isPat1(msg:Message;Var flag:boolean);
-var flag1:boolean;
-begin
-    flag1:=false;
-    if(msg.msgType=nonce) then
-        flag1:=true;
-    endif;
-    flag := flag1;
-end;
+  var flag1:boolean;
+  begin
+      flag1:=false;
+      if(msg.msgType=nonce) then
+          flag1:=true;
+      endif;
+      flag := flag1;
+  end;
 
 --- is form {A},flag=true means yes
 procedure isPat2(msg:Message;Var flag:boolean);
-var flag1:boolean;
-begin
-    flag1:=false;
-    if(msg.msgType=agent) then
-        flag1:=true;
-    endif;
-    flag := flag1;
-end;
+  var flag1:boolean;
+  begin
+      flag1:=false;
+      if(msg.msgType=agent) then
+          flag1:=true;
+      endif;
+      flag := flag1;
+  end;
 
 --- is form {Na,A},flag=true means yes
 procedure isPat3(msg:Message;Var flag:boolean);
-var flag1:boolean;
-begin
-    flag1:=false;
-    if(msg.msgType=concat) then
-        if (msgs[msg.concatPart1].msgType=nonce & msgs[msg.concatPart2].msgType=agent ) then
-            flag1:=true;
-        endif;
-    endif;
-    flag := flag1;
-end;
+  var flag1:boolean;
+  begin
+      flag1:=false;
+      if(msg.msgType=concat) then
+          if (msgs[msg.concatPart1].msgType=nonce & msgs[msg.concatPart2].msgType=agent ) then
+              flag1:=true;
+          endif;
+      endif;
+      flag := flag1;
+  end;
 
 --- is form Pk(B),flag=true means yes
 procedure isPat4(msg:Message;Var flag:boolean);
-var flag1:boolean;
-begin
-    flag1:=false;
-    if(msg.msgType=key) then
-        if ( msg.k.encTyp=PK) then
-            flag1:=true;
-        endif;
-    endif;
-    flag := flag1;
-end;
+  var flag1:boolean;
+  begin
+      flag1:=false;
+      if(msg.msgType=key) then
+          if ( msg.k.encTyp=PK) then
+              flag1:=true;
+          endif;
+      endif;
+      flag := flag1;
+  end;
 
 --- is form {Na,A}pk(B),flag=true means yes
 procedure isPat5(msg:Message;Var flag:boolean);
-var flag1,flag_part1,flag_part2:boolean;
-begin
-    flag1:=false;
-    flag_part1:=false;
-    flag_part2:=false;
-    if(msg.msgType=aenc) then
-        isPat3(msgs[msg.aencMsg],flag_part1); ---pat3: {Na,A}
-        isPat4(msgs[msg.aencKey],flag_part2); ---pat4: PK(B)
-        if (flag_part1 & flag_part2) then
-            flag1:=true;
-        endif;
-    endif;
-    flag := flag1;
-end;
+  var flag1,flag_part1,flag_part2:boolean;
+  begin
+      flag1:=false;
+      flag_part1:=false;
+      flag_part2:=false;
+      if(msg.msgType=aenc) then
+          isPat3(msgs[msg.aencMsg],flag_part1); ---pat3: {Na,A}
+          isPat4(msgs[msg.aencKey],flag_part2); ---pat4: PK(B)
+          if (flag_part1 & flag_part2) then
+              flag1:=true;
+          endif;
+      endif;
+      flag := flag1;
+  end;
 
 --- is form {Na,Nb},flag=true means yes
 procedure isPat6(msg:Message;Var flag:boolean);
-var flag1:boolean;
-begin
-    flag1:=false;
-    if(msg.msgType=concat) then
-        if (msgs[msg.concatPart1].msgType=nonce & msgs[msg.concatPart2].msgType=nonce) then
-            flag1:=true;
-        endif;
-    endif;
-    flag := flag1;
-end;
+  var flag1:boolean;
+  begin
+      flag1:=false;
+      if(msg.msgType=concat) then
+          if (msgs[msg.concatPart1].msgType=nonce & msgs[msg.concatPart2].msgType=nonce) then
+              flag1:=true;
+          endif;
+      endif;
+      flag := flag1;
+  end;
 
 --- is form {Na,Nb}PK(A),flag=true means yes
 procedure isPat7(msg:Message;Var flag:boolean);
-var flag1,flag_part1,flag_part2:boolean;
-begin
-    flag1:=false;
-    flag_part1:=false;
-    flag_part2:=false;
-    if(msg.msgType=aenc) then
-        isPat6(msgs[msg.aencMsg],flag_part1);  ---pat6: {Na,Nb}
-        isPat4(msgs[msg.aencKey],flag_part2);  ---pat4: Pk(A)
-        if (flag_part1 & flag_part2) then
-            flag1:=true;
-        endif;
-    endif;
-    flag := flag1;
-end;
+  var flag1,flag_part1,flag_part2:boolean;
+  begin
+      flag1:=false;
+      flag_part1:=false;
+      flag_part2:=false;
+      if(msg.msgType=aenc) then
+          isPat6(msgs[msg.aencMsg],flag_part1);  ---pat6: {Na,Nb}
+          isPat4(msgs[msg.aencKey],flag_part2);  ---pat4: Pk(A)
+          if (flag_part1 & flag_part2) then
+              flag1:=true;
+          endif;
+      endif;
+      flag := flag1;
+  end;
 
 --- is form {Nb}PK(B),flag=true means yes
 procedure isPat8(msg:Message;Var flag:boolean);
-var flag1,flag_part1,flag_part2:boolean;
-begin
-    flag1:=false;
-    flag_part1:=false;
-    flag_part2:=false;
-    if(msg.msgType=aenc) then
-        isPat1(msgs[msg.aencMsg],flag_part1);  --- pat1:{Na}
-        isPat4(msgs[msg.aencKey],flag_part2);  --- Pat4:PK(B)
-        if (flag_part1 & flag_part2) then
-            flag1:=true;
-        endif;
-    endif;
-    flag := flag1;
-end;
+  var flag1,flag_part1,flag_part2:boolean;
+  begin
+      flag1:=false;
+      flag_part1:=false;
+      flag_part2:=false;
+      if(msg.msgType=aenc) then
+          isPat1(msgs[msg.aencMsg],flag_part1);  --- pat1:{Na}
+          isPat4(msgs[msg.aencKey],flag_part2);  --- Pat4:PK(B)
+          if (flag_part1 & flag_part2) then
+              flag1:=true;
+          endif;
+      endif;
+      flag := flag1;
+  end;
 
 --- procedure construct msg
 procedure cons1(Na:NonceType; A:AgentType; B: AgentType; Var msg:Message; Var num:indexType);
-begin
-  clear msg;
-  lookAddPat5(Na, A, B, msg, num);
-end;
+  begin
+    clear msg;
+    lookAddPat5(Na, A, B, msg, num);
+  end;
 
 procedure cons2(Na:NonceType; Nb:NonceType; A:AgentType; Var msg:Message; Var num: indexType);
-begin
-  clear msg;
-  lookAddPat7(Na, Nb, A,msg,num);
-end;
+  begin
+    clear msg;
+    lookAddPat7(Na, Nb, A,msg,num);
+  end;
 
 procedure cons3(Nb:NonceType; B:AgentType; Var msg:Message; Var num: indexType);
-begin
-  clear msg;
-  lookAddPat8(Nb,B,msg,num);
-end;
+  begin
+    clear msg;
+    lookAddPat8(Nb,B,msg,num);
+  end;
 
 --- procedure destruct msg
 procedure destruct1(msg:Message; Var Na:NonceType; Var A: AgentType; Var B: AgentType);
@@ -524,7 +524,7 @@ begin
   num:=index;
 end;
 
---- function: lookUp/inverseKey
+--- function: lookUp/inverseKey/constructs
 function inverseKey(msgK:Message):Message;
   var key_inv:Message;
   begin
@@ -566,6 +566,20 @@ function lookUp(msg: Message): indexType;
     return index;
   end;
 
+---Pat1:Na; Pat2: A; Pat3: concat(Na,A)
+function construct3By12(msgNo1,msgNo2:indexType):indexType;
+  var index : indexType;
+      locNa : NonceType;
+      locA  : AgentType;
+      msg   : Message;
+  begin
+    index := 0;
+    locNa := msgs[msgNo1].noncePart;
+    locA  := msgs[msgNo2].ag;
+    lookAddPat3(locNa,locA,msg,index);
+    return index;
+  end;
+
 ---pat3: concat(Na,A); pat4: key(PK, B); pat5:aenc({Na,A},Pk(B))
 function construct5By34(msgNo3,msgNo4:indexType):indexType;
   var index : indexType;
@@ -581,6 +595,37 @@ function construct5By34(msgNo3,msgNo4:indexType):indexType;
     lookAddPat5(locNa,locA,k_ag,msg,index);
     return index;
   end;
+
+--- pat6:concat(Na,Nb); pat4:key(PK, B); pat7: aenc({Na,Nb},pk(A))
+function construct7By64(msgNo6,msgNo4:indexType):indexType;
+  var index : indexType;
+      locNa : NonceType;
+      locNb : NonceType;
+      k_ag  : AgentType;  --- agent A
+      msg   : Message;
+  begin
+    index := 0;
+    locNa := msgs[msgs[msgNo6].concatPart1].noncePart;
+    locNb := msgs[msgs[msgNo6].concatPart2].noncePart;
+    k_ag  := msgs[msgNo4].k.ag;
+    lookAddPat7(locNa,locNb,k_ag,msg,index);
+    return index;
+  end;
+
+--- pat1:Nb; pat4:key(PK, B); pat8: aenc({Nb},pk(A))
+function construct8By14(msgNo1,msgNo4:indexType):indexType;
+  var index : indexType;
+      locNb : NonceType;
+      k_ag  : AgentType;  --- agent B
+      msg   : Message;
+  begin
+    index := 0;
+    locNb := msgs[msgNo1].noncePart;
+    k_ag  := msgs[msgNo4].k.ag;
+    lookAddPat8(locNb,k_ag,msg,index);
+    return index;
+  end;
+
 --- rule for Alice
 ruleset i:aliceNums do
   rule "roleA1"
@@ -633,7 +678,7 @@ end;
 --- rules for bob 
 ruleset i:bobNums do 
   rule "roleB1"
-    bobs[i].st = B1 & ch[1].empty = false & intruder.st=emitted1 & ch[1].receiver=bobs[i].B 
+    bobs[i].st = B1 & ch[1].empty = false & ch[1].receiver=bobs[i].B  --- & intruder.st=emitted1
     ==>
     Var loc_A,loc_B:AgentType;
         loc_Na:NonceType;
@@ -656,7 +701,7 @@ ruleset i:bobNums do
     end;
 
   rule "roleB2"
-    bobs[i].st = B2 & ch[3].empty = false & intruder.st = emitted3 & ch[3].receiver=bobs[i].B 
+    bobs[i].st = B2 & ch[3].empty = false & ch[3].receiver=bobs[i].B ---& intruder.st = emitted3
     ==>
     Var loc_B:AgentType;
         loc_Nb:NonceType;
@@ -792,6 +837,111 @@ ruleset i:indexType do    --- pat3size
   endruleset;
 endruleset;
 
+--- pat7: {Na,Nb}Pk(A)
+ruleset i:indexType do  --- pat7size means the capacity of pat7Set, that is indexType
+  rule "decrypty7" 
+    i < pat7Set.length & Spy_known[pat7Set.content[i]] &
+    !Spy_known[msgs[pat7Set.content[i]].aencMsg] 
+    ==>
+    var key_inv:Message;
+    begin
+      key_inv := inverseKey(msgs[msgs[pat7Set.content[i]].aencKey]);
+      if (Spy_known[lookUp(key_inv)]) then
+        Spy_known[msgs[pat7Set.content[i]].aencMsg]:=true;
+      endif;
+    end;
+endruleset;
+
+--- pat6:{Na,Nb}
+--- pat4:pk(A)
+ruleset i:indexType do    --- pat6size
+  ruleset j:indexType do  --- pat4size
+    rule "encrypty7" 
+      i<pat6Set.length & Spy_known[pat6Set.content[i]]&
+      j<pat4Set.length & Spy_known[pat4Set.content[j]]&
+      !Spy_known[construct7By64(pat6Set.content[i],pat4Set.content[j])]
+      ==>
+      Spy_known[construct7By64(pat6Set.content[i],pat4Set.content[j])]:=true;
+    endrule
+  endruleset;
+endruleset;
+
+--- pat8: {Nb}Pk(B)
+ruleset i:indexType do  --- pat8size means the capacity of pat7Set, that is indexType
+  rule "decrypty8" 
+    i < pat8Set.length & Spy_known[pat8Set.content[i]] &
+    !Spy_known[msgs[pat8Set.content[i]].aencMsg] 
+    ==>
+    var key_inv:Message;
+    begin
+      key_inv := inverseKey(msgs[msgs[pat8Set.content[i]].aencKey]);
+      if (Spy_known[lookUp(key_inv)]) then
+        Spy_known[msgs[pat8Set.content[i]].aencMsg]:=true;
+      endif;
+    end;
+endruleset;
+
+--- pat1:Nb
+--- pat4:pk(B)
+ruleset i:indexType do    --- pat1size
+  ruleset j:indexType do  --- pat4size
+    rule "encrypty8" 
+      i<pat1Set.length & Spy_known[pat1Set.content[i]]&
+      j<pat4Set.length & Spy_known[pat4Set.content[j]]&
+      !Spy_known[construct8By14(pat1Set.content[i],pat4Set.content[j])]
+      ==>
+      Spy_known[construct8By14(pat1Set.content[i],pat4Set.content[j])]:=true;
+    endrule
+  endruleset;
+endruleset;
+
+---enconcat and deconcat : make msg pairs and destroy msg pairs
+---pat3: Na,A
+ruleset i:indexType do  --- pat3size means the capacity of pat3Set, that is indexType
+  rule "deconcat3" 
+    i < pat3Set.length & Spy_known[pat3Set.content[i]] &
+    !(Spy_known[msgs[pat3Set.content[i]].concatPart1] & Spy_known[msgs[pat3Set.content[i]].concatPart2] )
+    ==>
+    begin
+      if (!Spy_known[msgs[pat3Set.content[i]].concatPart1]) then
+        Spy_known[msgs[pat3Set.content[i]].concatPart1]:=true;
+      endif;
+      if (!Spy_known[msgs[pat3Set.content[i]].concatPart2]) then
+        Spy_known[msgs[pat3Set.content[i]].concatPart2]:=true;
+      endif;
+    end;
+endruleset;
+
+---Pat1: Na
+---Pat2: A 
+ruleset i:indexType do    --- pat1size
+  ruleset j:indexType do  --- pat2size
+    rule "enconcat3" 
+      i<pat1Set.length & Spy_known[pat1Set.content[i]]&
+      j<pat4Set.length & Spy_known[pat4Set.content[j]]&
+      !Spy_known[construct3By12(pat1Set.content[i],pat2Set.content[j])]
+      ==>
+      Spy_known[construct3By12(pat1Set.content[i],pat2Set.content[j])]:=true;
+    endrule
+  endruleset;
+endruleset;
+
+---pat6: Na,Nb
+ruleset i:indexType do  --- pat6size means the capacity of pat6Set, that is indexType
+  rule "deconcat6" 
+    i < pat6Set.length & Spy_known[pat6Set.content[i]] &
+    !(Spy_known[msgs[pat6Set.content[i]].concatPart1] & Spy_known[msgs[pat6Set.content[i]].concatPart2] )
+    ==>
+    begin
+      if (!Spy_known[msgs[pat6Set.content[i]].concatPart1]) then
+        Spy_known[msgs[pat6Set.content[i]].concatPart1]:=true;
+      endif;
+      if (!Spy_known[msgs[pat6Set.content[i]].concatPart2]) then
+        Spy_known[msgs[pat6Set.content[i]].concatPart2]:=true;
+      endif;
+    end;
+endruleset;
+
 --- intruder emit msg 1
 ruleset i: msgLen do
   ruleset j: bobNums do
@@ -806,7 +956,7 @@ ruleset i: msgLen do
             ch[1].sender:=intruderType;
             ch[1].receiver:=bobs[j].B;
             emit[msgNo]:=true;
-            intruder.st:=emitted1;
+            ---intruder.st:=emitted1;
             put "   1'I->B\n";
             put ch[1].msg;
           endif;
@@ -828,7 +978,7 @@ ruleset i:msgLen do
           ch[1].sender:=intruderType;
           ch[1].receiver:=bobs[j].B;
           emit[msgNo]:=true;
-          intruder.st:=emitted2;
+          ---intruder.st:=emitted2;
           put "   1'I->B\n";
           put ch[1].msg;
         endif;
@@ -836,6 +986,7 @@ ruleset i:msgLen do
     end;
   end;
 
+--- intruder emit msg 3
 ruleset i: msgLen do
   ruleset j: bobNums do
     rule "intruderEmitMsg3" 
@@ -849,7 +1000,7 @@ ruleset i: msgLen do
           ch[3].sender:=intruderType;
           ch[3].receiver:=bobs[j].B;
           emit[msgNo]:=true;
-          intruder.st:=emitted3;
+          ---intruder.st:=emitted3;
           put "   3'I->B\n";
           put ch[3].msg;
         endif;
