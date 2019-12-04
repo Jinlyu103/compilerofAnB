@@ -963,12 +963,14 @@ ruleset i:indexType do    --- pat1size
     rule "enconcat6" 
       i<pat1Set.length & Spy_known[pat1Set.content[i]]&
       j<pat1Set.length & Spy_known[pat1Set.content[j]]&
+      i != j &
       !Spy_known[construct6By11(pat1Set.content[i],pat1Set.content[j])]
       ==>
       Spy_known[construct6By11(pat1Set.content[i],pat1Set.content[j])]:=true;
     endrule
   endruleset;
 endruleset;
+
 --- intruder emit msg 1
 ruleset i: msgLen do
   ruleset j: bobNums do
@@ -984,7 +986,7 @@ ruleset i: msgLen do
             ch[1].receiver:=bobs[j].B;
             emit[msgNo]:=true;
             ---intruder.st:=emitted1;
-            put "   1'I->B\n";
+            put "1. I->B\n";
             put ch[1].msg;
           endif;
         end;
@@ -999,15 +1001,15 @@ ruleset i:msgLen do
     	==>
         begin 
         if (emit[msgNo]=false) then
-          clear ch[1].msg;
-          ch[1].empty:=false;
-          ch[1].msg:=msgs[msgNo];
-          ch[1].sender:=intruderType;
-          ch[1].receiver:=bobs[j].B;
+          clear ch[2].msg;
+          ch[2].empty:=false;
+          ch[2].msg:=msgs[msgNo];
+          ch[2].sender:=intruderType;
+          ch[2].receiver:=bobs[j].B;
           emit[msgNo]:=true;
           ---intruder.st:=emitted2;
-          put "   1'I->B\n";
-          put ch[1].msg;
+          put "2. I->B\n";
+          put ch[2].msg;
         endif;
       end;
     end;
@@ -1028,7 +1030,7 @@ ruleset i: msgLen do
           ch[3].receiver:=bobs[j].B;
           emit[msgNo]:=true;
           ---intruder.st:=emitted3;
-          put "   3'I->B\n";
+          put "3. I->B\n";
           put ch[3].msg;
         endif;
       end;
