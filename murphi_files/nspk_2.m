@@ -971,11 +971,11 @@ ruleset i:indexType do    --- pat1size
   endruleset;
 endruleset;
 
---- intruder emit msg 1
+--- intruder emit msg 1,pat5:{Na,A}pk(B)
 ruleset i: msgLen do
   ruleset j: bobNums do
     rule "intruderEmitMsg1" 
-    	ch[1].empty=true   ---intruder.st=deducted1 & 
+    	ch[1].empty=true & i < pat5Set.length & Spy_known[pat5Set.content[i]]  ---intruder.st=deducted1 & 
     	==>
         begin 
           if (emit[msgNo]=false) then
@@ -993,11 +993,11 @@ ruleset i: msgLen do
     end;
   end;
 
---- intruder emit msg 2
+--- intruder emit msg 2 pat7:{Na,Nb}Pk(A)
 ruleset i:msgLen do
   ruleset j:aliceNums do
     rule "intruderEmitMsg2" 
-    	ch[2].empty=true   ---intruder.st=deducted2 & 
+    	ch[2].empty=true & i < pat7Set.length & Spy_known[pat7Set.content[i]] ---intruder.st=deducted2 & 
     	==>
         begin 
         if (emit[msgNo]=false) then
@@ -1019,7 +1019,7 @@ ruleset i:msgLen do
 ruleset i: msgLen do
   ruleset j: bobNums do
     rule "intruderEmitMsg3" 
-    	ch[3].empty=true   ---intruder.st=deducted3 & 
+    	ch[3].empty=true & i < pat8Set.length & Spy_known[pat8Set.content[i]]  ---intruder.st=deducted3 & 
     	==>
       begin
         if (emit[msgNo]=false)  then	
@@ -1064,6 +1064,16 @@ startstate
   endfor;
 
   msg_end := 0;
+  for i:msgLen do
+    pat1Set.content[i] := 0;
+    pat2Set.content[i] := 0;
+    pat3Set.content[i] := 0;
+    pat4Set.content[i] := 0;
+    pat5Set.content[i] := 0;
+    pat6Set.content[i] := 0;
+    pat7Set.content[i] := 0;
+    pat8Set.content[i] := 0; 
+  endfor;
 
   pat1Set.length:= 0;
   pat2Set.length:= 0;
@@ -1075,5 +1085,8 @@ startstate
   pat8Set.length:= 0;
   msgNo := 0;
 
+  for i:indexType do 
+    Spy_known[i] := false;
+  endfor;
 end;
 
