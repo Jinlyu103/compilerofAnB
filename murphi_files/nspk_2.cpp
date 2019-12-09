@@ -2954,6 +2954,7 @@ mu_1__type_8 mu_1__type_8_undefined_var;
 
 const int mu_aliceNum = 1;
 const int mu_bobNum = 1;
+const int mu_intruderNum = 1;
 const int mu_total_fact = 20;
 const int mu_deductionsNum = 20;
 const int mu_msgpassingNum = 3;
@@ -4471,6 +4472,7 @@ mu_ch[3].mu_msg = mu_msgs[mu_msgNo];
 mu_ch[3].mu_sender = mu_intruderType;
 mu_ch[3].mu_receiver = mu_bobs[mu_j].mu_B;
 mu_emit[mu_msgNo] = mu_true;
+mu_intruder.mu_st = mu_emitted3;
 cout << "3. I->B\n";
 mu_ch[3].mu_msg.print();
 }
@@ -4573,6 +4575,7 @@ mu_ch[2].mu_msg = mu_msgs[mu_msgNo];
 mu_ch[2].mu_sender = mu_intruderType;
 mu_ch[2].mu_receiver = mu_bobs[mu_j].mu_B;
 mu_emit[mu_msgNo] = mu_true;
+mu_intruder.mu_st = mu_emitted2;
 cout << "2. I->B\n";
 mu_ch[2].mu_msg.print();
 }
@@ -4675,6 +4678,7 @@ mu_ch[1].mu_msg = mu_msgs[mu_msgNo];
 mu_ch[1].mu_sender = mu_intruderType;
 mu_ch[1].mu_receiver = mu_bobs[mu_j].mu_B;
 mu_emit[mu_msgNo] = mu_true;
+mu_intruder.mu_st = mu_emitted1;
 cout << "1. I->B\n";
 mu_ch[1].mu_msg.print();
 }
@@ -6659,6 +6663,7 @@ mu_bobs[mu_i].mu_st = mu_B1;
 };
 mu_bobs[1].mu_B = mu_Bob;
 mu_bobs[1].mu_Nb = mu_Nb;
+mu_intruder.mu_st = mu_wait;
 {
 for(int mu_i = 1; mu_i <= 3; mu_i++) {
 mu_ch[mu_i].mu_empty = mu_true;

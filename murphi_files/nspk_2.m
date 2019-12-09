@@ -5,7 +5,7 @@
 const
     aliceNum:1;  		--- number of initaitors (Alice/Intruder)
     bobNum:1;       	--- number of responders(Bob/Intruder)
-   ---intruderNum:1;		--- number of intruders
+   intruderNum:1;		--- number of intruders
     total_fact:20;  	--- the size of spy-known array.
     deductionsNum:20; 	--- the size of deduction array
     msgpassingNum:3;   	--- number of messages
@@ -739,7 +739,7 @@ end;
 
 --- rules for intruder
 rule "intruderGetMsg1"
-  ch[1].empty = false & ch[1].receiver = intruderType  ---intruder.st = wait &
+  ch[1].empty=false & ch[1].receiver=intruderType  ---intruder.st = wait &
   ==>
   Var flag_pat5:boolean;
   ---Var msgNo:indexType;
@@ -756,6 +756,7 @@ rule "intruderGetMsg1"
     ---endif;
     ch[1].empty := true;
     intruder.st := gotmsg1;  ---the state of intruder
+    ---put "intruser get msg1\n";
   end;
 
 rule "intruderGetMsg2"
@@ -985,7 +986,7 @@ ruleset i: msgLen do
             ch[1].sender:=intruderType;
             ch[1].receiver:=bobs[j].B;
             emit[msgNo]:=true;
-            ---intruder.st:=emitted1;
+            intruder.st:=emitted1;
             put "1. I->B\n";
             put ch[1].msg;
           endif;
@@ -1007,7 +1008,7 @@ ruleset i:msgLen do
           ch[2].sender:=intruderType;
           ch[2].receiver:=bobs[j].B;
           emit[msgNo]:=true;
-          ---intruder.st:=emitted2;
+          intruder.st:=emitted2;
           put "2. I->B\n";
           put ch[2].msg;
         endif;
@@ -1029,7 +1030,7 @@ ruleset i: msgLen do
           ch[3].sender:=intruderType;
           ch[3].receiver:=bobs[j].B;
           emit[msgNo]:=true;
-          ---intruder.st:=emitted3;
+          intruder.st:=emitted3;
           put "3. I->B\n";
           put ch[3].msg;
         endif;
@@ -1050,6 +1051,8 @@ startstate
   endfor;
   bobs[1].B := Bob;
   bobs[1].Nb := Nb;
+
+  intruder.st := wait;
 
   for i:msgpassingNums do
     ch[i].empty := true;
