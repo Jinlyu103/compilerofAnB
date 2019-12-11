@@ -871,7 +871,7 @@ ruleset i:indexType do  --- pat5size means the capacity of pat5Set, that is inde
         msgPat3 :=msgs[pat5Set.content[i]].aencMsg;
         isPat3(msgs[msgPat3],flag_pat3);  ---pat3: {Na,A}
         if (flag_pat3) then     ---put this msg into pat3Set
-          if(!exist(pat3Set,msgNo)) then
+          if(!exist(pat3Set,msgPat3)) then
             ---put "put this msg into pat3\n";
             ---put msgPat3;
             pat3Set.length:=pat3Set.length+1;
@@ -886,13 +886,28 @@ endruleset;
 --- pat4:PK(B)
 ruleset i:indexType do    --- pat3size
   ruleset j:indexType do  --- pat4size
-    rule "encrypty5" 
-      i<=pat3Set.length & Spy_known[pat3Set.content[i]]&
-      j<=pat4Set.length & Spy_known[pat4Set.content[j]]&
+    rule "encrypty5"      --- This rule is not fired!
+      i<=pat3Set.length & Spy_known[pat3Set.content[i]] &
+      j<=pat4Set.length & Spy_known[pat4Set.content[j]] &
       !Spy_known[construct5By34(pat3Set.content[i],pat4Set.content[j])]
       ==>
-      Spy_known[construct5By34(pat3Set.content[i],pat4Set.content[j])]:=true;
-    endrule
+      var encMsgNo : indexType;
+          encMsg: Message;
+      begin
+        put "encrypt 5.\n";
+        if (msgs[pat4Set.content[j]].k.ag=intruder.B) then
+          encMsgNo := construct5By34(pat3Set.content[i],pat4Set.content[j]);
+          if (!exist(pat5Set,encMsgNo)) then
+            ---put "put concatMsg into pat5Set\n";
+            ---put encMsgNo;
+            pat5Set.length:=pat5Set.length+1;
+            pat5Set.content[pat5Set.length] := encMsgNo;
+          endif;
+          if (!Spy_known[encMsgNo]) then
+            Spy_known[encMsgNo]:=true;
+          endif;
+        endif;
+      end;
   endruleset;
 endruleset;
 
@@ -903,10 +918,25 @@ ruleset i:indexType do  --- pat7size means the capacity of pat7Set, that is inde
     !Spy_known[msgs[pat7Set.content[i]].aencMsg] 
     ==>
     var key_inv:Message;
+        msgPat6:indexType;
+        flag_pat6:boolean;
     begin
+      put "decrypt 7\n";
       key_inv := inverseKey(msgs[msgs[pat7Set.content[i]].aencKey]);
-      if (Spy_known[lookUp(key_inv)]) then
+      if (key_inv.k.ag = intruderType) then  ---Spy_known[lookUp(key_inv)]
+        ---put "decrypt 71\n";
         Spy_known[msgs[pat7Set.content[i]].aencMsg]:=true;
+        ---put this msg into pat6Set
+        msgPat6 :=msgs[pat7Set.content[i]].aencMsg;
+        isPat6(msgs[msgPat6],flag_pat6);  ---pat6: {Na,Nb}
+        if (flag_pat6) then     ---put this msg into pat6Set
+          if(!exist(pat6Set,msgPat6)) then
+            ---put "put this msg into pat6\n";
+            ---put msgPat6;
+            pat6Set.length:=pat6Set.length+1;
+            pat6Set.content[pat6Set.length] := msgPat6; 
+          endif;
+        endif;
       endif;
     end;
 endruleset;
@@ -1166,6 +1196,10 @@ startstate
   pat8Set.length:= 0;
   msgNo := 0;
 
+  for i:indexType do 
+    Spy_known[i] := false;
+  endfor;
+
   msg_end:=msg_end+1;
   msgs[msg_end].msgType := key;
   msgs[msg_end].k.ag:=intruderType;
@@ -1173,12 +1207,17 @@ startstate
 
   pat4Set.length := pat4Set.length + 1; ---A,B
   pat4Set.content[pat4Set.length] :=msg_end;
-
-  for i:indexType do 
-    Spy_known[i] := false;
-  endfor;
-
   Spy_known[msg_end] := true;
+
+  msg_end := msg_end+1;  ---pk(B)
+  msgs[msg_end].msgType := key;
+  msgs[msg_end].k.ag:=Bob;
+  msgs[msg_end].k.encTyp:=PK;
+
+  pat4Set.length := pat4Set.length + 1; ---A,B
+  pat4Set.content[pat4Set.length] :=msg_end;
+  Spy_known[msg_end] := true;
+
 end;
 
 invariant "sec"
