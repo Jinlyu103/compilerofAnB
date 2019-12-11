@@ -1223,7 +1223,7 @@ end;
 invariant "sec"
   forall i:msgLen do
    (msgs[i].msgType=nonce &
-   (msgs[i].noncePart=Na|msgs[i].noncePart=Nb)) 
+   msgs[i].noncePart=Nb) 
     ->
    Spy_known[i]=false
 end;

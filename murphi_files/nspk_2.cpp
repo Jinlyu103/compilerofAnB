@@ -6778,12 +6778,7 @@ bool mu__boolexpr146;
 bool mu__boolexpr147;
   if (!((mu_msgs[mu_i].mu_msgType) == (mu_nonce))) mu__boolexpr147 = FALSE ;
   else {
-bool mu__boolexpr148;
-  if ((mu_msgs[mu_i].mu_noncePart) == (mu_Na)) mu__boolexpr148 = TRUE ;
-  else {
-  mu__boolexpr148 = ((mu_msgs[mu_i].mu_noncePart) == (mu_Nb)) ; 
-}
-  mu__boolexpr147 = (mu__boolexpr148) ; 
+  mu__boolexpr147 = ((mu_msgs[mu_i].mu_noncePart) == (mu_Nb)) ; 
 }
   if (!(mu__boolexpr147)) mu__boolexpr146 = TRUE ;
   else {
@@ -6796,7 +6791,7 @@ if ( !(mu__boolexpr146) )
 return mu__quant145;
 };
 
-bool mu__condition_149() // Condition for Rule "sec"
+bool mu__condition_148() // Condition for Rule "sec"
 {
   return mu__invariant_144( );
 }
@@ -6804,7 +6799,7 @@ bool mu__condition_149() // Condition for Rule "sec"
 /**** end rule declaration ****/
 
 const rulerec invariants[] = {
-{"sec", &mu__condition_149, NULL, },
+{"sec", &mu__condition_148, NULL, },
 };
 const unsigned short numinvariants = 1;
 
