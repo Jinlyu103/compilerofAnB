@@ -1056,7 +1056,7 @@ ruleset i: msgLen do
     	ch[1].empty=true & i <= pat5Set.length & Spy_known[pat5Set.content[i]]  ---intruder.st=deducted1 & 
     	==>
         begin 
-          if (emit[pat5Set.content[i]]=false) then
+          if (emit[pat5Set.content[i]]=false & msgs[msgs[pat5Set.content[i]].aencKey].k.ag=intruder.B) then
             clear ch[1];
             ch[1].empty:=false;
             ch[1].msg:=msgs[pat5Set.content[i]];
@@ -1168,11 +1168,11 @@ startstate
 
   msg_end:=msg_end+1;
   msgs[msg_end].msgType := key;
-  msgs[msg_end].k.ag:=intruder.B;
-  msgs[msg_end].k.encTyp:=PK;
+  msgs[msg_end].k.ag:=intruderType;
+  msgs[msg_end].k.encTyp:=SK;  ---- SK(intruserType) for intruder to decrypt msg form Alice 
 
-  pat4Set.length := pat2Set.length + 1; ---A,B
-  pat4Set.content[pat2Set.length] :=msg_end;
+  pat4Set.length := pat4Set.length + 1; ---A,B
+  pat4Set.content[pat4Set.length] :=msg_end;
 
   for i:indexType do 
     Spy_known[i] := false;
