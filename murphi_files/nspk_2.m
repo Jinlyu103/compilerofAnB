@@ -894,7 +894,7 @@ ruleset i:indexType do    --- pat3size
       var encMsgNo : indexType;
           encMsg: Message;
       begin
-        put "encrypt 5.\n";
+        ---put "encrypt 5.\n";
         if (msgs[pat4Set.content[j]].k.ag=intruder.B) then
           encMsgNo := construct5By34(pat3Set.content[i],pat4Set.content[j]);
           if (!exist(pat5Set,encMsgNo)) then
@@ -921,7 +921,7 @@ ruleset i:indexType do  --- pat7size means the capacity of pat7Set, that is inde
         msgPat6:indexType;
         flag_pat6:boolean;
     begin
-      put "decrypt 7\n";
+      ---put "decrypt 7\n";
       key_inv := inverseKey(msgs[msgs[pat7Set.content[i]].aencKey]);
       if (key_inv.k.ag = intruderType) then  ---Spy_known[lookUp(key_inv)]
         ---put "decrypt 71\n";
@@ -950,8 +950,21 @@ ruleset i:indexType do    --- pat6size
       j<=pat4Set.length & Spy_known[pat4Set.content[j]]&
       !Spy_known[construct7By64(pat6Set.content[i],pat4Set.content[j])]
       ==>
-      Spy_known[construct7By64(pat6Set.content[i],pat4Set.content[j])]:=true;
-    endrule
+      var encMsgNo:indexType;
+          encMsg:Message;
+      begin
+        put "encrypt 7.\n";
+        if (msgs[pat4Set.content[j]].k.ag = intruder.B) then
+          encMsgNo := construct7By64(pat6Set.content[i],pat4Set.content[j]);
+          if(!exist(pat7Set,encMsgNo)) then
+            pat7Set.length := pat7Set.length+1;
+            pat7Set.content[pat7Set.length] := encMsgNo;
+          endif;
+          if (!Spy_known[encMsgNo]) then
+            Spy_known[encMsgNo]:=true;
+          endif;
+        endif;
+    end;
   endruleset;
 endruleset;
 
@@ -1000,7 +1013,7 @@ ruleset i:indexType do  --- pat3size means the capacity of pat3Set, that is inde
         msgPat1 := msgs[pat3Set.content[i]].concatPart1;
         isPat1(msgs[msgPat1],flag_pat1);  ---pat1: Na
         if (flag_pat1) then     ---put this msg into pat1Set
-          if(!exist(pat1Set,msgNo)) then
+          if(!exist(pat1Set,msgPat1)) then
             ---put "put this msg into pat1\n";
             ---put msgPat1;
             pat1Set.length:=pat1Set.length+1;
@@ -1054,12 +1067,31 @@ ruleset i:indexType do  --- pat6size means the capacity of pat6Set, that is inde
     i <= pat6Set.length & Spy_known[pat6Set.content[i]] &
     !(Spy_known[msgs[pat6Set.content[i]].concatPart1] & Spy_known[msgs[pat6Set.content[i]].concatPart2] )
     ==>
+    var msgPa1_1, msgPa1_2:indexType;
+        flag_pat1_1, flag_pat1_2:boolean;
     begin
+      put "deconcat 6.\n";
       if (!Spy_known[msgs[pat6Set.content[i]].concatPart1]) then
         Spy_known[msgs[pat6Set.content[i]].concatPart1]:=true;
+        msgPa1_1 := msgs[pat6Set.content[i]].concatPart1;
+        isPat1(msgs[msgPa1_1],flag_pat1_1);
+        if (flag_pat1_1) then
+          if (!exist(pat1Set,msgPa1_1)) then
+            pat1Set.length := pat1Set.length+1;
+            pat1Set.content[pat1Set.length] := msgPa1_1;
+          endif;
+        endif;
       endif;
       if (!Spy_known[msgs[pat6Set.content[i]].concatPart2]) then
         Spy_known[msgs[pat6Set.content[i]].concatPart2]:=true;
+        msgPa1_2 := msgs[pat6Set.content[i]].concatPart2;
+        isPat1(msgs[msgPa1_2],flag_pat1_2);
+        if (flag_pat1_2) then
+          if (!exist(pat1Set,msgPa1_2)) then
+            pat1Set.length := pat1Set.length+1;
+            pat1Set.content[pat1Set.length] := msgPa1_2;
+          endif;
+        endif;
       endif;
     end;
 endruleset;
@@ -1074,8 +1106,18 @@ ruleset i:indexType do    --- pat1size
       i != j &
       !Spy_known[construct6By11(pat1Set.content[i],pat1Set.content[j])]
       ==>
-      Spy_known[construct6By11(pat1Set.content[i],pat1Set.content[j])]:=true;
-    endrule
+      var concatMsg: indexType;
+      begin
+        concatMsg := construct6By11(pat1Set.content[i],pat1Set.content[j]);
+        Spy_known[concatMsg]:=true;
+        ---put concatMsg into pat6Set
+        if(!exist(pat6Set,concatMsg)) then
+          put "put concatMsg into pat6Set\n";
+          put concatMsg;
+          pat6Set.length:=pat6Set.length+1;
+          pat6Set.content[pat6Set.length] := concatMsg; 
+        endif;
+      end;
   endruleset;
 endruleset;
 

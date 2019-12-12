@@ -4700,7 +4700,21 @@ bool mu__boolexpr63;
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
-mu_Spy_known[mu_construct6By11( mu_pat1Set.mu_content[mu_i], mu_pat1Set.mu_content[mu_j] )] = mu_true;
+/*** Variable declaration ***/
+mu_1_indexType mu_concatMsg("concatMsg",0);
+
+mu_concatMsg = mu_construct6By11( mu_pat1Set.mu_content[mu_i], mu_pat1Set.mu_content[mu_j] );
+mu_Spy_known[mu_concatMsg] = mu_true;
+if ( !(mu_exist( mu_pat6Set, mu_concatMsg )) )
+{
+cout << "put concatMsg into pat6Set\n";
+mu_concatMsg.print();
+mu_pat6Set.mu_length = (mu_pat6Set.mu_length) + (1);
+if (mu_concatMsg.isundefined())
+  mu_pat6Set.mu_content[mu_pat6Set.mu_length].undefine();
+else
+  mu_pat6Set.mu_content[mu_pat6Set.mu_length] = mu_concatMsg;
+}
   };
 
 };
@@ -4788,13 +4802,52 @@ bool mu__boolexpr69;
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
+/*** Variable declaration ***/
+mu_1_indexType mu_msgPa1_1("msgPa1_1",0);
+
+/*** Variable declaration ***/
+mu_1_indexType mu_msgPa1_2("msgPa1_2",8);
+
+/*** Variable declaration ***/
+mu_0_boolean mu_flag_pat1_1("flag_pat1_1",16);
+
+/*** Variable declaration ***/
+mu_0_boolean mu_flag_pat1_2("flag_pat1_2",24);
+
+cout << "deconcat 6.\n";
 if ( !(mu_Spy_known[mu_msgs[mu_pat6Set.mu_content[mu_i]].mu_concatPart1]) )
 {
 mu_Spy_known[mu_msgs[mu_pat6Set.mu_content[mu_i]].mu_concatPart1] = mu_true;
+mu_msgPa1_1 = mu_msgs[mu_pat6Set.mu_content[mu_i]].mu_concatPart1;
+mu_isPat1 ( mu_msgs[mu_msgPa1_1], mu_flag_pat1_1 );
+if ( mu_flag_pat1_1 )
+{
+if ( !(mu_exist( mu_pat1Set, mu_msgPa1_1 )) )
+{
+mu_pat1Set.mu_length = (mu_pat1Set.mu_length) + (1);
+if (mu_msgPa1_1.isundefined())
+  mu_pat1Set.mu_content[mu_pat1Set.mu_length].undefine();
+else
+  mu_pat1Set.mu_content[mu_pat1Set.mu_length] = mu_msgPa1_1;
+}
+}
 }
 if ( !(mu_Spy_known[mu_msgs[mu_pat6Set.mu_content[mu_i]].mu_concatPart2]) )
 {
 mu_Spy_known[mu_msgs[mu_pat6Set.mu_content[mu_i]].mu_concatPart2] = mu_true;
+mu_msgPa1_2 = mu_msgs[mu_pat6Set.mu_content[mu_i]].mu_concatPart2;
+mu_isPat1 ( mu_msgs[mu_msgPa1_2], mu_flag_pat1_2 );
+if ( mu_flag_pat1_2 )
+{
+if ( !(mu_exist( mu_pat1Set, mu_msgPa1_2 )) )
+{
+mu_pat1Set.mu_length = (mu_pat1Set.mu_length) + (1);
+if (mu_msgPa1_2.isundefined())
+  mu_pat1Set.mu_content[mu_pat1Set.mu_length].undefine();
+else
+  mu_pat1Set.mu_content[mu_pat1Set.mu_length] = mu_msgPa1_2;
+}
+}
 }
   };
 
@@ -5028,7 +5081,7 @@ mu_msgPat1 = mu_msgs[mu_pat3Set.mu_content[mu_i]].mu_concatPart1;
 mu_isPat1 ( mu_msgs[mu_msgPat1], mu_flag_pat1 );
 if ( mu_flag_pat1 )
 {
-if ( !(mu_exist( mu_pat1Set, mu_msgNo )) )
+if ( !(mu_exist( mu_pat1Set, mu_msgPat1 )) )
 {
 mu_pat1Set.mu_length = (mu_pat1Set.mu_length) + (1);
 if (mu_msgPat1.isundefined())
@@ -5363,7 +5416,29 @@ bool mu__boolexpr103;
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
-mu_Spy_known[mu_construct7By64( mu_pat6Set.mu_content[mu_i], mu_pat4Set.mu_content[mu_j] )] = mu_true;
+/*** Variable declaration ***/
+mu_1_indexType mu_encMsgNo("encMsgNo",0);
+
+/*** Variable declaration ***/
+mu_1_Message mu_encMsg("encMsg",8);
+
+cout << "encrypt 7.\n";
+if ( (mu_msgs[mu_pat4Set.mu_content[mu_j]].mu_k.mu_ag) == (mu_intruder.mu_B) )
+{
+mu_encMsgNo = mu_construct7By64( mu_pat6Set.mu_content[mu_i], mu_pat4Set.mu_content[mu_j] );
+if ( !(mu_exist( mu_pat7Set, mu_encMsgNo )) )
+{
+mu_pat7Set.mu_length = (mu_pat7Set.mu_length) + (1);
+if (mu_encMsgNo.isundefined())
+  mu_pat7Set.mu_content[mu_pat7Set.mu_length].undefine();
+else
+  mu_pat7Set.mu_content[mu_pat7Set.mu_length] = mu_encMsgNo;
+}
+if ( !(mu_Spy_known[mu_encMsgNo]) )
+{
+mu_Spy_known[mu_encMsgNo] = mu_true;
+}
+}
   };
 
 };
@@ -5450,7 +5525,6 @@ mu_1_indexType mu_msgPat6("msgPat6",88);
 /*** Variable declaration ***/
 mu_0_boolean mu_flag_pat6("flag_pat6",96);
 
-cout << "decrypt 7\n";
 mu_key_inv = mu_inverseKey( mu_msgs[mu_msgs[mu_pat7Set.mu_content[mu_i]].mu_aencKey] );
 if ( (mu_key_inv.mu_k.mu_ag) == (mu_intruderType) )
 {
@@ -5586,7 +5660,6 @@ mu_1_indexType mu_encMsgNo("encMsgNo",0);
 /*** Variable declaration ***/
 mu_1_Message mu_encMsg("encMsg",8);
 
-cout << "encrypt 5.\n";
 if ( (mu_msgs[mu_pat4Set.mu_content[mu_j]].mu_k.mu_ag) == (mu_intruder.mu_B) )
 {
 mu_encMsgNo = mu_construct5By34( mu_pat3Set.mu_content[mu_i], mu_pat4Set.mu_content[mu_j] );
