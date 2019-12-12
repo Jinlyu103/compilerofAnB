@@ -120,7 +120,7 @@ var
   emit          : Array[indexType] of boolean;
 ---  KEY           : KeyType;
   msg           : Message;   ---
-  msgNo         : indexType; --- for intruder gets msg 
+  ---msgNo         : indexType; --- for intruder gets msg 
   eve           : Event;
   endn          : indexType;
   end1          : indexType;
@@ -457,6 +457,7 @@ procedure cons1(Na:NonceType; A:AgentType; B: AgentType; Var msg:Message; Var nu
 procedure cons2(Na:NonceType; Nb:NonceType; A:AgentType; Var msg:Message; Var num: indexType);
   begin
     clear msg;
+    clear num;
     lookAddPat7(Na, Nb, A,msg,num);
   end;
 
@@ -715,7 +716,7 @@ ruleset i:bobNums do
     ==>
     Var loc_A,loc_B:AgentType;
         loc_Na:NonceType;
-        msgNo:indexType;
+        msgNo1:indexType;
     begin
       clear msg;
       msg:=ch[1].msg;       --- receive message
@@ -728,12 +729,14 @@ ruleset i:bobNums do
         ---put loc_B;
         ch[1].empty := true;
         ---put loc_B;
-        cons2(loc_Na, bobs[i].Nb, loc_A, msg, msgNo); ----?!
+        cons2(loc_Na, bobs[i].Nb, loc_A, msg, msgNo1); ----?!
         ---put loc_B;
+        put msg;
+        clear ch[2];
         ch[2].msg := msg;   --- send message 
         ch[2].empty := false;
         bobs[i].st := B2;
-        ch[2].receiver:=intruderType;
+        ch[2].receiver:=loc_A;
         ch[2].sender := bobs[i].B;
         ---put loc_B;
         put "2. B -> I\n";
@@ -752,7 +755,7 @@ ruleset i:bobNums do
       destruct3(msg,loc_Nb,loc_B);
       if (loc_B = bobs[i].B & loc_Nb=bobs[i].Nb) then
         bobs[i].st := B3;
-        put "\nend\n";
+        ---put "\nend\n";
         put msg;
       endif;
     end;
@@ -769,7 +772,7 @@ rule "intruderGetMsg1"
   ch[1].empty=false & ch[1].receiver=intruderType  ---intruder.st = wait &
   ==>
   Var flag_pat5:boolean;
-  ---Var msgNo:indexType;
+  Var msgNo:indexType;
   begin
     clear msg;
     clear msgNo;
@@ -789,9 +792,10 @@ rule "intruderGetMsg1"
   end;
 
 rule "intruderGetMsg2"
-  ch[2].empty=false & ch[2].receiver=intruderType ---intruder.st = emitted1 &
+  ch[2].empty=false ---& ch[2].receiver=intruderType ;intruder.st = emitted1 &  
   ==>
   Var flag_pat7:boolean;
+      msgNo: indexType;
   begin
     clear msg;
     clear msgNo;
@@ -811,6 +815,7 @@ rule "intruderGetMsg3"
   ch[3].empty=false & ch[3].receiver=intruderType   ---intruder.st = emitted2 &
   ==>
   Var flag_pat8: boolean;
+      msgNo: indexType;
   begin
     clear msg;
     clear msgNo;
@@ -1026,7 +1031,7 @@ ruleset i:indexType do  --- pat3size means the capacity of pat3Set, that is inde
         msgPat2 := msgs[pat3Set.content[i]].concatPart2;
         isPat2(msgs[msgPat2],flag_pat2);  ---pat2: A
         if (flag_pat2) then     ---put this msg into pat2Set
-          if(!exist(pat2Set,msgNo)) then
+          if(!exist(pat2Set,msgPat2)) then
             ---put "put this msg into pat2\n";
             ---put msgPat2;
             pat2Set.length:=pat2Set.length+1;
@@ -1134,7 +1139,7 @@ ruleset i: msgLen do
             ch[1].msg:=msgs[pat5Set.content[i]];
             ch[1].sender:=intruderType;
             ch[1].receiver:=bobs[j].B;
-            emit[msgNo]:=true;
+            emit[pat5Set.content[i]]:=true;
             intruder.st:=emitted1;
             put "1. I->B\n";
             put ch[1].msg;
@@ -1150,13 +1155,13 @@ ruleset i:msgLen do
     	ch[2].empty=true & i <= pat7Set.length & Spy_known[pat7Set.content[i]] ---intruder.st=deducted2 & 
     	==>
         begin 
-        if (emit[pat7Set.content[i]]=false) then
+        if (emit[pat7Set.content[i]]=false & msgs[msgs[pat7Set.content[i]].aencKey].k.ag=alices[i].A ) then
           clear ch[2];
           ch[2].empty:=false;
-          ch[2].msg:=msgs[msgNo];
+          ch[2].msg:=msgs[pat7Set.content[i]];
           ch[2].sender:=intruderType;
           ch[2].receiver:=alices[j].A;
-          emit[msgNo]:=true;
+          emit[pat7Set.content[i]]:=true;
           intruder.st:=emitted2;
           put "2. I->A\n";
           put ch[2].msg;
@@ -1172,13 +1177,13 @@ ruleset i: msgLen do
     	ch[3].empty=true & i <= pat8Set.length & Spy_known[pat8Set.content[i]]  ---intruder.st=deducted3 & 
     	==>
       begin
-        if (emit[msgNo]=false)  then	
+        if (emit[pat8Set.content[i]]=false)  then	
           clear ch[3];
           ch[3].empty:=false;
-          ch[3].msg:=msgs[msgNo];
+          ch[3].msg:=msgs[pat8Set.content[i]];
           ch[3].sender:=intruderType;
           ch[3].receiver:=bobs[j].B;
-          emit[msgNo]:=true;
+          emit[pat8Set.content[i]]:=true;
           intruder.st:=emitted3;
           put "3. I->B\n";
           put ch[3].msg;
@@ -1236,7 +1241,7 @@ startstate
   pat6Set.length:= 0;
   pat7Set.length:= 0;
   pat8Set.length:= 0;
-  msgNo := 0;
+  ---msgNo := 0;
 
   for i:indexType do 
     Spy_known[i] := false;

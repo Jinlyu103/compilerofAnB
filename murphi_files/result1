@@ -1,0 +1,447 @@
+This program should be regarded as a DEBUGGING aid, not as a 
+certifier of correctness.
+Call with the -l flag or read the license file for terms
+and conditions of use.
+Run this program with "-h" for the list of options.
+
+Bugs, questions, and comments should be directed to
+"melatti@di.uniroma1.it".
+
+CMurphi compiler last modified date: Aug  7 2019
+Include files last modified date:    Nov 8 2016
+==========================================================================
+
+==========================================================================
+Caching Murphi Release 5.4.9.1
+Finite-state Concurrent System Verifier.
+
+Caching Murphi Release 5.4.9.1 is based on various versions of Murphi.
+Caching Murphi Release 5.4.9.1 :
+Copyright (C) 2009-2012 by Sapienza University of Rome.
+Murphi release 3.1 :
+Copyright (C) 1992 - 1999 by the Board of Trustees of
+Leland Stanford Junior University.
+
+==========================================================================
+
+Protocol: nspk_2
+
+Algorithm:
+	Verification by breadth first search.
+	with symmetry algorithm 3 -- Heuristic Small Memory Normalization
+	with permutation trial limit 10.
+
+Memory usage:
+
+	* The size of each state is 5168 bits (rounded up to 648 bytes).
+	* The memory allocated for the hash table and state queue is
+	  8 Mbytes.
+	  With two words of overhead per state, the maximum size of
+	  the state space is 12197 states.
+	   * Use option "-k" or "-m" to increase this, if necessary.
+	* Capacity in queue for breadth-first search: 1219 states.
+	   * Change the constant gPercentActiveStates in mu_prolog.inc
+	     to increase this, if necessary.
+
+Warning: No trace will not be printed in the case of protocol errors!
+         Check the options if you want to have error traces.
+1. A -> I
+ch[1].msg.msgType:aenc
+ch[1].msg.ag:Undefined
+ch[1].msg.noncePart:Undefined
+ch[1].msg.k.encTyp:Undefined
+ch[1].msg.k.ag:Undefined
+ch[1].msg.aencMsg:5
+ch[1].msg.aencKey:6
+ch[1].msg.sencMsg:Undefined
+ch[1].msg.sencKey:Undefined
+ch[1].msg.concatPart1:Undefined
+ch[1].msg.concatPart2:Undefined
+1. I->B
+ch[1].msg.msgType:aenc
+ch[1].msg.ag:Undefined
+ch[1].msg.noncePart:Undefined
+ch[1].msg.k.encTyp:Undefined
+ch[1].msg.k.ag:Undefined
+ch[1].msg.aencMsg:5
+ch[1].msg.aencKey:2
+ch[1].msg.sencMsg:Undefined
+ch[1].msg.sencKey:Undefined
+ch[1].msg.concatPart1:Undefined
+ch[1].msg.concatPart2:Undefined
+1. I->B
+ch[1].msg.msgType:aenc
+ch[1].msg.ag:Undefined
+ch[1].msg.noncePart:Undefined
+ch[1].msg.k.encTyp:Undefined
+ch[1].msg.k.ag:Undefined
+ch[1].msg.aencMsg:5
+ch[1].msg.aencKey:2
+ch[1].msg.sencMsg:Undefined
+ch[1].msg.sencKey:Undefined
+ch[1].msg.concatPart1:Undefined
+ch[1].msg.concatPart2:Undefined
+2. B -> I
+ch[2].msg.msgType:aenc
+ch[2].msg.ag:Undefined
+ch[2].msg.noncePart:Undefined
+ch[2].msg.k.encTyp:Undefined
+ch[2].msg.k.ag:Undefined
+ch[2].msg.aencMsg:10
+ch[2].msg.aencKey:11
+ch[2].msg.sencMsg:Undefined
+ch[2].msg.sencKey:Undefined
+ch[2].msg.concatPart1:Undefined
+ch[2].msg.concatPart2:Undefined
+1. I->B
+ch[1].msg.msgType:aenc
+ch[1].msg.ag:Undefined
+ch[1].msg.noncePart:Undefined
+ch[1].msg.k.encTyp:Undefined
+ch[1].msg.k.ag:Undefined
+ch[1].msg.aencMsg:5
+ch[1].msg.aencKey:2
+ch[1].msg.sencMsg:Undefined
+ch[1].msg.sencKey:Undefined
+ch[1].msg.concatPart1:Undefined
+ch[1].msg.concatPart2:Undefined
+1. I->B
+ch[1].msg.msgType:aenc
+ch[1].msg.ag:Undefined
+ch[1].msg.noncePart:Undefined
+ch[1].msg.k.encTyp:Undefined
+ch[1].msg.k.ag:Undefined
+ch[1].msg.aencMsg:5
+ch[1].msg.aencKey:2
+ch[1].msg.sencMsg:Undefined
+ch[1].msg.sencKey:Undefined
+ch[1].msg.concatPart1:Undefined
+ch[1].msg.concatPart2:Undefined
+1. I->B
+ch[1].msg.msgType:aenc
+ch[1].msg.ag:Undefined
+ch[1].msg.noncePart:Undefined
+ch[1].msg.k.encTyp:Undefined
+ch[1].msg.k.ag:Undefined
+ch[1].msg.aencMsg:5
+ch[1].msg.aencKey:2
+ch[1].msg.sencMsg:Undefined
+ch[1].msg.sencKey:Undefined
+ch[1].msg.concatPart1:Undefined
+ch[1].msg.concatPart2:Undefined
+2. B -> I
+ch[2].msg.msgType:aenc
+ch[2].msg.ag:Undefined
+ch[2].msg.noncePart:Undefined
+ch[2].msg.k.encTyp:Undefined
+ch[2].msg.k.ag:Undefined
+ch[2].msg.aencMsg:12
+ch[2].msg.aencKey:13
+ch[2].msg.sencMsg:Undefined
+ch[2].msg.sencKey:Undefined
+ch[2].msg.concatPart1:Undefined
+ch[2].msg.concatPart2:Undefined
+2. B -> I
+ch[2].msg.msgType:aenc
+ch[2].msg.ag:Undefined
+ch[2].msg.noncePart:Undefined
+ch[2].msg.k.encTyp:Undefined
+ch[2].msg.k.ag:Undefined
+ch[2].msg.aencMsg:12
+ch[2].msg.aencKey:13
+ch[2].msg.sencMsg:Undefined
+ch[2].msg.sencKey:Undefined
+ch[2].msg.concatPart1:Undefined
+ch[2].msg.concatPart2:Undefined
+1. I->B
+ch[1].msg.msgType:aenc
+ch[1].msg.ag:Undefined
+ch[1].msg.noncePart:Undefined
+ch[1].msg.k.encTyp:Undefined
+ch[1].msg.k.ag:Undefined
+ch[1].msg.aencMsg:5
+ch[1].msg.aencKey:2
+ch[1].msg.sencMsg:Undefined
+ch[1].msg.sencKey:Undefined
+ch[1].msg.concatPart1:Undefined
+ch[1].msg.concatPart2:Undefined
+2. B -> I
+ch[2].msg.msgType:aenc
+ch[2].msg.ag:Undefined
+ch[2].msg.noncePart:Undefined
+ch[2].msg.k.encTyp:Undefined
+ch[2].msg.k.ag:Undefined
+ch[2].msg.aencMsg:12
+ch[2].msg.aencKey:13
+ch[2].msg.sencMsg:Undefined
+ch[2].msg.sencKey:Undefined
+ch[2].msg.concatPart1:Undefined
+ch[2].msg.concatPart2:Undefined
+2. B -> I
+ch[2].msg.msgType:aenc
+ch[2].msg.ag:Undefined
+ch[2].msg.noncePart:Undefined
+ch[2].msg.k.encTyp:Undefined
+ch[2].msg.k.ag:Undefined
+ch[2].msg.aencMsg:12
+ch[2].msg.aencKey:13
+ch[2].msg.sencMsg:Undefined
+ch[2].msg.sencKey:Undefined
+ch[2].msg.concatPart1:Undefined
+ch[2].msg.concatPart2:Undefined
+2. I->A
+ch[2].msg.msgType:aenc
+ch[2].msg.ag:Undefined
+ch[2].msg.noncePart:Undefined
+ch[2].msg.k.encTyp:Undefined
+ch[2].msg.k.ag:Undefined
+ch[2].msg.aencMsg:10
+ch[2].msg.aencKey:11
+ch[2].msg.sencMsg:Undefined
+ch[2].msg.sencKey:Undefined
+ch[2].msg.concatPart1:Undefined
+ch[2].msg.concatPart2:Undefined
+2. B -> I
+ch[2].msg.msgType:aenc
+ch[2].msg.ag:Undefined
+ch[2].msg.noncePart:Undefined
+ch[2].msg.k.encTyp:Undefined
+ch[2].msg.k.ag:Undefined
+ch[2].msg.aencMsg:12
+ch[2].msg.aencKey:13
+ch[2].msg.sencMsg:Undefined
+ch[2].msg.sencKey:Undefined
+ch[2].msg.concatPart1:Undefined
+ch[2].msg.concatPart2:Undefined
+2. I->A
+ch[2].msg.msgType:aenc
+ch[2].msg.ag:Undefined
+ch[2].msg.noncePart:Undefined
+ch[2].msg.k.encTyp:Undefined
+ch[2].msg.k.ag:Undefined
+ch[2].msg.aencMsg:12
+ch[2].msg.aencKey:13
+ch[2].msg.sencMsg:Undefined
+ch[2].msg.sencKey:Undefined
+ch[2].msg.concatPart1:Undefined
+ch[2].msg.concatPart2:Undefined
+2. I->A
+ch[2].msg.msgType:aenc
+ch[2].msg.ag:Undefined
+ch[2].msg.noncePart:Undefined
+ch[2].msg.k.encTyp:Undefined
+ch[2].msg.k.ag:Undefined
+ch[2].msg.aencMsg:10
+ch[2].msg.aencKey:11
+ch[2].msg.sencMsg:Undefined
+ch[2].msg.sencKey:Undefined
+ch[2].msg.concatPart1:Undefined
+ch[2].msg.concatPart2:Undefined
+3. A -> I
+ch[3].msg.msgType:aenc
+ch[3].msg.ag:Undefined
+ch[3].msg.noncePart:Undefined
+ch[3].msg.k.encTyp:Undefined
+ch[3].msg.k.ag:Undefined
+ch[3].msg.aencMsg:9
+ch[3].msg.aencKey:6
+ch[3].msg.sencMsg:Undefined
+ch[3].msg.sencKey:Undefined
+ch[3].msg.concatPart1:Undefined
+ch[3].msg.concatPart2:Undefined
+2. I->A
+ch[2].msg.msgType:aenc
+ch[2].msg.ag:Undefined
+ch[2].msg.noncePart:Undefined
+ch[2].msg.k.encTyp:Undefined
+ch[2].msg.k.ag:Undefined
+ch[2].msg.aencMsg:10
+ch[2].msg.aencKey:11
+ch[2].msg.sencMsg:Undefined
+ch[2].msg.sencKey:Undefined
+ch[2].msg.concatPart1:Undefined
+ch[2].msg.concatPart2:Undefined
+2. I->A
+ch[2].msg.msgType:aenc
+ch[2].msg.ag:Undefined
+ch[2].msg.noncePart:Undefined
+ch[2].msg.k.encTyp:Undefined
+ch[2].msg.k.ag:Undefined
+ch[2].msg.aencMsg:12
+ch[2].msg.aencKey:13
+ch[2].msg.sencMsg:Undefined
+ch[2].msg.sencKey:Undefined
+ch[2].msg.concatPart1:Undefined
+ch[2].msg.concatPart2:Undefined
+2. I->A
+ch[2].msg.msgType:aenc
+ch[2].msg.ag:Undefined
+ch[2].msg.noncePart:Undefined
+ch[2].msg.k.encTyp:Undefined
+ch[2].msg.k.ag:Undefined
+ch[2].msg.aencMsg:12
+ch[2].msg.aencKey:13
+ch[2].msg.sencMsg:Undefined
+ch[2].msg.sencKey:Undefined
+ch[2].msg.concatPart1:Undefined
+ch[2].msg.concatPart2:Undefined
+3. A -> I
+ch[3].msg.msgType:aenc
+ch[3].msg.ag:Undefined
+ch[3].msg.noncePart:Undefined
+ch[3].msg.k.encTyp:Undefined
+ch[3].msg.k.ag:Undefined
+ch[3].msg.aencMsg:11
+ch[3].msg.aencKey:6
+ch[3].msg.sencMsg:Undefined
+ch[3].msg.sencKey:Undefined
+ch[3].msg.concatPart1:Undefined
+ch[3].msg.concatPart2:Undefined
+2. I->A
+ch[2].msg.msgType:aenc
+ch[2].msg.ag:Undefined
+ch[2].msg.noncePart:Undefined
+ch[2].msg.k.encTyp:Undefined
+ch[2].msg.k.ag:Undefined
+ch[2].msg.aencMsg:10
+ch[2].msg.aencKey:11
+ch[2].msg.sencMsg:Undefined
+ch[2].msg.sencKey:Undefined
+ch[2].msg.concatPart1:Undefined
+ch[2].msg.concatPart2:Undefined
+2. I->A
+ch[2].msg.msgType:aenc
+ch[2].msg.ag:Undefined
+ch[2].msg.noncePart:Undefined
+ch[2].msg.k.encTyp:Undefined
+ch[2].msg.k.ag:Undefined
+ch[2].msg.aencMsg:10
+ch[2].msg.aencKey:11
+ch[2].msg.sencMsg:Undefined
+ch[2].msg.sencKey:Undefined
+ch[2].msg.concatPart1:Undefined
+ch[2].msg.concatPart2:Undefined
+3. A -> I
+ch[3].msg.msgType:aenc
+ch[3].msg.ag:Undefined
+ch[3].msg.noncePart:Undefined
+ch[3].msg.k.encTyp:Undefined
+ch[3].msg.k.ag:Undefined
+ch[3].msg.aencMsg:9
+ch[3].msg.aencKey:6
+ch[3].msg.sencMsg:Undefined
+ch[3].msg.sencKey:Undefined
+ch[3].msg.concatPart1:Undefined
+ch[3].msg.concatPart2:Undefined
+3. A -> I
+ch[3].msg.msgType:aenc
+ch[3].msg.ag:Undefined
+ch[3].msg.noncePart:Undefined
+ch[3].msg.k.encTyp:Undefined
+ch[3].msg.k.ag:Undefined
+ch[3].msg.aencMsg:9
+ch[3].msg.aencKey:6
+ch[3].msg.sencMsg:Undefined
+ch[3].msg.sencKey:Undefined
+ch[3].msg.concatPart1:Undefined
+ch[3].msg.concatPart2:Undefined
+2. I->A
+ch[2].msg.msgType:aenc
+ch[2].msg.ag:Undefined
+ch[2].msg.noncePart:Undefined
+ch[2].msg.k.encTyp:Undefined
+ch[2].msg.k.ag:Undefined
+ch[2].msg.aencMsg:12
+ch[2].msg.aencKey:13
+ch[2].msg.sencMsg:Undefined
+ch[2].msg.sencKey:Undefined
+ch[2].msg.concatPart1:Undefined
+ch[2].msg.concatPart2:Undefined
+3. A -> I
+ch[3].msg.msgType:aenc
+ch[3].msg.ag:Undefined
+ch[3].msg.noncePart:Undefined
+ch[3].msg.k.encTyp:Undefined
+ch[3].msg.k.ag:Undefined
+ch[3].msg.aencMsg:11
+ch[3].msg.aencKey:6
+ch[3].msg.sencMsg:Undefined
+ch[3].msg.sencKey:Undefined
+ch[3].msg.concatPart1:Undefined
+ch[3].msg.concatPart2:Undefined
+3. A -> I
+ch[3].msg.msgType:aenc
+ch[3].msg.ag:Undefined
+ch[3].msg.noncePart:Undefined
+ch[3].msg.k.encTyp:Undefined
+ch[3].msg.k.ag:Undefined
+ch[3].msg.aencMsg:11
+ch[3].msg.aencKey:6
+ch[3].msg.sencMsg:Undefined
+ch[3].msg.sencKey:Undefined
+ch[3].msg.concatPart1:Undefined
+ch[3].msg.concatPart2:Undefined
+2. I->A
+ch[2].msg.msgType:aenc
+ch[2].msg.ag:Undefined
+ch[2].msg.noncePart:Undefined
+ch[2].msg.k.encTyp:Undefined
+ch[2].msg.k.ag:Undefined
+ch[2].msg.aencMsg:10
+ch[2].msg.aencKey:11
+ch[2].msg.sencMsg:Undefined
+ch[2].msg.sencKey:Undefined
+ch[2].msg.concatPart1:Undefined
+ch[2].msg.concatPart2:Undefined
+3. A -> I
+ch[3].msg.msgType:aenc
+ch[3].msg.ag:Undefined
+ch[3].msg.noncePart:Undefined
+ch[3].msg.k.encTyp:Undefined
+ch[3].msg.k.ag:Undefined
+ch[3].msg.aencMsg:9
+ch[3].msg.aencKey:6
+ch[3].msg.sencMsg:Undefined
+ch[3].msg.sencKey:Undefined
+ch[3].msg.concatPart1:Undefined
+ch[3].msg.concatPart2:Undefined
+3. A -> I
+ch[3].msg.msgType:aenc
+ch[3].msg.ag:Undefined
+ch[3].msg.noncePart:Undefined
+ch[3].msg.k.encTyp:Undefined
+ch[3].msg.k.ag:Undefined
+ch[3].msg.aencMsg:9
+ch[3].msg.aencKey:6
+ch[3].msg.sencMsg:Undefined
+ch[3].msg.sencKey:Undefined
+ch[3].msg.concatPart1:Undefined
+ch[3].msg.concatPart2:Undefined
+3. I->B
+ch[3].msg.msgType:aenc
+ch[3].msg.ag:Undefined
+ch[3].msg.noncePart:Undefined
+ch[3].msg.k.encTyp:Undefined
+ch[3].msg.k.ag:Undefined
+ch[3].msg.aencMsg:9
+ch[3].msg.aencKey:6
+ch[3].msg.sencMsg:Undefined
+ch[3].msg.sencKey:Undefined
+ch[3].msg.concatPart1:Undefined
+ch[3].msg.concatPart2:Undefined
+
+==========================================================================
+
+Result:
+
+	Invariant "sec" failed.
+
+State Space Explored:
+
+	74 states, 230 rules fired in 0.10s.
+
+Analysis of State Space:
+
+	There are rules that are never fired.
+	If you are running with symmetry, this may be why.  Otherwise,
+	please run this program with "-pr" for the rules information.
