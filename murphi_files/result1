@@ -33,7 +33,7 @@ Algorithm:
 
 Memory usage:
 
-	* The size of each state is 5168 bits (rounded up to 648 bytes).
+	* The size of each state is 5160 bits (rounded up to 648 bytes).
 	* The memory allocated for the hash table and state queue is
 	  8 Mbytes.
 	  With two words of overhead per state, the maximum size of
@@ -81,6 +81,17 @@ ch[1].msg.sencMsg:Undefined
 ch[1].msg.sencKey:Undefined
 ch[1].msg.concatPart1:Undefined
 ch[1].msg.concatPart2:Undefined
+msg.msgType:aenc
+msg.ag:Undefined
+msg.noncePart:Undefined
+msg.k.encTyp:Undefined
+msg.k.ag:Undefined
+msg.aencMsg:10
+msg.aencKey:11
+msg.sencMsg:Undefined
+msg.sencKey:Undefined
+msg.concatPart1:Undefined
+msg.concatPart2:Undefined
 2. B -> I
 ch[2].msg.msgType:aenc
 ch[2].msg.ag:Undefined
@@ -129,6 +140,17 @@ ch[1].msg.sencMsg:Undefined
 ch[1].msg.sencKey:Undefined
 ch[1].msg.concatPart1:Undefined
 ch[1].msg.concatPart2:Undefined
+msg.msgType:aenc
+msg.ag:Undefined
+msg.noncePart:Undefined
+msg.k.encTyp:Undefined
+msg.k.ag:Undefined
+msg.aencMsg:12
+msg.aencKey:13
+msg.sencMsg:Undefined
+msg.sencKey:Undefined
+msg.concatPart1:Undefined
+msg.concatPart2:Undefined
 2. B -> I
 ch[2].msg.msgType:aenc
 ch[2].msg.ag:Undefined
@@ -141,6 +163,17 @@ ch[2].msg.sencMsg:Undefined
 ch[2].msg.sencKey:Undefined
 ch[2].msg.concatPart1:Undefined
 ch[2].msg.concatPart2:Undefined
+msg.msgType:aenc
+msg.ag:Undefined
+msg.noncePart:Undefined
+msg.k.encTyp:Undefined
+msg.k.ag:Undefined
+msg.aencMsg:12
+msg.aencKey:13
+msg.sencMsg:Undefined
+msg.sencKey:Undefined
+msg.concatPart1:Undefined
+msg.concatPart2:Undefined
 2. B -> I
 ch[2].msg.msgType:aenc
 ch[2].msg.ag:Undefined
@@ -165,6 +198,17 @@ ch[1].msg.sencMsg:Undefined
 ch[1].msg.sencKey:Undefined
 ch[1].msg.concatPart1:Undefined
 ch[1].msg.concatPart2:Undefined
+msg.msgType:aenc
+msg.ag:Undefined
+msg.noncePart:Undefined
+msg.k.encTyp:Undefined
+msg.k.ag:Undefined
+msg.aencMsg:12
+msg.aencKey:13
+msg.sencMsg:Undefined
+msg.sencKey:Undefined
+msg.concatPart1:Undefined
+msg.concatPart2:Undefined
 2. B -> I
 ch[2].msg.msgType:aenc
 ch[2].msg.ag:Undefined
@@ -177,6 +221,17 @@ ch[2].msg.sencMsg:Undefined
 ch[2].msg.sencKey:Undefined
 ch[2].msg.concatPart1:Undefined
 ch[2].msg.concatPart2:Undefined
+msg.msgType:aenc
+msg.ag:Undefined
+msg.noncePart:Undefined
+msg.k.encTyp:Undefined
+msg.k.ag:Undefined
+msg.aencMsg:12
+msg.aencKey:13
+msg.sencMsg:Undefined
+msg.sencKey:Undefined
+msg.concatPart1:Undefined
+msg.concatPart2:Undefined
 2. B -> I
 ch[2].msg.msgType:aenc
 ch[2].msg.ag:Undefined
@@ -201,6 +256,17 @@ ch[2].msg.sencMsg:Undefined
 ch[2].msg.sencKey:Undefined
 ch[2].msg.concatPart1:Undefined
 ch[2].msg.concatPart2:Undefined
+msg.msgType:aenc
+msg.ag:Undefined
+msg.noncePart:Undefined
+msg.k.encTyp:Undefined
+msg.k.ag:Undefined
+msg.aencMsg:12
+msg.aencKey:13
+msg.sencMsg:Undefined
+msg.sencKey:Undefined
+msg.concatPart1:Undefined
+msg.concatPart2:Undefined
 2. B -> I
 ch[2].msg.msgType:aenc
 ch[2].msg.ag:Undefined
@@ -438,7 +504,7 @@ Result:
 
 State Space Explored:
 
-	74 states, 230 rules fired in 0.10s.
+	82 states, 269 rules fired in 0.10s.
 
 Analysis of State Space:
 
