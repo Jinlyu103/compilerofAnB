@@ -527,6 +527,50 @@ procedure get_msgNo(msg:Message; Var num:indexType);
     num:=index;
   end;
 
+
+procedure printMsg(msg:Message);
+  begin
+    if msg.msgType=null then
+      put "null\n";
+    elsif msg.msgType=agent then
+      put msg.ag;
+    elsif msg.msgType=nonce then
+      put msg.noncePart;
+    elsif msg.msgType=key then
+      if msg.k.encTyp = PK then
+        put "PK(";
+        put msg.k.ag;
+        put ")";
+      elsif msg.k.encTyp=SK then
+        put "SK(";
+        put msg.k.ag;
+        put ")";
+      elsif msg.k.encTyp=SymK then
+        put "SymK(";
+        put msg.k.ag;
+        put ")";
+      endif;
+    elsif msg.msgType=aenc then
+      put "aenc{";
+      printMsg(msgs[msg.aencMsg]);
+      put ",";
+      printMsg(msgs[msg.aencKey]);
+      put "}\n";
+    elsif msg.msgType=senc then
+      put "senc{";
+      printMsg(msgs[msg.sencMsg]);
+      put ",";
+      printMsg(msgs[msg.sencKey]);
+      put "}\n";
+    elsif msg.msgType=concat then
+      put "concat{";
+      printMsg(msgs[msg.concatPart1]);
+      put ",";
+      printMsg(msgs[msg.concatPart1]);
+      put "}";
+    endif;
+  end;
+
 --- function: lookUp/inverseKey/constructs
 function inverseKey(msgK:Message):Message;
   var key_inv:Message;
@@ -671,7 +715,8 @@ ruleset i:aliceNums do
       ch[1].receiver := intruderType;
       alices[i].st := A2;
       put "1. A -> I\n";
-      put ch[1].msg;
+      ---put ch[1].msg;
+      printMsg(ch[1].msg);
     end;
 
   rule "roleA2"
@@ -698,7 +743,8 @@ ruleset i:aliceNums do
         ch[3].sender := alices[i].A;
         ch[3].empty := false;
         put "3. A -> I\n";
-        put ch[3].msg;
+        ---put ch[3].msg;
+        printMsg(ch[3].msg);
       endif;
     end;
 
@@ -740,7 +786,8 @@ ruleset i:bobNums do
         ch[2].sender := bobs[i].B;
         ---put loc_B;
         put "2. B -> I\n";
-        put ch[2].msg;
+        ---put ch[2].msg;
+        printMsg(ch[2].msg);
       endif;
     end;
 
@@ -756,7 +803,8 @@ ruleset i:bobNums do
       if (loc_B = bobs[i].B & loc_Nb=bobs[i].Nb) then
         bobs[i].st := B3;
         ---put "\nend\n";
-        put msg;
+        ---put msg;
+        printMsg(msg);
       endif;
     end;
 
@@ -958,7 +1006,7 @@ ruleset i:indexType do    --- pat6size
       var encMsgNo:indexType;
           encMsg:Message;
       begin
-        put "encrypt 7.\n";
+        ---put "encrypt 7.\n";
         if (msgs[pat4Set.content[j]].k.ag = intruder.B) then
           encMsgNo := construct7By64(pat6Set.content[i],pat4Set.content[j]);
           if(!exist(pat7Set,encMsgNo)) then
@@ -980,10 +1028,20 @@ ruleset i:indexType do  --- pat8size means the capacity of pat8Set, that is inde
     !Spy_known[msgs[pat8Set.content[i]].aencMsg] 
     ==>
     var key_inv:Message;
+        msgPat1:indexType;
+        flag_pat1:boolean;
     begin
       key_inv := inverseKey(msgs[msgs[pat8Set.content[i]].aencKey]);
-      if (Spy_known[lookUp(key_inv)]) then
+      if (key_inv.k.ag = intruderType) then
         Spy_known[msgs[pat8Set.content[i]].aencMsg]:=true;
+        msgPat1:=msgs[pat8Set.content[i]].aencMsg;
+        isPat1(msgs[msgPat1],flag_pat1);
+        if (flag_pat1) then
+          if (!exist(pat1Set,msgPat1)) then
+            pat1Set.length:=pat1Set.length+1;
+            pat1Set.content[pat1Set.length]:=msgPat1;
+          endif;
+        endif;
       endif;
     end;
 endruleset;
@@ -997,8 +1055,20 @@ ruleset i:indexType do    --- pat1size
       j<=pat4Set.length & Spy_known[pat4Set.content[j]]&
       !Spy_known[construct8By14(pat1Set.content[i],pat4Set.content[j])]
       ==>
-      Spy_known[construct8By14(pat1Set.content[i],pat4Set.content[j])]:=true;
-    endrule
+      var encMsgNo:indexType;
+          encMsg:Message;
+      begin
+        if (msgs[pat4Set.content[j]].k.ag=intruder.B) then
+          encMsgNo := construct8By14(pat1Set.content[i],pat4Set.content[j]);
+          if (!exist(pat8Set,encMsgNo)) then
+            pat8Set.length := pat8Set.length+1;
+            pat8Set.content[pat8Set.length]:=encMsgNo;
+          endif;
+          if (!Spy_known[encMsgNo]) then
+            Spy_known[encMsgNo] := true;
+          endif;
+        endif;
+      end;
   endruleset;
 endruleset;
 
@@ -1057,8 +1127,8 @@ ruleset i:indexType do    --- pat1size
         Spy_known[concatMsg]:=true;
         ---put concatMsg into pat3Set
         if(!exist(pat3Set,concatMsg)) then
-          put "put concatMsg into pat3Set\n";
-          put concatMsg;
+          ---put "put concatMsg into pat3Set\n";
+          ---put concatMsg;
           pat3Set.length:=pat3Set.length+1;
           pat3Set.content[pat3Set.length] := concatMsg; 
         endif;
@@ -1075,7 +1145,7 @@ ruleset i:indexType do  --- pat6size means the capacity of pat6Set, that is inde
     var msgPa1_1, msgPa1_2:indexType;
         flag_pat1_1, flag_pat1_2:boolean;
     begin
-      put "deconcat 6.\n";
+      ---put "deconcat 6.\n";
       if (!Spy_known[msgs[pat6Set.content[i]].concatPart1]) then
         Spy_known[msgs[pat6Set.content[i]].concatPart1]:=true;
         msgPa1_1 := msgs[pat6Set.content[i]].concatPart1;
@@ -1117,8 +1187,8 @@ ruleset i:indexType do    --- pat1size
         Spy_known[concatMsg]:=true;
         ---put concatMsg into pat6Set
         if(!exist(pat6Set,concatMsg)) then
-          put "put concatMsg into pat6Set\n";
-          put concatMsg;
+          ---put "put concatMsg into pat6Set\n";
+          ---put concatMsg;
           pat6Set.length:=pat6Set.length+1;
           pat6Set.content[pat6Set.length] := concatMsg; 
         endif;
@@ -1141,8 +1211,9 @@ ruleset i: msgLen do
             ch[1].receiver:=bobs[j].B;
             emit[pat5Set.content[i]]:=true;
             intruder.st:=emitted1;
-            put "1. I->B\n";
-            put ch[1].msg;
+            put "1. I->B\n";            
+            printMsg(ch[1].msg);
+            put "\n";
           endif;
         end;
     end;
@@ -1163,8 +1234,9 @@ ruleset i:msgLen do
           ch[2].receiver:=alices[j].A;
           emit[pat7Set.content[i]]:=true;
           intruder.st:=emitted2;
-          put "2. I->A\n";
-          put ch[2].msg;
+          put "2. I->A\n";          
+          printMsg(ch[2].msg);
+          put "\n";
         endif;
       end;
     end;
@@ -1177,7 +1249,7 @@ ruleset i: msgLen do
     	ch[3].empty=true & i <= pat8Set.length & Spy_known[pat8Set.content[i]]  ---intruder.st=deducted3 & 
     	==>
       begin
-        if (emit[pat8Set.content[i]]=false)  then	
+        if (emit[pat8Set.content[i]]=false & msgs[msgs[pat8Set.content[i]].aencKey].k.ag=intruder.B)  then	
           clear ch[3];
           ch[3].empty:=false;
           ch[3].msg:=msgs[pat8Set.content[i]];
@@ -1186,7 +1258,8 @@ ruleset i: msgLen do
           emit[pat8Set.content[i]]:=true;
           intruder.st:=emitted3;
           put "3. I->B\n";
-          put ch[3].msg;
+          printMsg(ch[3].msg);
+          put "\n";
         endif;
       end;
     end;
