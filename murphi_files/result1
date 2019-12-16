@@ -33,13 +33,13 @@ Algorithm:
 
 Memory usage:
 
-	* The size of each state is 4168 bits (rounded up to 528 bytes).
+	* The size of each state is 4008 bits (rounded up to 504 bytes).
 	* The memory allocated for the hash table and state queue is
 	  8 Mbytes.
 	  With two words of overhead per state, the maximum size of
-	  the state space is 14923 states.
+	  the state space is 15601 states.
 	   * Use option "-k" or "-m" to increase this, if necessary.
-	* Capacity in queue for breadth-first search: 1492 states.
+	* Capacity in queue for breadth-first search: 1560 states.
 	   * Change the constant gPercentActiveStates in mu_prolog.inc
 	     to increase this, if necessary.
 
@@ -47,42 +47,66 @@ Warning: No trace will not be printed in the case of protocol errors!
          Check the options if you want to have error traces.
 1. A -> I
 aenc{concat{Na,Alice},PK(intruderType)}
-1. I->B
-aenc{concat{Na,Alice},PK(Bob)}
-3. I->B
-aenc{Na,PK(Bob)}
 
 1. I->B
 aenc{concat{Na,Alice},PK(Bob)}
-2. B -> I
-aenc{concat{Na,Nb},PK(Alice)}
-1. I->B
-aenc{concat{Na,Alice},PK(Bob)}
+
 3. I->B
 aenc{Na,PK(Bob)}
 
 1. I->B
 aenc{concat{Na,Alice},PK(Bob)}
+
 2. B -> I
 aenc{concat{Na,Nb},PK(Alice)}
-2. B -> I
-aenc{concat{Na,Nb},PK(Alice)}
+
 1. I->B
 aenc{concat{Na,Alice},PK(Bob)}
+
+3. I->B
+aenc{Na,PK(Bob)}
+
+1. I->B
+aenc{concat{Na,Alice},PK(Bob)}
+
+2. B -> I
+aenc{concat{Na,Nb},PK(Alice)}
+
+2. B -> I
+aenc{concat{Na,Nb},PK(Alice)}
+
+1. I->B
+aenc{concat{Na,Alice},PK(Bob)}
+
 3. I->B
 aenc{Na,PK(Bob)}
 
 2. B -> I
 aenc{concat{Na,Nb},PK(Alice)}
+
 2. I->A
 aenc{concat{Na,Nb},PK(Alice)}
 
 2. B -> I
 aenc{concat{Na,Nb},PK(Alice)}
+
 2. B -> I
 aenc{concat{Na,Nb},PK(Alice)}
+
 3. I->B
 aenc{Na,PK(Bob)}
+
+2. I->A
+aenc{concat{Na,Nb},PK(Alice)}
+
+3. I->B
+aenc{Na,PK(Bob)}
+
+2. I->A
+aenc{concat{Na,Nb},PK(Alice)}
+
+3. A -> I
+aenc{Nb,PK(intruderType)}
 
 2. I->A
 aenc{concat{Na,Nb},PK(Alice)}
@@ -95,8 +119,6 @@ aenc{concat{Na,Nb},PK(Alice)}
 
 3. A -> I
 aenc{Nb,PK(intruderType)}
-2. I->A
-aenc{concat{Na,Nb},PK(Alice)}
 
 3. I->B
 aenc{Na,PK(Bob)}
@@ -106,16 +128,10 @@ aenc{concat{Na,Nb},PK(Alice)}
 
 3. A -> I
 aenc{Nb,PK(intruderType)}
-3. I->B
-aenc{Na,PK(Bob)}
-
-2. I->A
-aenc{concat{Na,Nb},PK(Alice)}
 
 3. A -> I
 aenc{Nb,PK(intruderType)}
-3. A -> I
-aenc{Nb,PK(intruderType)}
+
 2. I->A
 aenc{concat{Na,Nb},PK(Alice)}
 
@@ -127,6 +143,7 @@ aenc{Na,PK(Bob)}
 
 3. A -> I
 aenc{Nb,PK(intruderType)}
+
 2. I->A
 aenc{concat{Na,Nb},PK(Alice)}
 
@@ -138,6 +155,7 @@ aenc{Na,PK(Bob)}
 
 3. A -> I
 aenc{Nb,PK(intruderType)}
+
 
 ==========================================================================
 
@@ -147,7 +165,7 @@ Result:
 
 State Space Explored:
 
-	80 states, 285 rules fired in 0.10s.
+	73 states, 270 rules fired in 0.10s.
 
 Analysis of State Space:
 

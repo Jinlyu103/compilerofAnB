@@ -5,7 +5,7 @@
 const
     aliceNum:1;  		--- number of initaitors (Alice/Intruder)
     bobNum:1;       	--- number of responders(Bob/Intruder)
-   intruderNum:1;		--- number of intruders
+    intruderNum:1;		--- number of intruders
     total_fact:20;  	--- the size of spy-known array.
     deductionsNum:20; 	--- the size of deduction array
     msgpassingNum:3;   	--- number of messages
@@ -21,19 +21,18 @@ type
   msgpassingNums:1..msgpassingNum;
   eventNums:0..eventNum;
 
-  AgentType: enum{Alice,Bob,intruderType};
-  NonceType: enum{Na,Na1,Nb,Nb1};
-  EncryptType: enum{PK,SK,SymK}; ---Public key, Secret key, Symmentric key
+  AgentType   : enum{Alice,Bob,intruderType};
+  NonceType   : enum{Na,Na1,Nb,Nb1};
+  EncryptType : enum{PK,SK,SymK}; ---Public key, Secret key, Symmentric key
 
   KeyType: record
     encTyp: EncryptType;
     ag: AgentType;
   end;
 
-  AliceStatus: enum{A1,A2,A3};
-  BobStatus: enum{B1,B2,B3};
-  IntruderStatus: enum{wait,gotmsg1,gotmsg2,gotmsg3,deducted1,deducted2,deducted3,emitted1,emitted2,emitted3}; 
-  ---more than 4 states of intruders: it waits, it gets(3), it deducts(3),and it emits(3)
+  AliceStatus   : enum{A1,A2,A3};
+  BobStatus     : enum{B1,B2,B3};
+  IntruderStatus: enum{wait,gotmsg1,gotmsg2,gotmsg3,emitted1,emitted2,emitted3}; 
 
   MsgType: enum{null,agent,nonce,key,aenc,senc,concat,hash};
   Message: record
@@ -49,6 +48,7 @@ type
     concatPart2 : indexType;
   end;
 
+/*--- never used.
   DeduceType: enum{encryptDed, decrypt, enConcatDed, deConcatDed}; ---encryptDed:加密 decrypt:解密  enConcatDed:合成concat deConcatDed:拆分concat
   TDeduction: record	
     deduced :boolean;
@@ -57,7 +57,7 @@ type
     assumption1: indexType;
     assumption2: indexType;
   end;
-
+*/
   Channel : record
     msg     : Message;
     sender  : AgentType;
@@ -82,14 +82,15 @@ type
 	  B : AgentType;
     st: IntruderStatus;
   end;
-
+/*
+--- never used.
   Event: record	        --- ???
     send 	: boolean;
     sender  : AgentType;
     receiver: AgentType;
     nonce	: NonceType;
   end;
-
+*/
   msgSet: record
     content: Array[msgLen] of indexType;
     length : msgLen;
@@ -112,21 +113,17 @@ var
   pat8Set     : msgSet;   ---Pat8: {Nb}Pk(B)
 
   msg_end       : indexType;
-  ded_end       : DeductionsNums;
-  eve_end       : eventNums;
----  msg1          : Message;
----  de1           : TDeduction;
   Spy_known     : Array[indexType] of boolean;
   emit          : Array[indexType] of boolean;
----  KEY           : KeyType;
-  msg           : Message;   ---
-  ---msgNo         : indexType; --- for intruder gets msg 
-  eve           : Event;
-  endn          : indexType;
-  end1          : indexType;
-  end2          : indexType;
----  Deductions    : Array[DeductionsNums] of TDeduction;
----  allMsgs       : array[msgLen] of indexType;
+  ---msg           : Message;   
+  ---ded_end       : DeductionsNums;
+  ---eve_end       : eventNums;
+  ---eve           : Event;
+  ---endn          : indexType;
+  ---end1          : indexType;
+  ---end2          : indexType;
+  ---Deductions    : Array[DeductionsNums] of TDeduction;
+  ---allMsgs       : array[msgLen] of indexType;
   ---systemEvent   : array[eventNums] of Event;
 
 --- Pat1 Na
@@ -717,6 +714,7 @@ ruleset i:aliceNums do
       put "1. A -> I\n";
       ---put ch[1].msg;
       printMsg(ch[1].msg);
+      put "\n";
     end;
 
   rule "roleA2"
@@ -725,6 +723,7 @@ ruleset i:aliceNums do
     Var loc_A,loc_B: AgentType;
         loc_Na, loc_Nb: NonceType;
         msgNo: indexType;
+        msg : Message;
     begin
       clear msg;
       msg:=ch[2].msg;
@@ -745,6 +744,7 @@ ruleset i:aliceNums do
         put "3. A -> I\n";
         ---put ch[3].msg;
         printMsg(ch[3].msg);
+        put "\n";
       endif;
     end;
 
@@ -763,6 +763,7 @@ ruleset i:bobNums do
     Var loc_A,loc_B:AgentType;
         loc_Na:NonceType;
         msgNo1:indexType;
+        msg:Message;
     begin
       clear msg;
       msg:=ch[1].msg;       --- receive message
@@ -782,6 +783,7 @@ ruleset i:bobNums do
         put "2. B -> I\n";
         ---put ch[2].msg;
         printMsg(ch[2].msg);
+        put "\n";
       endif;
     end;
 
@@ -790,6 +792,7 @@ ruleset i:bobNums do
     ==>
     Var loc_B:AgentType;
         loc_Nb:NonceType;
+        msg:Message;
     begin
       clear msg;
       msg:=ch[3].msg;
@@ -800,6 +803,7 @@ ruleset i:bobNums do
         ---put "\nend\n";
         ---put msg;
         printMsg(msg);
+        put "\n";
       endif;
     end;
 
@@ -815,7 +819,8 @@ rule "intruderGetMsg1"
   ch[1].empty=false & ch[1].receiver=intruderType  ---intruder.st = wait &
   ==>
   Var flag_pat5:boolean;
-  Var msgNo:indexType;
+      msgNo:indexType;
+      msg:Message;
   begin
     clear msg;
     clear msgNo;
@@ -839,6 +844,7 @@ rule "intruderGetMsg2"
   ==>
   Var flag_pat7:boolean;
       msgNo: indexType;
+      msg:Message;
   begin
     clear msg;
     clear msgNo;
@@ -859,6 +865,7 @@ rule "intruderGetMsg3"
   ==>
   Var flag_pat8: boolean;
       msgNo: indexType;
+      msg:Message;
   begin
     clear msg;
     clear msgNo;
@@ -874,31 +881,6 @@ rule "intruderGetMsg3"
     intruder.st:=gotmsg3;
   end;
 
---- intruder deducting msgs
-/*rule "intruderDeduct1"
-  intruder.st=gotmsg1 
-  ==>
-  begin
-    --- some operations...
-    intruder.st := deducted1; 
-  end;
-*/
-/*rule "intruderDeduct2"
-  intruder.st=gotmsg2
-  ==>
-  begin
-  ---some operations...
-    intruder.st := deducted3;
-  end;
-*/
-/*rule "intruderDeduct3"
-  intruder.st=gotmsg3
-  ==>
-  begin
-  ---some operations...
-    intruder.st:=deducted3;
-  end;
-*/
 --- encrypt and decrypt
 --- pat5: {Na,A}Pk(B)
 ruleset i:indexType do  --- pat5size means the capacity of pat5Set, that is indexType
@@ -1209,7 +1191,8 @@ ruleset i: msgLen do
             intruder.st:=emitted1;
             put "1. I->B\n";            
             printMsg(ch[1].msg);
-            ---put emit[pat5Set.content[i]];            
+            ---put emit[pat5Set.content[i]];  
+            put "\n";          
           endif;
         end;
     end;
@@ -1344,6 +1327,7 @@ invariant "sec"
     ->
    Spy_known[i]=false
 end;
+
 /*
 invariant "auth"
   forall i:eventNums do
