@@ -255,11 +255,11 @@ let genRuleName rolename i =
 ;;
 
 let genSendGuard rolename i =
-  printf "role%s[i].st = st%s[%d] & ch[%d].empty = true \n==>" rolename rolename i i
+  printf "role%s[i].st = %s%d & ch[%d].empty = true \n==>" rolename rolename i i
 ;;
 
 let genRecvGuard rolename i =
-  printf "role%s[i].st = st%s[%d] & ch[%d].empty = false & ch[%d].receiver = role%s[i].%s\n==>" rolename rolename i i i rolename rolename
+  printf "role%s[i].st = %s%d & ch[%d].empty = false & ch[%d].receiver = role%s[i].%s\n==>" rolename rolename i i i rolename rolename
 ;;
 
 let print_atom a =
@@ -296,7 +296,7 @@ begin
   printf "   ch[%d].msg := msg;\n" i;
   printf "   ch[%d].sender := role%s[i].%s;\n" i rolename rolename;
   printf "   ch[%d].receiver := IndexTyperuder_;\n" i;
-  printf "   role%s[i].st := st%s[%d];\nend;\n" rolename rolename ((i+1) mod length) ; 
+  printf "   role%s[i].st := %s%d;\nend;\n" rolename rolename ((i mod length)+1) ; 
   (* (i+1) should be (i+1) % length of the strand list *)
 ;;
 
@@ -332,7 +332,7 @@ begin
   print_atom (geti_th_atom knws_ofRl 2);
   printf ") then
    ch[%d].empty:=true;\n   endif;\n" i;
-  printf "   role%s[i].st := st%s[%d];\nend;\n" rolename rolename ((i+1) mod length);
+  printf "   role%s[i].st := %s%d;\nend;\n" rolename rolename ((i mod length)+1);
 ;;
 
 let trans act m i rolename length knws =
@@ -359,14 +359,14 @@ let print_murphiRule outc actions knws =  (*printf "murphi code"*)
   let rolelist = getRolesFromKnws knws [] in (* Get role list:[A;B;...] *)
   let actsOfAllRls = getActsList actions rolelist in  (* Get act list: [(sign,msg);(sign,msg);...] *)
   List.iteri ~f:(fun i r -> if i = 0 then
-			    let acts = match List.nth actsOfAllRls i with
-				       | None -> []
-				       | Some a -> a
-     	   		     in
-			     let lenActs = List.length acts in
-			     List.iteri ~f:(fun j act -> match act with
-					| None -> output_string outc "null"
-					| Some a -> trans a (genMsg a) j r lenActs knws) acts ) rolelist
+                              let acts = match List.nth actsOfAllRls i with
+                                  | None -> []
+                                  | Some a -> a
+                              in
+                              let lenActs = List.length acts in
+                              List.iteri ~f:(fun j act -> match act with
+                              | None -> output_string outc "null"
+                              | Some a -> trans a (genMsg a) (j+1) r lenActs knws) acts ) rolelist
 ;;
 (* generation code to encode each msg pattern *)
 (* Extracting msg patterns from actions and its sub-patterns *)
@@ -544,8 +544,8 @@ let trActionsToMurphi outc actions knws =
   |`Null -> output_string outc "null"
   |`Act (seq,r1,r2,n,m) -> print_murphiRule outc actions knws
   |`Actlist arr -> print_murphiRule outc actions knws; 
-		   printf "\nTo genetate each message pattern:\n";
-   		   print_murphiEncodeMsg outc actions knws;(* print_murphiMsgPat: generation code to encode each msg pattern *)
+		               printf "\nTo genetate each message pattern:\n";
+   		             print_murphiEncodeMsg outc actions knws;(* print_murphiMsgPat: generation code to encode each msg pattern *)
 ;;
 let output_murphiCode outc pocol =
   match pocol with
