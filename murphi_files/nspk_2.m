@@ -127,7 +127,7 @@ var
   end2          : indexType;
 ---  Deductions    : Array[DeductionsNums] of TDeduction;
 ---  allMsgs       : array[msgLen] of indexType;
-  systemEvent   : array[eventNums] of Event;
+  ---systemEvent   : array[eventNums] of Event;
 
 --- Pat1 Na
 procedure lookAddPat1( Na:NonceType; Var msg:Message; Var num: indexType);  
@@ -566,7 +566,7 @@ procedure printMsg(msg:Message);
       put "concat{";
       printMsg(msgs[msg.concatPart1]);
       put ",";
-      printMsg(msgs[msg.concatPart1]);
+      printMsg(msgs[msg.concatPart2]);
       put "}";
     endif;
   end;
@@ -767,17 +767,11 @@ ruleset i:bobNums do
       clear msg;
       msg:=ch[1].msg;       --- receive message
       destruct1(msg,loc_Na,loc_A,loc_B); --- destruct1 is not "Bob's" decryption operation.
-      ---put loc_B;
-      ---put loc_A;
-      ---put loc_Na;
-      ---put msg;
-      if (loc_B=bobs[i].B ) then
-        ---put loc_B;
-        ch[1].empty := true;
-        ---put loc_B;
+      if (loc_B=bobs[i].B ) then        
+        ch[1].empty := true;        
         cons2(loc_Na, bobs[i].Nb, loc_A, msg, msgNo1); ----?!
         ---put loc_B;
-        put msg;
+        ---put msg;
         clear ch[2];
         ch[2].msg := msg;   --- send message 
         ch[2].empty := false;
@@ -801,6 +795,7 @@ ruleset i:bobNums do
       msg:=ch[3].msg;
       destruct3(msg,loc_Nb,loc_B);
       if (loc_B = bobs[i].B & loc_Nb=bobs[i].Nb) then
+        ---put loc_Nb;
         bobs[i].st := B3;
         ---put "\nend\n";
         ---put msg;
@@ -1203,17 +1198,18 @@ ruleset i: msgLen do
     	ch[1].empty=true & i <= pat5Set.length & Spy_known[pat5Set.content[i]]  ---intruder.st=deducted1 & 
     	==>
         begin 
-          if (emit[pat5Set.content[i]]=false & msgs[msgs[pat5Set.content[i]].aencKey].k.ag=intruder.B) then
+          ---put emit[pat5Set.content[i]];
+          if (!emit[pat5Set.content[i]] & msgs[msgs[pat5Set.content[i]].aencKey].k.ag=intruder.B) then
             clear ch[1];
             ch[1].empty:=false;
             ch[1].msg:=msgs[pat5Set.content[i]];
             ch[1].sender:=intruderType;
             ch[1].receiver:=bobs[j].B;
-            emit[pat5Set.content[i]]:=true;
+            emit[pat5Set.content[i]] := true;
             intruder.st:=emitted1;
             put "1. I->B\n";            
             printMsg(ch[1].msg);
-            put "\n";
+            ---put emit[pat5Set.content[i]];            
           endif;
         end;
     end;
@@ -1255,10 +1251,11 @@ ruleset i: msgLen do
           ch[3].msg:=msgs[pat8Set.content[i]];
           ch[3].sender:=intruderType;
           ch[3].receiver:=bobs[j].B;
-          emit[pat8Set.content[i]]:=true;
+          emit[pat8Set.content[i]] := true;
           intruder.st:=emitted3;
           put "3. I->B\n";
           printMsg(ch[3].msg);
+          ---put emit[pat8Set.content[i]];
           put "\n";
         endif;
       end;

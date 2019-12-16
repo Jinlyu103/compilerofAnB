@@ -33,147 +33,76 @@ Algorithm:
 
 Memory usage:
 
-	* The size of each state is 5160 bits (rounded up to 648 bytes).
+	* The size of each state is 4168 bits (rounded up to 528 bytes).
 	* The memory allocated for the hash table and state queue is
 	  8 Mbytes.
 	  With two words of overhead per state, the maximum size of
-	  the state space is 12197 states.
+	  the state space is 14923 states.
 	   * Use option "-k" or "-m" to increase this, if necessary.
-	* Capacity in queue for breadth-first search: 1219 states.
+	* Capacity in queue for breadth-first search: 1492 states.
 	   * Change the constant gPercentActiveStates in mu_prolog.inc
 	     to increase this, if necessary.
 
 Warning: No trace will not be printed in the case of protocol errors!
          Check the options if you want to have error traces.
 1. A -> I
-aenc{concat{Na,Na},PK(intruderType)}
+aenc{concat{Na,Alice},PK(intruderType)}
 1. I->B
-aenc{concat{Na,Na},PK(Bob)}
-
+aenc{concat{Na,Alice},PK(Bob)}
 3. I->B
 aenc{Na,PK(Bob)}
 
 1. I->B
-aenc{concat{Na,Na},PK(Bob)}
-
-msg.msgType:aenc
-msg.ag:Undefined
-msg.noncePart:Undefined
-msg.k.encTyp:Undefined
-msg.k.ag:Undefined
-msg.aencMsg:10
-msg.aencKey:11
-msg.sencMsg:Undefined
-msg.sencKey:Undefined
-msg.concatPart1:Undefined
-msg.concatPart2:Undefined
+aenc{concat{Na,Alice},PK(Bob)}
 2. B -> I
-aenc{concat{Na,Na},PK(Alice)}
+aenc{concat{Na,Nb},PK(Alice)}
 1. I->B
-aenc{concat{Na,Na},PK(Bob)}
-
+aenc{concat{Na,Alice},PK(Bob)}
 3. I->B
 aenc{Na,PK(Bob)}
 
 1. I->B
-aenc{concat{Na,Na},PK(Bob)}
-
-msg.msgType:aenc
-msg.ag:Undefined
-msg.noncePart:Undefined
-msg.k.encTyp:Undefined
-msg.k.ag:Undefined
-msg.aencMsg:12
-msg.aencKey:13
-msg.sencMsg:Undefined
-msg.sencKey:Undefined
-msg.concatPart1:Undefined
-msg.concatPart2:Undefined
+aenc{concat{Na,Alice},PK(Bob)}
 2. B -> I
-aenc{concat{Na,Na},PK(Alice)}
-msg.msgType:aenc
-msg.ag:Undefined
-msg.noncePart:Undefined
-msg.k.encTyp:Undefined
-msg.k.ag:Undefined
-msg.aencMsg:12
-msg.aencKey:13
-msg.sencMsg:Undefined
-msg.sencKey:Undefined
-msg.concatPart1:Undefined
-msg.concatPart2:Undefined
+aenc{concat{Na,Nb},PK(Alice)}
 2. B -> I
-aenc{concat{Na,Na},PK(Alice)}
+aenc{concat{Na,Nb},PK(Alice)}
 1. I->B
-aenc{concat{Na,Na},PK(Bob)}
-
+aenc{concat{Na,Alice},PK(Bob)}
 3. I->B
 aenc{Na,PK(Bob)}
 
-msg.msgType:aenc
-msg.ag:Undefined
-msg.noncePart:Undefined
-msg.k.encTyp:Undefined
-msg.k.ag:Undefined
-msg.aencMsg:12
-msg.aencKey:13
-msg.sencMsg:Undefined
-msg.sencKey:Undefined
-msg.concatPart1:Undefined
-msg.concatPart2:Undefined
 2. B -> I
-aenc{concat{Na,Na},PK(Alice)}
+aenc{concat{Na,Nb},PK(Alice)}
 2. I->A
-aenc{concat{Na,Na},PK(Alice)}
+aenc{concat{Na,Nb},PK(Alice)}
 
-msg.msgType:aenc
-msg.ag:Undefined
-msg.noncePart:Undefined
-msg.k.encTyp:Undefined
-msg.k.ag:Undefined
-msg.aencMsg:12
-msg.aencKey:13
-msg.sencMsg:Undefined
-msg.sencKey:Undefined
-msg.concatPart1:Undefined
-msg.concatPart2:Undefined
 2. B -> I
-aenc{concat{Na,Na},PK(Alice)}
-msg.msgType:aenc
-msg.ag:Undefined
-msg.noncePart:Undefined
-msg.k.encTyp:Undefined
-msg.k.ag:Undefined
-msg.aencMsg:12
-msg.aencKey:13
-msg.sencMsg:Undefined
-msg.sencKey:Undefined
-msg.concatPart1:Undefined
-msg.concatPart2:Undefined
+aenc{concat{Na,Nb},PK(Alice)}
 2. B -> I
-aenc{concat{Na,Na},PK(Alice)}
+aenc{concat{Na,Nb},PK(Alice)}
 3. I->B
 aenc{Na,PK(Bob)}
 
 2. I->A
-aenc{concat{Na,Na},PK(Alice)}
+aenc{concat{Na,Nb},PK(Alice)}
 
 3. I->B
 aenc{Na,PK(Bob)}
 
 2. I->A
-aenc{concat{Na,Na},PK(Alice)}
+aenc{concat{Na,Nb},PK(Alice)}
 
 3. A -> I
 aenc{Nb,PK(intruderType)}
 2. I->A
-aenc{concat{Na,Na},PK(Alice)}
+aenc{concat{Na,Nb},PK(Alice)}
 
 3. I->B
 aenc{Na,PK(Bob)}
 
 2. I->A
-aenc{concat{Na,Na},PK(Alice)}
+aenc{concat{Na,Nb},PK(Alice)}
 
 3. A -> I
 aenc{Nb,PK(intruderType)}
@@ -181,17 +110,17 @@ aenc{Nb,PK(intruderType)}
 aenc{Na,PK(Bob)}
 
 2. I->A
-aenc{concat{Na,Na},PK(Alice)}
+aenc{concat{Na,Nb},PK(Alice)}
 
 3. A -> I
 aenc{Nb,PK(intruderType)}
 3. A -> I
 aenc{Nb,PK(intruderType)}
 2. I->A
-aenc{concat{Na,Na},PK(Alice)}
+aenc{concat{Na,Nb},PK(Alice)}
 
 2. I->A
-aenc{concat{Na,Na},PK(Alice)}
+aenc{concat{Na,Nb},PK(Alice)}
 
 3. I->B
 aenc{Na,PK(Bob)}
@@ -199,10 +128,10 @@ aenc{Na,PK(Bob)}
 3. A -> I
 aenc{Nb,PK(intruderType)}
 2. I->A
-aenc{concat{Na,Na},PK(Alice)}
+aenc{concat{Na,Nb},PK(Alice)}
 
 2. I->A
-aenc{concat{Na,Na},PK(Alice)}
+aenc{concat{Na,Nb},PK(Alice)}
 
 3. I->B
 aenc{Na,PK(Bob)}
