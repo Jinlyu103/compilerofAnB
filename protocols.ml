@@ -286,7 +286,7 @@ let print_cons_atoms rolename i atoms =
 let genSendAct rolename i atoms length =
   printf "
 var msg:Message;
-msgNo:IndexType;
+    msgNo:IndexType;
 begin
    clear msg;
    cons%d(" i;
@@ -295,8 +295,10 @@ begin
   printf "   ch[%d].empty := false;\n" i;
   printf "   ch[%d].msg := msg;\n" i;
   printf "   ch[%d].sender := role%s[i].%s;\n" i rolename rolename;
-  printf "   ch[%d].receiver := IndexTyperuder_;\n" i;
-  printf "   role%s[i].st := %s%d;\nend;\n" rolename rolename ((i mod length)+1) ; 
+  printf "   ch[%d].receiver := intruderType;\n" i;
+  printf "   role%s[i].st := %s%d;\n" rolename rolename ((i mod length)+1) ; 
+  printf "   put \"%d. %s -> I\\n\";\n   printMsg(ch[%d].msg);\n" i rolename i;
+  printf "end;\n";
   (* (i+1) should be (i+1) % length of the strand list *)
 ;;
 
@@ -319,8 +321,9 @@ let genRecvAct rolename i atoms length knws=
   let knws_ofRl = getKnws knws rolename in
   printf "
 var loc_A loc_B:AgentIdType;
-loc_Na,loc_Nb:NonceType;
-msgNo:IndexType;
+    loc_Na,loc_Nb:NonceType;
+    msgNo:IndexType;
+    msg : Message;
 begin
    clear msg;
    msg := ch[%d].msg;
@@ -331,7 +334,7 @@ begin
   printf " & loc_Na=role%s[i]." rolename;
   print_atom (geti_th_atom knws_ofRl 2);
   printf ") then
-   ch[%d].empty:=true;\n   endif;\n" i;
+      ch[%d].empty:=true;\n   endif;\n" i;
   printf "   role%s[i].st := %s%d;\nend;\n" rolename rolename ((i mod length)+1);
 ;;
 
@@ -544,8 +547,8 @@ let trActionsToMurphi outc actions knws =
   |`Null -> output_string outc "null"
   |`Act (seq,r1,r2,n,m) -> print_murphiRule outc actions knws
   |`Actlist arr -> print_murphiRule outc actions knws; 
-		               printf "\nTo genetate each message pattern:\n";
-   		             print_murphiEncodeMsg outc actions knws;(* print_murphiMsgPat: generation code to encode each msg pattern *)
+		               (*printf "\nTo genetate each message pattern:\n";*)
+   		             (*print_murphiEncodeMsg outc actions knws;*)(* print_murphiMsgPat: generation code to encode each msg pattern *)
 ;;
 let output_murphiCode outc pocol =
   match pocol with
