@@ -45,116 +45,167 @@ Memory usage:
 
 Warning: No trace will not be printed in the case of protocol errors!
          Check the options if you want to have error traces.
-1. A -> I
+ch[1]: A -> I
 aenc{concat{Na,Alice},PK(intruderType)}
 
-1. I->B
+ch[1]: I->B
 aenc{concat{Na,Alice},PK(Bob)}
 
-3. I->B
+ch[3]: I->B
 aenc{Na,PK(Bob)}
 
-1. I->B
+ch[1]: I->B
 aenc{concat{Na,Alice},PK(Bob)}
 
-2. B -> I
-aenc{concat{Na,Nb},PK(Alice)}
-
-1. I->B
+ch[1]: I->B
 aenc{concat{Na,Alice},PK(Bob)}
 
-3. I->B
+ch[3]: I->B
 aenc{Na,PK(Bob)}
 
-1. I->B
+ch[1]: I->B
 aenc{concat{Na,Alice},PK(Bob)}
 
-2. B -> I
+ch[2]: B -> I
 aenc{concat{Na,Nb},PK(Alice)}
 
-2. B -> I
-aenc{concat{Na,Nb},PK(Alice)}
-
-1. I->B
+ch[1]: I->B
 aenc{concat{Na,Alice},PK(Bob)}
 
-3. I->B
+ch[3]: I->B
 aenc{Na,PK(Bob)}
 
-2. B -> I
+ch[2]: B -> I
 aenc{concat{Na,Nb},PK(Alice)}
 
-2. I->A
+ch[2]: B -> I
 aenc{concat{Na,Nb},PK(Alice)}
 
-2. B -> I
-aenc{concat{Na,Nb},PK(Alice)}
-
-2. B -> I
-aenc{concat{Na,Nb},PK(Alice)}
-
-3. I->B
+ch[3]: I->B
 aenc{Na,PK(Bob)}
 
-2. I->A
+ch[2]: B -> I
 aenc{concat{Na,Nb},PK(Alice)}
 
-3. I->B
+ch[2]: B -> I
+aenc{concat{Na,Nb},PK(Alice)}
+
+ch[3]: I->B
 aenc{Na,PK(Bob)}
 
-2. I->A
+ch[2]: B -> I
 aenc{concat{Na,Nb},PK(Alice)}
 
-3. A -> I
+ch[2]: I->A
+aenc{concat{Na,Nb},PK(Alice)}
+
+ch[2]: B -> I
+aenc{concat{Na,Nb},PK(Alice)}
+
+ch[2]: B -> I
+aenc{concat{Na,Nb},PK(Alice)}
+
+ch[3]: I->B
+aenc{Na,PK(Bob)}
+
+ch[2]: I->A
+aenc{concat{Na,Nb},PK(Alice)}
+
+ch[2]: B -> I
+aenc{concat{Na,Nb},PK(Alice)}
+
+ch[3]: I->B
+aenc{Na,PK(Bob)}
+
+ch[2]: I->A
+aenc{concat{Na,Nb},PK(Alice)}
+
+ch[2]: I->A
+aenc{concat{Na,Nb},PK(Alice)}
+
+ch[3]: I->B
+aenc{Na,PK(Bob)}
+
+ch[2]: I->A
+aenc{concat{Na,Nb},PK(Alice)}
+
+ch[3]: I->B
+aenc{Na,PK(Bob)}
+
+ch[2]: I->A
+aenc{concat{Na,Nb},PK(Alice)}
+
+ch[3]: A -> I
 aenc{Nb,PK(intruderType)}
 
-2. I->A
+ch[2]: I->A
 aenc{concat{Na,Nb},PK(Alice)}
 
-3. I->B
+ch[2]: I->A
+aenc{concat{Na,Nb},PK(Alice)}
+
+ch[3]: I->B
 aenc{Na,PK(Bob)}
 
-2. I->A
-aenc{concat{Na,Nb},PK(Alice)}
-
-3. A -> I
+ch[3]: A -> I
 aenc{Nb,PK(intruderType)}
 
-3. I->B
+ch[2]: I->A
+aenc{concat{Na,Nb},PK(Alice)}
+
+ch[2]: I->A
+aenc{concat{Na,Nb},PK(Alice)}
+
+ch[3]: I->B
 aenc{Na,PK(Bob)}
 
-2. I->A
-aenc{concat{Na,Nb},PK(Alice)}
-
-3. A -> I
+ch[3]: A -> I
 aenc{Nb,PK(intruderType)}
 
-3. A -> I
+ch[3]: A -> I
 aenc{Nb,PK(intruderType)}
 
-2. I->A
-aenc{concat{Na,Nb},PK(Alice)}
+ch[1]: A -> I
+aenc{concat{Na,Alice},PK(intruderType)}
 
-2. I->A
-aenc{concat{Na,Nb},PK(Alice)}
-
-3. I->B
+ch[3]: I->B
 aenc{Na,PK(Bob)}
 
-3. A -> I
-aenc{Nb,PK(intruderType)}
-
-2. I->A
-aenc{concat{Na,Nb},PK(Alice)}
-
-2. I->A
-aenc{concat{Na,Nb},PK(Alice)}
-
-3. I->B
+ch[3]: I->B
 aenc{Na,PK(Bob)}
 
-3. A -> I
+ch[3]: A -> I
 aenc{Nb,PK(intruderType)}
+
+ch[1]: A -> I
+aenc{concat{Na,Alice},PK(intruderType)}
+
+ch[3]: I->B
+aenc{Na,PK(Bob)}
+
+ch[3]: I->B
+aenc{Na,PK(Bob)}
+
+ch[3]: A -> I
+aenc{Nb,PK(intruderType)}
+
+ch[1]: A -> I
+aenc{concat{Na,Alice},PK(intruderType)}
+
+ch[3]: A -> I
+aenc{Nb,PK(intruderType)}
+
+ch[3]: I->B
+aenc{Na,PK(Bob)}
+
+ch[3]: A -> I
+aenc{Nb,PK(intruderType)}
+
+ch[1]: A -> I
+aenc{concat{Na,Alice},PK(intruderType)}
+
+ch[1]: A -> I
+aenc{concat{Na,Alice},PK(intruderType)}
 
 
 ==========================================================================
@@ -165,7 +216,7 @@ Result:
 
 State Space Explored:
 
-	73 states, 270 rules fired in 0.10s.
+	99 states, 416 rules fired in 0.10s.
 
 Analysis of State Space:
 

@@ -2373,7 +2373,6 @@ mu_1__type_6 mu_1__type_6_undefined_var;
 
 const int mu_aliceNum = 1;
 const int mu_bobNum = 1;
-const int mu_intruderNum = 1;
 const int mu_total_fact = 20;
 const int mu_deductionsNum = 20;
 const int mu_msgpassingNum = 3;
@@ -3890,7 +3889,7 @@ mu_ch[3].mu_sender = mu_intruderType;
 mu_ch[3].mu_receiver = mu_bobs[mu_j].mu_B;
 mu_emit[mu_pat8Set.mu_content[mu_i]] = mu_true;
 mu_intruder.mu_st = mu_emitted3;
-cout << "3. I->B\n";
+cout << "ch[3]: I->B\n";
 mu_printMsg ( mu_ch[3].mu_msg );
 cout << "\n";
 }
@@ -3999,7 +3998,7 @@ mu_ch[2].mu_sender = mu_intruderType;
 mu_ch[2].mu_receiver = mu_alices[mu_j].mu_A;
 mu_emit[mu_pat7Set.mu_content[mu_i]] = mu_true;
 mu_intruder.mu_st = mu_emitted2;
-cout << "2. I->A\n";
+cout << "ch[2]: I->A\n";
 mu_printMsg ( mu_ch[2].mu_msg );
 cout << "\n";
 }
@@ -4108,7 +4107,7 @@ mu_ch[1].mu_sender = mu_intruderType;
 mu_ch[1].mu_receiver = mu_bobs[mu_j].mu_B;
 mu_emit[mu_pat5Set.mu_content[mu_i]] = mu_true;
 mu_intruder.mu_st = mu_emitted1;
-cout << "1. I->B\n";
+cout << "ch[1]: I->B\n";
 mu_printMsg ( mu_ch[1].mu_msg );
 cout << "\n";
 }
@@ -5591,67 +5590,9 @@ public:
     static mu_1_bobNums mu_i;
     mu_i.value((r % 1) + 1);
     r = r / 1;
-    return (mu_bobs[mu_i].mu_st) == (mu_B3);
-  }
-
-  void NextRule(unsigned & what_rule)
-  {
-    unsigned r = what_rule - 2376;
-    static mu_1_bobNums mu_i;
-    mu_i.value((r % 1) + 1);
-    r = r / 1;
-    while (what_rule < 2377 )
-      {
-	if ( ( TRUE  ) ) {
-	      if ((mu_bobs[mu_i].mu_st) == (mu_B3)) {
-		if ( ( TRUE  ) )
-		  return;
-		else
-		  what_rule++;
-	      }
-	      else
-		what_rule += 1;
-	}
-	else
-	  what_rule += 1;
-    r = what_rule - 2376;
-    mu_i.value((r % 1) + 1);
-    r = r / 1;
-    }
-  }
-
-  void Code(unsigned r)
-  {
-    static mu_1_bobNums mu_i;
-    mu_i.value((r % 1) + 1);
-    r = r / 1;
-mu_bobs[mu_i].mu_st = mu_B1;
-  };
-
-};
-/******************** RuleBase17 ********************/
-class RuleBase17
-{
-public:
-  int Priority()
-  {
-    return 0;
-  }
-  char * Name(unsigned r)
-  {
-    static mu_1_bobNums mu_i;
-    mu_i.value((r % 1) + 1);
-    r = r / 1;
-    return tsprintf("roleB2, i:%s", mu_i.Name());
-  }
-  bool Condition(unsigned r)
-  {
-    static mu_1_bobNums mu_i;
-    mu_i.value((r % 1) + 1);
-    r = r / 1;
 bool mu__boolexpr125;
 bool mu__boolexpr126;
-  if (!((mu_bobs[mu_i].mu_st) == (mu_B2))) mu__boolexpr126 = FALSE ;
+  if (!((mu_bobs[mu_i].mu_st) == (mu_B3))) mu__boolexpr126 = FALSE ;
   else {
   mu__boolexpr126 = ((mu_ch[3].mu_empty) == (mu_false)) ; 
 }
@@ -5664,16 +5605,16 @@ bool mu__boolexpr126;
 
   void NextRule(unsigned & what_rule)
   {
-    unsigned r = what_rule - 2377;
+    unsigned r = what_rule - 2376;
     static mu_1_bobNums mu_i;
     mu_i.value((r % 1) + 1);
     r = r / 1;
-    while (what_rule < 2378 )
+    while (what_rule < 2377 )
       {
 	if ( ( TRUE  ) ) {
 bool mu__boolexpr127;
 bool mu__boolexpr128;
-  if (!((mu_bobs[mu_i].mu_st) == (mu_B2))) mu__boolexpr128 = FALSE ;
+  if (!((mu_bobs[mu_i].mu_st) == (mu_B3))) mu__boolexpr128 = FALSE ;
   else {
   mu__boolexpr128 = ((mu_ch[3].mu_empty) == (mu_false)) ; 
 }
@@ -5692,7 +5633,7 @@ bool mu__boolexpr128;
 	}
 	else
 	  what_rule += 1;
-    r = what_rule - 2377;
+    r = what_rule - 2376;
     mu_i.value((r % 1) + 1);
     r = r / 1;
     }
@@ -5722,10 +5663,82 @@ bool mu__boolexpr129;
 }
 if ( mu__boolexpr129 )
 {
-mu_bobs[mu_i].mu_st = mu_B3;
 mu_printMsg ( mu_msg );
 cout << "\n";
+mu_bobs[mu_i].mu_st = mu_B1;
 }
+  };
+
+};
+/******************** RuleBase17 ********************/
+class RuleBase17
+{
+public:
+  int Priority()
+  {
+    return 0;
+  }
+  char * Name(unsigned r)
+  {
+    static mu_1_bobNums mu_i;
+    mu_i.value((r % 1) + 1);
+    r = r / 1;
+    return tsprintf("roleB2, i:%s", mu_i.Name());
+  }
+  bool Condition(unsigned r)
+  {
+    static mu_1_bobNums mu_i;
+    mu_i.value((r % 1) + 1);
+    r = r / 1;
+bool mu__boolexpr130;
+  if (!((mu_bobs[mu_i].mu_st) == (mu_B2))) mu__boolexpr130 = FALSE ;
+  else {
+  mu__boolexpr130 = ((mu_ch[2].mu_empty) == (mu_true)) ; 
+}
+    return mu__boolexpr130;
+  }
+
+  void NextRule(unsigned & what_rule)
+  {
+    unsigned r = what_rule - 2377;
+    static mu_1_bobNums mu_i;
+    mu_i.value((r % 1) + 1);
+    r = r / 1;
+    while (what_rule < 2378 )
+      {
+	if ( ( TRUE  ) ) {
+bool mu__boolexpr131;
+  if (!((mu_bobs[mu_i].mu_st) == (mu_B2))) mu__boolexpr131 = FALSE ;
+  else {
+  mu__boolexpr131 = ((mu_ch[2].mu_empty) == (mu_true)) ; 
+}
+	      if (mu__boolexpr131) {
+		if ( ( TRUE  ) )
+		  return;
+		else
+		  what_rule++;
+	      }
+	      else
+		what_rule += 1;
+	}
+	else
+	  what_rule += 1;
+    r = what_rule - 2377;
+    mu_i.value((r % 1) + 1);
+    r = r / 1;
+    }
+  }
+
+  void Code(unsigned r)
+  {
+    static mu_1_bobNums mu_i;
+    mu_i.value((r % 1) + 1);
+    r = r / 1;
+mu_ch[2].mu_empty = mu_false;
+cout << "ch[2]: B -> I\n";
+mu_printMsg ( mu_ch[2].mu_msg );
+cout << "\n";
+mu_bobs[mu_i].mu_st = mu_B3;
   };
 
 };
@@ -5749,17 +5762,17 @@ public:
     static mu_1_bobNums mu_i;
     mu_i.value((r % 1) + 1);
     r = r / 1;
-bool mu__boolexpr130;
-bool mu__boolexpr131;
-  if (!((mu_bobs[mu_i].mu_st) == (mu_B1))) mu__boolexpr131 = FALSE ;
+bool mu__boolexpr132;
+bool mu__boolexpr133;
+  if (!((mu_bobs[mu_i].mu_st) == (mu_B1))) mu__boolexpr133 = FALSE ;
   else {
-  mu__boolexpr131 = ((mu_ch[1].mu_empty) == (mu_false)) ; 
+  mu__boolexpr133 = ((mu_ch[1].mu_empty) == (mu_false)) ; 
 }
-  if (!(mu__boolexpr131)) mu__boolexpr130 = FALSE ;
+  if (!(mu__boolexpr133)) mu__boolexpr132 = FALSE ;
   else {
-  mu__boolexpr130 = ((mu_ch[1].mu_receiver) == (mu_bobs[mu_i].mu_B)) ; 
+  mu__boolexpr132 = ((mu_ch[1].mu_receiver) == (mu_bobs[mu_i].mu_B)) ; 
 }
-    return mu__boolexpr130;
+    return mu__boolexpr132;
   }
 
   void NextRule(unsigned & what_rule)
@@ -5771,17 +5784,17 @@ bool mu__boolexpr131;
     while (what_rule < 2379 )
       {
 	if ( ( TRUE  ) ) {
-bool mu__boolexpr132;
-bool mu__boolexpr133;
-  if (!((mu_bobs[mu_i].mu_st) == (mu_B1))) mu__boolexpr133 = FALSE ;
+bool mu__boolexpr134;
+bool mu__boolexpr135;
+  if (!((mu_bobs[mu_i].mu_st) == (mu_B1))) mu__boolexpr135 = FALSE ;
   else {
-  mu__boolexpr133 = ((mu_ch[1].mu_empty) == (mu_false)) ; 
+  mu__boolexpr135 = ((mu_ch[1].mu_empty) == (mu_false)) ; 
 }
-  if (!(mu__boolexpr133)) mu__boolexpr132 = FALSE ;
+  if (!(mu__boolexpr135)) mu__boolexpr134 = FALSE ;
   else {
-  mu__boolexpr132 = ((mu_ch[1].mu_receiver) == (mu_bobs[mu_i].mu_B)) ; 
+  mu__boolexpr134 = ((mu_ch[1].mu_receiver) == (mu_bobs[mu_i].mu_B)) ; 
 }
-	      if (mu__boolexpr132) {
+	      if (mu__boolexpr134) {
 		if ( ( TRUE  ) )
 		  return;
 		else
@@ -5826,17 +5839,14 @@ if ( (mu_loc_B) == (mu_bobs[mu_i].mu_B) )
 mu_ch[1].mu_empty = mu_true;
 mu_cons2 ( mu_loc_Na, mu_bobs[mu_i].mu_Nb, mu_loc_A, mu_msg, mu_msgNo1 );
 mu_ch[2].clear();
+mu_ch[2].mu_empty = mu_true;
 mu_ch[2].mu_msg = mu_msg;
-mu_ch[2].mu_empty = mu_false;
 mu_bobs[mu_i].mu_st = mu_B2;
 if (mu_loc_A.isundefined())
   mu_ch[2].mu_receiver.undefine();
 else
   mu_ch[2].mu_receiver = mu_loc_A;
 mu_ch[2].mu_sender = mu_bobs[mu_i].mu_B;
-cout << "2. B -> I\n";
-mu_printMsg ( mu_ch[2].mu_msg );
-cout << "\n";
 }
   };
 
@@ -5861,7 +5871,12 @@ public:
     static mu_1_aliceNums mu_i;
     mu_i.value((r % 1) + 1);
     r = r / 1;
-    return (mu_alices[mu_i].mu_st) == (mu_A3);
+bool mu__boolexpr136;
+  if (!((mu_alices[mu_i].mu_st) == (mu_A3))) mu__boolexpr136 = FALSE ;
+  else {
+  mu__boolexpr136 = ((mu_ch[3].mu_empty) == (mu_true)) ; 
+}
+    return mu__boolexpr136;
   }
 
   void NextRule(unsigned & what_rule)
@@ -5873,7 +5888,12 @@ public:
     while (what_rule < 2380 )
       {
 	if ( ( TRUE  ) ) {
-	      if ((mu_alices[mu_i].mu_st) == (mu_A3)) {
+bool mu__boolexpr137;
+  if (!((mu_alices[mu_i].mu_st) == (mu_A3))) mu__boolexpr137 = FALSE ;
+  else {
+  mu__boolexpr137 = ((mu_ch[3].mu_empty) == (mu_true)) ; 
+}
+	      if (mu__boolexpr137) {
 		if ( ( TRUE  ) )
 		  return;
 		else
@@ -5895,6 +5915,10 @@ public:
     static mu_1_aliceNums mu_i;
     mu_i.value((r % 1) + 1);
     r = r / 1;
+mu_ch[3].mu_empty = mu_false;
+cout << "ch[3]: A -> I\n";
+mu_printMsg ( mu_ch[3].mu_msg );
+cout << "\n";
 mu_alices[mu_i].mu_st = mu_A1;
   };
 
@@ -5919,22 +5943,22 @@ public:
     static mu_1_aliceNums mu_i;
     mu_i.value((r % 1) + 1);
     r = r / 1;
-bool mu__boolexpr134;
-bool mu__boolexpr135;
-bool mu__boolexpr136;
-  if (!((mu_alices[mu_i].mu_st) == (mu_A2))) mu__boolexpr136 = FALSE ;
+bool mu__boolexpr138;
+bool mu__boolexpr139;
+bool mu__boolexpr140;
+  if (!((mu_alices[mu_i].mu_st) == (mu_A2))) mu__boolexpr140 = FALSE ;
   else {
-  mu__boolexpr136 = ((mu_ch[2].mu_empty) == (mu_false)) ; 
+  mu__boolexpr140 = ((mu_ch[2].mu_empty) == (mu_false)) ; 
 }
-  if (!(mu__boolexpr136)) mu__boolexpr135 = FALSE ;
+  if (!(mu__boolexpr140)) mu__boolexpr139 = FALSE ;
   else {
-  mu__boolexpr135 = ((mu_intruder.mu_st) == (mu_emitted2)) ; 
+  mu__boolexpr139 = ((mu_intruder.mu_st) == (mu_emitted2)) ; 
 }
-  if (!(mu__boolexpr135)) mu__boolexpr134 = FALSE ;
+  if (!(mu__boolexpr139)) mu__boolexpr138 = FALSE ;
   else {
-  mu__boolexpr134 = ((mu_ch[2].mu_receiver) == (mu_alices[mu_i].mu_A)) ; 
+  mu__boolexpr138 = ((mu_ch[2].mu_receiver) == (mu_alices[mu_i].mu_A)) ; 
 }
-    return mu__boolexpr134;
+    return mu__boolexpr138;
   }
 
   void NextRule(unsigned & what_rule)
@@ -5946,22 +5970,22 @@ bool mu__boolexpr136;
     while (what_rule < 2381 )
       {
 	if ( ( TRUE  ) ) {
-bool mu__boolexpr137;
-bool mu__boolexpr138;
-bool mu__boolexpr139;
-  if (!((mu_alices[mu_i].mu_st) == (mu_A2))) mu__boolexpr139 = FALSE ;
+bool mu__boolexpr141;
+bool mu__boolexpr142;
+bool mu__boolexpr143;
+  if (!((mu_alices[mu_i].mu_st) == (mu_A2))) mu__boolexpr143 = FALSE ;
   else {
-  mu__boolexpr139 = ((mu_ch[2].mu_empty) == (mu_false)) ; 
+  mu__boolexpr143 = ((mu_ch[2].mu_empty) == (mu_false)) ; 
 }
-  if (!(mu__boolexpr139)) mu__boolexpr138 = FALSE ;
+  if (!(mu__boolexpr143)) mu__boolexpr142 = FALSE ;
   else {
-  mu__boolexpr138 = ((mu_intruder.mu_st) == (mu_emitted2)) ; 
+  mu__boolexpr142 = ((mu_intruder.mu_st) == (mu_emitted2)) ; 
 }
-  if (!(mu__boolexpr138)) mu__boolexpr137 = FALSE ;
+  if (!(mu__boolexpr142)) mu__boolexpr141 = FALSE ;
   else {
-  mu__boolexpr137 = ((mu_ch[2].mu_receiver) == (mu_alices[mu_i].mu_A)) ; 
+  mu__boolexpr141 = ((mu_ch[2].mu_receiver) == (mu_alices[mu_i].mu_A)) ; 
 }
-	      if (mu__boolexpr137) {
+	      if (mu__boolexpr141) {
 		if ( ( TRUE  ) )
 		  return;
 		else
@@ -6004,23 +6028,20 @@ mu_1_Message mu_msg("msg",40);
 mu_msg.clear();
 mu_msg = mu_ch[2].mu_msg;
 mu_destruct2 ( mu_msg, mu_loc_Na, mu_loc_Nb, mu_loc_A );
-bool mu__boolexpr140;
-  if (!((mu_loc_A) == (mu_alices[mu_i].mu_A))) mu__boolexpr140 = FALSE ;
+bool mu__boolexpr144;
+  if (!((mu_loc_A) == (mu_alices[mu_i].mu_A))) mu__boolexpr144 = FALSE ;
   else {
-  mu__boolexpr140 = ((mu_loc_Na) == (mu_alices[mu_i].mu_Na)) ; 
+  mu__boolexpr144 = ((mu_loc_Na) == (mu_alices[mu_i].mu_Na)) ; 
 }
-if ( mu__boolexpr140 )
+if ( mu__boolexpr144 )
 {
 mu_ch[2].mu_empty = mu_true;
 mu_cons3 ( mu_loc_Nb, mu_alices[mu_i].mu_B, mu_msg, mu_msgNo );
+mu_ch[3].mu_empty = mu_true;
 mu_ch[3].mu_msg = mu_msg;
-mu_alices[mu_i].mu_st = mu_A3;
 mu_ch[3].mu_receiver = mu_intruderType;
 mu_ch[3].mu_sender = mu_alices[mu_i].mu_A;
-mu_ch[3].mu_empty = mu_false;
-cout << "3. A -> I\n";
-mu_printMsg ( mu_ch[3].mu_msg );
-cout << "\n";
+mu_alices[mu_i].mu_st = mu_A3;
 }
   };
 
@@ -6045,12 +6066,12 @@ public:
     static mu_1_aliceNums mu_i;
     mu_i.value((r % 1) + 1);
     r = r / 1;
-bool mu__boolexpr141;
-  if (!((mu_alices[mu_i].mu_st) == (mu_A1))) mu__boolexpr141 = FALSE ;
+bool mu__boolexpr145;
+  if (!((mu_alices[mu_i].mu_st) == (mu_A1))) mu__boolexpr145 = FALSE ;
   else {
-  mu__boolexpr141 = ((mu_ch[1].mu_empty) == (mu_true)) ; 
+  mu__boolexpr145 = ((mu_ch[1].mu_empty) == (mu_true)) ; 
 }
-    return mu__boolexpr141;
+    return mu__boolexpr145;
   }
 
   void NextRule(unsigned & what_rule)
@@ -6062,12 +6083,12 @@ bool mu__boolexpr141;
     while (what_rule < 2382 )
       {
 	if ( ( TRUE  ) ) {
-bool mu__boolexpr142;
-  if (!((mu_alices[mu_i].mu_st) == (mu_A1))) mu__boolexpr142 = FALSE ;
+bool mu__boolexpr146;
+  if (!((mu_alices[mu_i].mu_st) == (mu_A1))) mu__boolexpr146 = FALSE ;
   else {
-  mu__boolexpr142 = ((mu_ch[1].mu_empty) == (mu_true)) ; 
+  mu__boolexpr146 = ((mu_ch[1].mu_empty) == (mu_true)) ; 
 }
-	      if (mu__boolexpr142) {
+	      if (mu__boolexpr146) {
 		if ( ( TRUE  ) )
 		  return;
 		else
@@ -6102,7 +6123,7 @@ mu_ch[1].mu_msg = mu_msg;
 mu_ch[1].mu_sender = mu_alices[mu_i].mu_A;
 mu_ch[1].mu_receiver = mu_intruderType;
 mu_alices[mu_i].mu_st = mu_A2;
-cout << "1. A -> I\n";
+cout << "ch[1]: A -> I\n";
 mu_printMsg ( mu_ch[1].mu_msg );
 cout << "\n";
   };
@@ -6431,38 +6452,38 @@ unsigned short StartStateManager::numstartstates = 1;
 /********************
   Invariant records
  ********************/
-int mu__invariant_143() // Invariant "sec"
+int mu__invariant_147() // Invariant "sec"
 {
-bool mu__quant144; 
-mu__quant144 = TRUE;
+bool mu__quant148; 
+mu__quant148 = TRUE;
 {
 for(int mu_i = 0; mu_i <= 20; mu_i++) {
-bool mu__boolexpr145;
-bool mu__boolexpr146;
-  if (!((mu_msgs[mu_i].mu_msgType) == (mu_nonce))) mu__boolexpr146 = FALSE ;
+bool mu__boolexpr149;
+bool mu__boolexpr150;
+  if (!((mu_msgs[mu_i].mu_msgType) == (mu_nonce))) mu__boolexpr150 = FALSE ;
   else {
-  mu__boolexpr146 = ((mu_msgs[mu_i].mu_noncePart) == (mu_Nb)) ; 
+  mu__boolexpr150 = ((mu_msgs[mu_i].mu_noncePart) == (mu_Nb)) ; 
 }
-  if (!(mu__boolexpr146)) mu__boolexpr145 = TRUE ;
+  if (!(mu__boolexpr150)) mu__boolexpr149 = TRUE ;
   else {
-  mu__boolexpr145 = ((mu_Spy_known[mu_i]) == (mu_false)) ; 
+  mu__boolexpr149 = ((mu_Spy_known[mu_i]) == (mu_false)) ; 
 }
-if ( !(mu__boolexpr145) )
-  { mu__quant144 = FALSE; break; }
+if ( !(mu__boolexpr149) )
+  { mu__quant148 = FALSE; break; }
 };
 };
-return mu__quant144;
+return mu__quant148;
 };
 
-bool mu__condition_147() // Condition for Rule "sec"
+bool mu__condition_151() // Condition for Rule "sec"
 {
-  return mu__invariant_143( );
+  return mu__invariant_147( );
 }
 
 /**** end rule declaration ****/
 
 const rulerec invariants[] = {
-{"sec", &mu__condition_147, NULL, },
+{"sec", &mu__condition_151, NULL, },
 };
 const unsigned short numinvariants = 1;
 

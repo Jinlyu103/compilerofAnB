@@ -368,8 +368,9 @@ let print_murphiRule outc actions knws =  (*printf "murphi code"*)
                               in
                               let lenActs = List.length acts in
                               List.iteri ~f:(fun j act -> match act with
-                              | None -> output_string outc "null"
-                              | Some a -> trans a (genMsg a) (j+1) r lenActs knws) acts ) rolelist
+                                                        | None -> output_string outc "null"
+                                                        | Some a -> trans a (genMsg a) (j+1) r lenActs knws) 
+                                          acts ) rolelist
 ;;
 (* generation code to encode each msg pattern *)
 (* Extracting msg patterns from actions and its sub-patterns *)
@@ -432,11 +433,6 @@ let rec isSamePat m1 m2 =
 		    |`Var n2 -> true 
 		    | _ -> false
 		    end
-(*  |`Nonce n1	 -> begin 
-		    match m2 with
-		    |`Nonce n2 -> true 
-		    | _ -> false
-		    end*)
   |`Concat msgs1 -> begin
 		    match m2 with
 		    |`Concat msgs2 -> isSameList msgs1 msgs2
@@ -469,7 +465,6 @@ let rec getSubMsg msg =
   |`Null -> []
   |`Var nonce -> [`Var nonce]
   |`Str role  -> [`Str role]
-  (*|`Nonce na    -> [`Nonce na]*)
   |`Concat msgs -> let submsgs = List.concat (List.map ~f:getSubMsg msgs) in
 		   [msg]@msgs@submsgs
   |`Aenc (m,k) -> [msg]@[m;k]@(getSubMsg m)
@@ -518,6 +513,23 @@ let rec getPatList actions =
   | `Actlist arr -> List.concat (List.map ~f:getPatList arr)
 ;;
 
+(* 2019-12-17 *)
+let printPat pat i =
+	match pat with
+	|`Null -> printf "null"
+	|`Aenc (m1,k1) -> printf "pat%d: Aenc(%a,key)\n" i output_msg m1 
+	|`Senc (m1,k1) -> printf "pat%d: Senc(%a,key)\n" i output_msg m1
+	|`Hash m -> printf "pat%d: Hash(%a)" i output_msg m
+	|`Concat msgs -> printf "pat%d: Concat(" i; 
+			 List.iteri ~f:(fun j m -> printf "%a" output_msg m; if j = 0 then printf ",";) msgs;
+			 printf ")\n"
+	|`Var n -> printf "pat%d: Nonce(%a)\n" i output_msg (`Var n)
+	|`Str s -> printf "pat%d: Agent(%a)\n" i output_msg (`Str s)
+	|`Pk role ->printf "pat%d: %a\n" i output_msg (`Pk role) 
+	|`Sk role ->printf "pat%d: %a\n" i output_msg (`Sk role)
+	|`K (r1,r2) -> printf "pat%d: %a\n" i output_msg (`K (r1,r2))
+;;
+
 let print_murphiEncodeMsg outc actions knws = 
   match actions with
   | `Null -> output_string outc "null"
@@ -525,30 +537,20 @@ let print_murphiEncodeMsg outc actions knws =
                     let non_dup = del_duplicate patlist in (* delete duplicate *)
                     let non_equivalent = getEqvlMsgPattern non_dup in (* delete equivalent class *) 
                     printf "Patterns:\n";
-                    List.iteri ~f:(fun i pat -> encodeBody pat i ; printf "\n" ) non_equivalent
+                    List.iteri ~f:(fun i pat -> printPat pat (i+1) ; printf "\n" ) non_equivalent
   | `Act (seq,r1,r2,n,m) -> let patlist = getPatList actions in    (* get all patterns from actions *)
 		    	    let non_dup = del_duplicate patlist in (* delete duplicate *)
 			    let non_equivalent = getEqvlMsgPattern non_dup in (* delete equivalent class *) 
 			    printf "Patterns:\n";
-			    List.iteri ~f:(fun i pat -> match pat with
-				      |`Null -> printf "null"
-				      |`Aenc (m1,k1) -> printf "pat%d: Aenc(%a,key)\n" i output_msg m1
-				      |`Senc (m1,k1) -> printf "pat%d: Senc(%a,key)\n" i output_msg m1
-				      |`Hash m -> printf "pat%d: Hash(%a)\n" i output_msg m
-				      |`Concat msgs -> printf "pat%d: Concat\n" i; List.iteri ~f:(fun j m -> printf "   (%d: %a\n" j output_msg m) msgs
-				      |`Var n -> printf "pat%d: Nonce(%a)\n" i output_msg (`Var n)
-				      |`Str s -> printf "pat%d: Agent(%a)\n" i output_msg (`Str s)
-				      |`Pk role ->printf "pat%d: %a\n" i output_msg (`Pk role) 
-				      |`Sk role ->printf "pat%d: %a\n" i output_msg (`Sk role) ) non_equivalent
+			    List.iteri ~f:(fun i pat -> printPat pat (i+1) ) non_equivalent
 ;;
 (*-----------------------------------------------*)
 let trActionsToMurphi outc actions knws =
   match actions with
   |`Null -> output_string outc "null"
   |`Act (seq,r1,r2,n,m) -> print_murphiRule outc actions knws
-  |`Actlist arr -> print_murphiRule outc actions knws; 
-		               (*printf "\nTo genetate each message pattern:\n";*)
-   		             (*print_murphiEncodeMsg outc actions knws;*)(* print_murphiMsgPat: generation code to encode each msg pattern *)
+  |`Actlist arr -> (*print_murphiRule outc actions knws;*) 
+		   print_murphiEncodeMsg outc actions knws;(* print_murphiMsgPat: generation code to encode each msg pattern *)
 ;;
 let output_murphiCode outc pocol =
   match pocol with

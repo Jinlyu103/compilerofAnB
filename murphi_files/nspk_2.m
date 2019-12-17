@@ -5,7 +5,7 @@
 const
     aliceNum:1;  		--- number of initaitors (Alice/Intruder)
     bobNum:1;       	--- number of responders(Bob/Intruder)
-    intruderNum:1;		--- number of intruders
+    ---intruderNum:1;		--- number of intruders
     total_fact:20;  	--- the size of spy-known array.
     deductionsNum:20; 	--- the size of deduction array
     msgpassingNum:3;   	--- number of messages
@@ -698,7 +698,7 @@ function exist(PatnSet:msgSet; msgNo:indexType):boolean;
 
 --- rule for Alice
 ruleset i:aliceNums do
-  rule "roleA1"
+  rule "roleA1"   ---send msg:{Na,A}Pk(intruder)
     alices[i].st = A1 & ch[1].empty = true 
     ==>
     var msg: Message;
@@ -711,13 +711,13 @@ ruleset i:aliceNums do
       ch[1].sender := alices[i].A;
       ch[1].receiver := intruderType;
       alices[i].st := A2;
-      put "1. A -> I\n";
+      put "ch[1]: A -> I\n";
       ---put ch[1].msg;
       printMsg(ch[1].msg);
       put "\n";
     end;
 
-  rule "roleA2"
+  rule "roleA2"  --- receive msg: {Na,Nb}Pk(A)
     alices[i].st=A2 & ch[2].empty=false & intruder.st=emitted2 & ch[2].receiver=alices[i].A 
     ==>
     Var loc_A,loc_B: AgentType;
@@ -727,32 +727,29 @@ ruleset i:aliceNums do
     begin
       clear msg;
       msg:=ch[2].msg;
-      destruct2(msg,loc_Na,loc_Nb,loc_A);
-      /*put loc_Na;
-      put loc_Nb;
-      put loc_A;
-      put alices[i].A;
-      put alices[i].Na;*/
+      destruct2(msg,loc_Na,loc_Nb,loc_A);      
       if (loc_A=alices[i].A & loc_Na=alices[i].Na) then
         ch[2].empty := true;
         cons3(loc_Nb, alices[i].B, msg,msgNo);
+        ch[3].empty:=true;
         ch[3].msg := msg;
-        alices[i].st := A3;
         ch[3].receiver := intruderType;
         ch[3].sender := alices[i].A;
-        ch[3].empty := false;
-        put "3. A -> I\n";
-        ---put ch[3].msg;
-        printMsg(ch[3].msg);
-        put "\n";
+        alices[i].st := A3;
+        -------------------------------
       endif;
     end;
 
-  rule "roleA3"
-    alices[i].st = A3  
+  rule "roleA3"  ---send msg: {Nb}Pk(intruder)
+    alices[i].st = A3 & ch[3].empty = true
     ==>
-    alices[i].st := A1;
-  end;
+    begin    	
+      ch[3].empty := false;
+      put "ch[3]: A -> I\n";
+      printMsg(ch[3].msg);
+      put "\n";
+      alices[i].st := A1;
+    end;
 end;
 
 --- rules for bob 
@@ -770,25 +767,30 @@ ruleset i:bobNums do
       destruct1(msg,loc_Na,loc_A,loc_B); --- destruct1 is not "Bob's" decryption operation.
       if (loc_B=bobs[i].B ) then        
         ch[1].empty := true;        
-        cons2(loc_Na, bobs[i].Nb, loc_A, msg, msgNo1); ----?!
-        ---put loc_B;
-        ---put msg;
+        cons2(loc_Na, bobs[i].Nb, loc_A, msg, msgNo1); ----construct msg: {Na,Nb}pk(A)
+        
         clear ch[2];
-        ch[2].msg := msg;   --- send message 
-        ch[2].empty := false;
+        ch[2].empty := true;
+        ch[2].msg := msg;            
         bobs[i].st := B2;
         ch[2].receiver:=loc_A;
-        ch[2].sender := bobs[i].B;
-        ---put loc_B;
-        put "2. B -> I\n";
-        ---put ch[2].msg;
-        printMsg(ch[2].msg);
-        put "\n";
+        ch[2].sender := bobs[i].B;        
       endif;
     end;
 
-  rule "roleB2"
-    bobs[i].st = B2 & ch[3].empty = false & ch[3].receiver=bobs[i].B ---& intruder.st = emitted3
+  rule "roleB2" ----send msg: {Na,Nb}pk(A)
+    bobs[i].st = B2 & ch[2].empty = true 
+    ==>
+    begin
+      ch[2].empty := false;
+      put "ch[2]: B -> I\n";  
+      printMsg(ch[2].msg);
+      put "\n";
+      bobs[i].st := B3;
+    end;
+    
+  rule "roleB3" ---- receive msg : {Na}Pk(B)
+    bobs[i].st = B3 & ch[3].empty = false & ch[3].receiver=bobs[i].B ---& intruder.st = emitted3
     ==>
     Var loc_B:AgentType;
         loc_Nb:NonceType;
@@ -798,20 +800,13 @@ ruleset i:bobNums do
       msg:=ch[3].msg;
       destruct3(msg,loc_Nb,loc_B);
       if (loc_B = bobs[i].B & loc_Nb=bobs[i].Nb) then
-        ---put loc_Nb;
-        bobs[i].st := B3;
         ---put "\nend\n";
         ---put msg;
         printMsg(msg);
         put "\n";
+        bobs[i].st := B1;
       endif;
     end;
-
-  rule "roleB3"
-    bobs[i].st=B3
-    ==>
-    bobs[i].st := B1;
-  end;
 end;
 
 --- rules for intruder
@@ -1189,7 +1184,7 @@ ruleset i: msgLen do
             ch[1].receiver:=bobs[j].B;
             emit[pat5Set.content[i]] := true;
             intruder.st:=emitted1;
-            put "1. I->B\n";            
+            put "ch[1]: I->B\n";            
             printMsg(ch[1].msg);
             ---put emit[pat5Set.content[i]];  
             put "\n";          
@@ -1213,7 +1208,7 @@ ruleset i:msgLen do
           ch[2].receiver:=alices[j].A;
           emit[pat7Set.content[i]]:=true;
           intruder.st:=emitted2;
-          put "2. I->A\n";          
+          put "ch[2]: I->A\n";          
           printMsg(ch[2].msg);
           put "\n";
         endif;
@@ -1236,7 +1231,7 @@ ruleset i: msgLen do
           ch[3].receiver:=bobs[j].B;
           emit[pat8Set.content[i]] := true;
           intruder.st:=emitted3;
-          put "3. I->B\n";
+          put "ch[3]: I->B\n";
           printMsg(ch[3].msg);
           ---put emit[pat8Set.content[i]];
           put "\n";
