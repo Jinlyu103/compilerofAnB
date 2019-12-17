@@ -361,7 +361,7 @@ let genMsg act =
 let print_murphiRule outc actions knws =  (*printf "murphi code"*)
   let rolelist = getRolesFromKnws knws [] in (* Get role list:[A;B;...] *)
   let actsOfAllRls = getActsList actions rolelist in  (* Get act list: [(sign,msg);(sign,msg);...] *)
-  List.iteri ~f:(fun i r -> if i = 0 then
+  List.iteri ~f:(fun i r -> if i = 0  || i = 1 then
                               let acts = match List.nth actsOfAllRls i with
                                   | None -> []
                                   | Some a -> a
