@@ -584,26 +584,6 @@ and printDecRule (m,k) i i1 i2 =
 ;;
 
 (* encryption rules for aenc(Na.A, Pk(B)), aenc(Na.Nb,Pk(A)) and aenc(Nb,Pk(B))*)
-(*
-match m with
-  |`Concat msgs -> ()
-  |`Var n -> printf "    rule \"encrypt %d\"	---pat%d: {Nb}pk(B)\n" i i;
-	     printf "      i<=pat1Set.length & Spy_known[pat1Set.content[i]] &\n      j<=pat4Set.length & Spy_known[pat4Set.content[j]] &\n      !Spy_known[construct%dBy14(pat1Set.content[i],pat4Set.content[j])]\n      ==>\n" i;
-	     printf "      var encMsgNo:indexType;\n	  encMsg:Message;\n";
-	     printf "      begin\n";
-	     printf "        if (msgs[pat4Set.content[j]].k.ag=intruder.B) then\n";
-	     printf "          encMsgNo := construct%dBy14(pat1Set.content[i],pat4Set.content[j]);\n" i;
-	     printf "          if (!exist(pat%dSet,encMsgNo)) then\n" i;
-	     printf "            pat%dSet.length := pat8Set.length+1;\n            pat8Set.content[pat%dSet.length]:=encMsgNo;\n" i i;
-	     printf "          endif;\n";
-	     printf "          if (!Spy_known[encMsgNo]) then\n";
-	     printf "            Spy_known[encMsgNo] := true;\n";
-	     printf "          endif;\n";
-	     printf "        endif;\n";
-	     printf "      end;\n";
-	     printf "    end;\n";
-  |_ -> ()
-*)
 let rec aencryptRule (m,k) =
   (*printf "  aencrypt\n"*)
   let i = getPatNum (`Aenc (m,k)) in
