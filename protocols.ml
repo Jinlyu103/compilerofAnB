@@ -543,7 +543,7 @@ let getPatNum pat =
 				|Some (`Str s) -> 5	(* aenc(concat(Na,A),k)*)
 				|_ -> 0
 				end
-		|`Var n -> 8
+		|`Var n -> 8  (* aenc(Na,k)*)
 		|_ -> 0
 		end
   |`Concat msgs -> begin
@@ -558,25 +558,29 @@ let getPatNum pat =
   |_ -> 0
 ;;
 
-let adecryptRule (m,k) i =  (* among these patterns, m1 could be concat(Na,A), concat(Na,Nb), var(Na) *)
+(* decrypt rules for aenc(Na.A, Pk(B)), aenc(Na.Nb,Pk(A)) *)
+let rec adecryptRule (m,k) =  
   (*printf "  adecrypt\n";*)
-  match m with
-  |`Concat msgs -> ()
-  |`Var n -> printf "  rule \"decrypt %d\"	---pat%d: {Nb}pk(B)\n" i i;
-	     printf "    i<=pat%dSet.length & Spy_known[pat%dSet.content[i]] &\n    !Spy_known[msgs[pat%dSet.content[i]].aencMsg]\n    ==>\n" i i i;
-	     printf "    var key_inv:Message;\n	msgPat1:indexType;\n	flag_pat1:boolean;\n";
-	     printf "    begin\n";
-	     printf "      key_inv := inverseKey(msgs[msgs[pat%dSet.content[i]].aencKey])\n" i;
-	     printf "      if (key_inv.k.ag = intruderType) then\n";
-	     printf "        Spy_known[msgs[pat%dSet.content[i]].aencMsg]:=true;\n        msgPat1:=msgs[pat%dSet.content[i]].aencMsg;\n" i i;
-	     printf "        isPat1(msgs[msgPat1],flag_pat1);\n        if (flag_pat1) then\n";
-	     printf "          if (!exist(pat1Set,msgPat1)) then\n";
-	     printf "            pat1Set.length:=pat1Set.length+1;\n            pat1Set.content[pat1Set.length]:=msgPat1;\n";
-	     printf "          endif;\n";
-	     printf "        endif;\n";
-	     printf "      endif;\n";
-	     printf "    end;\n";
-  |_ -> ()
+  let i = getPatNum (`Aenc (m,k)) in
+  let i1 = getPatNum m in
+  let i2 = getPatNum k in
+  printDecRule (m,k) i i1 i2
+
+and printDecRule (m,k) i i1 i2 =
+   printf "  rule \"decrypt %d\"	---pat%d\n" i i;
+   printf "    i<=pat%dSet.length & Spy_known[pat%dSet.content[i]] &\n    !Spy_known[msgs[pat%dSet.content[i]].aencMsg]\n    ==>\n" i i i;
+   printf "    var key_inv:Message;\n	msgPat%d:indexType;\n	flag_pat%d:boolean;\n" i1 i1;
+   printf "    begin\n";
+   printf "      key_inv := inverseKey(msgs[msgs[pat%dSet.content[i]].aencKey]);\n" i;
+   printf "      if (key_inv.k.ag = intruderType) then\n";
+   printf "        Spy_known[msgs[pat%dSet.content[i]].aencMsg]:=true;\n        msgPat%d:=msgs[pat%dSet.content[i]].aencMsg;\n" i i1 i;
+   printf "        isPat%d(msgs[msgPat%d],flag_pat%d);\n        if (flag_pat%d) then\n" i1 i1 i1 i1;
+   printf "          if (!exist(pat%dSet,msgPat%d)) then\n" i1 i1;
+   printf "            pat%dSet.length:=pat%dSet.length+1;\n            pat%dSet.content[pat%dSet.length]:=msgPat%d;\n" i1 i1 i1 i1 i1;
+   printf "          endif;\n";
+   printf "        endif;\n";
+   printf "      endif;\n";
+   printf "    end;\n";
 ;;
 
 let aencryptRule (m,k) i =
@@ -605,7 +609,7 @@ let print_murphiRule_byPats pat i =
   match pat with
   |`Aenc (m1,k1) -> printf "--- encrypt and decrypt rules of pat: aenc(%a,%a), for intruder\n" output_msg m1 output_msg k1; 
 		    printf "ruleset i:indexType do \n";
-		    adecryptRule (m1,k1) i;
+		    adecryptRule (m1,k1) ;
 		    printf "endruleset;\n\n" ;
 		    printf "ruleset i:indexType do \n  ruleset j:indexType do \n";
 		    aencryptRule (m1,k1) i;

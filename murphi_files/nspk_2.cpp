@@ -5094,6 +5094,7 @@ mu_0_boolean mu_flag_pat6("flag_pat6",96);
 mu_key_inv = mu_inverseKey( mu_msgs[mu_msgs[mu_pat7Set.mu_content[mu_i]].mu_aencKey] );
 if ( (mu_key_inv.mu_k.mu_ag) == (mu_intruderType) )
 {
+cout << "decrypt 71\n";
 mu_Spy_known[mu_msgs[mu_pat7Set.mu_content[mu_i]].mu_aencMsg] = mu_true;
 mu_msgPat6 = mu_msgs[mu_pat7Set.mu_content[mu_i]].mu_aencMsg;
 mu_isPat6 ( mu_msgs[mu_msgPat6], mu_flag_pat6 );
