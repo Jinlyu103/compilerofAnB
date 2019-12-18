@@ -517,8 +517,8 @@ let rec getPatList actions =
 let printPat pat i =
 	match pat with
 	|`Null -> printf "null"
-	|`Aenc (m1,k1) -> printf "pat%d: Aenc(%a,key)\n" i output_msg m1 
-	|`Senc (m1,k1) -> printf "pat%d: Senc(%a,key)\n" i output_msg m1
+	|`Aenc (m1,k1) -> printf "pat%d: " i; printf "Aenc(%a,%a)\n" output_msg m1 output_msg k1
+	|`Senc (m1,k1) -> printf "pat%d: " i; printf "Senc(%a,%a)\n" output_msg m1 output_msg k1
 	|`Hash m -> printf "pat%d: Hash(%a)" i output_msg m
 	|`Concat msgs -> printf "pat%d: Concat(" i; 
 			 List.iteri ~f:(fun j m -> printf "%a" output_msg m; if j = 0 then printf ",";) msgs;
@@ -530,6 +530,90 @@ let printPat pat i =
 	|`K (r1,r2) -> printf "pat%d: %a\n" i output_msg (`K (r1,r2))
 ;;
 
+(* 2019-12-18 *)
+(* encrypt and decrypt / enconcat and deconcat *)
+(* Get pattern Set number in Murphi code *)
+let getPatNum pat =
+  match pat with
+  |`Aenc(m,k) -> begin
+		match m with
+		|`Concat msgs -> begin
+				match List.nth msgs 1 with
+				|Some (`Var n) -> 7	(* aenc(concat(Na,Nb),k)*)
+				|Some (`Str s) -> 5	(* aenc(concat(Na,A),k)*)
+				|_ -> 0
+				end
+		|`Var n -> 8
+		|_ -> 0
+		end
+  |`Concat msgs -> begin
+		   match List.nth msgs 1 with
+		   |Some (`Var n) -> 6	(* concat(Na,Nb)*)
+		   |Some (`Str s) -> 3	(* concat(Na,A) *)
+		   |_ -> 0
+		   end
+  |`Str s -> 2
+  |`Pk role -> 4
+  |`Var n -> 1
+  |_ -> 0
+;;
+
+let adecryptRule (m,k) i =  (* among these patterns, m1 could be concat(Na,A), concat(Na,Nb), var(Na) *)
+  (*printf "  adecrypt\n";*)
+  match m with
+  |`Concat msgs -> ()
+  |`Var n -> printf "  rule \"decrypt %d\"	---pat%d: {Nb}pk(B)\n" i i;
+	     printf "    i<=pat%dSet.length & Spy_known[pat%dSet.content[i]] &\n    !Spy_known[msgs[pat%dSet.content[i]].aencMsg]\n    ==>\n" i i i;
+	     printf "    var key_inv:Message;\n	msgPat1:indexType;\n	flag_pat1:boolean;\n";
+	     printf "    begin\n";
+	     printf "      key_inv := inverseKey(msgs[msgs[pat%dSet.content[i]].aencKey])\n" i;
+	     printf "      if (key_inv.k.ag = intruderType) then\n";
+	     printf "        Spy_known[msgs[pat%dSet.content[i]].aencMsg]:=true;\n        msgPat1:=msgs[pat%dSet.content[i]].aencMsg;\n" i i;
+	     printf "        isPat1(msgs[msgPat1],flag_pat1);\n        if (flag_pat1) then\n";
+	     printf "          if (!exist(pat1Set,msgPat1)) then\n";
+	     printf "            pat1Set.length:=pat1Set.length+1;\n            pat1Set.content[pat1Set.length]:=msgPat1;\n";
+	     printf "          endif;\n";
+	     printf "        endif;\n";
+	     printf "      endif;\n";
+	     printf "    end;\n";
+  |_ -> ()
+;;
+
+let aencryptRule (m,k) i =
+  (*printf "  aencrypt\n"*)
+  match m with
+  |`Concat msgs -> ()
+  |`Var n -> printf "    rule \"encrypt %d\"	---pat%d: {Nb}pk(B)\n" i i;
+	     printf "      i<=pat1Set.length & Spy_known[pat1Set.content[i]] &\n      j<=pat4Set.length & Spy_known[pat4Set.content[j]] &\n      !Spy_known[construct%dBy14(pat1Set.content[i],pat4Set.content[j])]\n      ==>\n" i;
+	     printf "      var encMsgNo:indexType;\n	  encMsg:Message;\n";
+	     printf "      begin\n";
+	     printf "        if (msgs[pat4Set.content[j]].k.ag=intruder.B) then\n";
+	     printf "          encMsgNo := construct%dBy14(pat1Set.content[i],pat4Set.content[j]);\n" i;
+	     printf "          if (!exist(pat%dSet,encMsgNo)) then\n" i;
+	     printf "            pat%dSet.length := pat8Set.length+1;\n            pat8Set.content[pat%dSet.length]:=encMsgNo;\n" i i;
+	     printf "          endif;\n";
+	     printf "          if (!Spy_known[encMsgNo]) then\n";
+	     printf "            Spy_known[encMsgNo] := true;\n";
+	     printf "          endif;\n";
+	     printf "        endif;\n";
+	     printf "      end;\n";
+	     printf "    end;\n";
+  |_ -> ()
+;;
+
+let print_murphiRule_byPats pat i =
+  match pat with
+  |`Aenc (m1,k1) -> printf "--- encrypt and decrypt rules of pat: aenc(%a,%a), for intruder\n" output_msg m1 output_msg k1; 
+		    printf "ruleset i:indexType do \n";
+		    adecryptRule (m1,k1) i;
+		    printf "endruleset;\n\n" ;
+		    printf "ruleset i:indexType do \n  ruleset j:indexType do \n";
+		    aencryptRule (m1,k1) i;
+	  	    printf "  endruleset;\nendruleset;\n\n" ;
+  |`Concat msgs -> printf "--- enconcat and deconcat rules for pat: concat(%a)\n\n" output_msg (`Concat msgs);
+  |_ -> ()
+;;
+
 let print_murphiEncodeMsg outc actions knws = 
   match actions with
   | `Null -> output_string outc "null"
@@ -537,12 +621,12 @@ let print_murphiEncodeMsg outc actions knws =
                     let non_dup = del_duplicate patlist in (* delete duplicate *)
                     let non_equivalent = getEqvlMsgPattern non_dup in (* delete equivalent class *) 
                     printf "Patterns:\n";
-                    List.iteri ~f:(fun i pat -> printPat pat (i+1) ; printf "\n" ) non_equivalent
+                    List.iteri ~f:(fun i pat -> print_murphiRule_byPats pat (i+1)) non_equivalent
   | `Act (seq,r1,r2,n,m) -> let patlist = getPatList actions in    (* get all patterns from actions *)
 		    	    let non_dup = del_duplicate patlist in (* delete duplicate *)
 			    let non_equivalent = getEqvlMsgPattern non_dup in (* delete equivalent class *) 
 			    printf "Patterns:\n";
-			    List.iteri ~f:(fun i pat -> printPat pat (i+1) ) non_equivalent
+			    List.iteri ~f:(fun i pat -> print_murphiRule_byPats pat (i+1) ) non_equivalent
 ;;
 (*-----------------------------------------------*)
 let trActionsToMurphi outc actions knws =
