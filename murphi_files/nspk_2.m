@@ -917,13 +917,13 @@ ruleset i:indexType do    --- pat3size
       !Spy_known[construct5By34(pat3Set.content[i],pat4Set.content[j])]
       ==>
       var encMsgNo : indexType;
-          encMsg: Message;
+          ---encMsg: Message;
       begin
         ---put "encrypt 5.\n";
         if (msgs[pat4Set.content[j]].k.ag=intruder.B) then
           encMsgNo := construct5By34(pat3Set.content[i],pat4Set.content[j]);
           if (!exist(pat5Set,encMsgNo)) then
-            ---put "put concatMsg into pat5Set\n";
+            ---put "put encMsg into pat5Set\n";
             ---put encMsgNo;
             pat5Set.length:=pat5Set.length+1;
             pat5Set.content[pat5Set.length] := encMsgNo;
@@ -976,7 +976,7 @@ ruleset i:indexType do    --- pat6size
       !Spy_known[construct7By64(pat6Set.content[i],pat4Set.content[j])]
       ==>
       var encMsgNo:indexType;
-          encMsg:Message;
+          ---encMsg:Message;
       begin
         ---put "encrypt 7.\n";
         if (msgs[pat4Set.content[j]].k.ag = intruder.B) then
@@ -1028,7 +1028,7 @@ ruleset i:indexType do    --- pat1size
       !Spy_known[construct8By14(pat1Set.content[i],pat4Set.content[j])]
       ==>
       var encMsgNo:indexType;
-          encMsg:Message;
+          ---encMsg:Message;
       begin
         if (msgs[pat4Set.content[j]].k.ag=intruder.B) then
           encMsgNo := construct8By14(pat1Set.content[i],pat4Set.content[j]);
@@ -1093,16 +1093,16 @@ ruleset i:indexType do    --- pat1size
       j<=pat2Set.length & Spy_known[pat3Set.content[j]]&
       !Spy_known[construct3By12(pat1Set.content[i],pat2Set.content[j])]
       ==>
-      var concatMsg: indexType;
+      var concatMsgNo: indexType;
       begin
-        concatMsg := construct3By12(pat1Set.content[i],pat2Set.content[j]);
-        Spy_known[concatMsg]:=true;
-        ---put concatMsg into pat3Set
-        if(!exist(pat3Set,concatMsg)) then
-          ---put "put concatMsg into pat3Set\n";
-          ---put concatMsg;
+        concatMsgNo := construct3By12(pat1Set.content[i],pat2Set.content[j]);
+        Spy_known[concatMsgNo]:=true;
+        ---put concatMsgNo into pat3Set
+        if(!exist(pat3Set,concatMsgNo)) then
+          ---put "put concatMsgNo into pat3Set\n";
+          ---put concatMsgNo;
           pat3Set.length:=pat3Set.length+1;
-          pat3Set.content[pat3Set.length] := concatMsg; 
+          pat3Set.content[pat3Set.length] := concatMsgNo; 
         endif;
       end;
   endruleset;
@@ -1148,21 +1148,21 @@ endruleset;
 ruleset i:indexType do    --- pat1size
   ruleset j:indexType do  --- pat1size
     rule "enconcat6" 
-      i<pat1Set.length & Spy_known[pat1Set.content[i]]&
-      j<pat1Set.length & Spy_known[pat1Set.content[j]]&
+      i<=pat1Set.length & Spy_known[pat1Set.content[i]]&
+      j<=pat1Set.length & Spy_known[pat1Set.content[j]]&
       i != j &
       !Spy_known[construct6By11(pat1Set.content[i],pat1Set.content[j])]
       ==>
-      var concatMsg: indexType;
+      var concatMsgNo: indexType;
       begin
-        concatMsg := construct6By11(pat1Set.content[i],pat1Set.content[j]);
-        Spy_known[concatMsg]:=true;
-        ---put concatMsg into pat6Set
-        if(!exist(pat6Set,concatMsg)) then
-          ---put "put concatMsg into pat6Set\n";
-          ---put concatMsg;
+        concatMsgNo := construct6By11(pat1Set.content[i],pat1Set.content[j]);
+        Spy_known[concatMsgNo]:=true;
+        ---put concatMsgNo into pat6Set
+        if(!exist(pat6Set,concatMsgNo)) then
+          ---put "put concatMsgNo into pat6Set\n";
+          ---put concatMsgNo;
           pat6Set.length:=pat6Set.length+1;
-          pat6Set.content[pat6Set.length] := concatMsg; 
+          pat6Set.content[pat6Set.length] := concatMsgNo; 
         endif;
       end;
   endruleset;

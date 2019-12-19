@@ -594,7 +594,7 @@ let rec aencryptRule (m,k) =
 and printEncRule (m,k) i i1 i2 =
   printf "    rule \"encrypt %d\"	---pat%d\n" i i;
   printf "      i<=pat%dSet.length & Spy_known[pat%dSet.content[i]] &\n      j<=pat%dSet.length & Spy_known[pat%dSet.content[j]] &\n      !Spy_known[construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j])]\n      ==>\n" i1 i1 i2 i2 i i1 i2 i1 i2;
-  printf "      var encMsgNo:indexType;\n	  encMsg:Message;\n";
+  printf "      var encMsgNo:indexType;\n	  ---encMsg:Message;\n";
   printf "      begin\n";
   printf "        if (msgs[pat%dSet.content[j]].k.ag=intruder.B) then\n" i2;
   printf "          encMsgNo := construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j]);\n" i i1 i2 i1 i2;
@@ -653,8 +653,35 @@ and printDeconcatRule msgs i i1 i2 =
 ;;
 
 (* enconcat rules for concat(Na,A) and concat(Na,Nb) *)
-let enconcatRule msgs =
-  printf "  enconcat rules\n";
+let rec enconcatRule msgs =
+  (*printf "  enconcat rules\n";*)
+  let i = getPatNum (`Concat msgs) in
+  let i1 = match List.nth msgs 0 with
+	   | Some m -> getPatNum m
+	   | None -> 0
+  in
+  let i2 = match List.nth msgs 1 with
+	   | Some m -> getPatNum m
+	   | None -> 0
+  in
+  printEnconcatRule msgs i i1 i2
+
+and printEnconcatRule msgs i i1 i2 =
+  printf "    rule \"enconcat %d\"	---pat%d\n" i i;
+  printf "      i<=pat%dSet.length & Spy_known[pat%dSet.content[i]] &\n      j<=pat%dSet.length & Spy_known[pat%dSet.content[j]] &\n" i1 i1 i2 i2;
+  if i1 = i2 then
+	printf "      i != j & \n"
+  else printf "";
+  printf "      !Spy_known[construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j])]\n      ==>\n" i i1 i2 i1 i2;
+  printf "      var concatMsgNo:indexType;\n";
+  printf "      begin\n";
+  printf "        concatMsgNo := construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j]);\n" i i1 i2 i1 i2;
+  printf "        Spy_known[concatMsgNo]:=true;\n";
+  printf "        if (!exist(pat%dSet,concatMsgNo)) then\n" i;
+  printf "          pat%dSet.length:=pat%dSet.length+1;\n" i i;
+  printf "          pat%dSet.content[pat%dSet.length]:=concatMsgNo;\n" i i;
+  printf "        endif;\n";
+  printf "      end;\n";
 ;;
 
 let print_murphiRule_byPats pat i =
@@ -670,9 +697,9 @@ let print_murphiRule_byPats pat i =
 		   printf "ruleset i:indexType do \n";
 		   deconcatRule msgs;
 		   printf "endruleset;\n\n" ;
-		   printf "ruleset i:indexType do \n";
+		   printf "ruleset i:indexType do \n  ruleset j:indexType do \n";
 		   enconcatRule msgs;
-		   printf "endruleset;\n\n" ;
+		   printf "  endruleset;\nendruleset;\n\n" ;
   |_ -> ()
 ;;
 
