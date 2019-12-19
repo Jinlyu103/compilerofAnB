@@ -33,7 +33,7 @@ ruleset i:indexType do
       !Spy_known[construct5By34(pat3Set.content[i],pat4Set.content[j])]
       ==>
       var encMsgNo:indexType;
-	  encMsg:Message;
+	  ---encMsg:Message;
       begin
         if (msgs[pat4Set.content[j]].k.ag=intruder.B) then
           encMsgNo := construct5By34(pat3Set.content[i],pat4Set.content[j]);
@@ -53,11 +53,55 @@ endruleset;
 --- enconcat and deconcat rules for pat: concat(Na.A)
 
 ruleset i:indexType do 
-deconcat rules
+  rule "deconcat 3"	---pat3
+    i<=pat3Set.length & Spy_known[pat3Set.content[i]] &
+    !(Spy_known[msgs[pat3Set.content[i]].concatPart1] & Spy_known[msgs[pat3Set.content[i]].concatPart2])
+    ==>
+    var msgPat1,msgPat2:indexType;
+        flag_pat1,flag_pat2:boolean;
+    begin
+      if (!Spy_known[msgs[pat3Set.content[i]].concatPart1]) then
+        Spy_known[msgs[pat3Set.content[i]].concatPart1]:=true;
+        msgPat1 := msgs[pat3Set.content[i]].concatPart1;
+        isPat1(msgs[msgPat1],flag_pat1);
+        if (flag_pat1) then
+          if(!exist(pat1Set,msgPat1)) then
+             pat1Set.length:=pat1Set.length+1;
+             pat1Set.content[pat1Set.length] := msgPat1;
+          endif;
+        endif;
+      endif;
+      if (!Spy_known[msgs[pat3Set.content[i]].concatPart2]) then
+        Spy_known[msgs[pat3Set.content[i]].concatPart2]:=true;
+        msgPat2 := msgs[pat3Set.content[i]].concatPart2;
+        isPat2(msgs[msgPat2],flag_pat2);
+        if (flag_pat2) then
+          if(!exist(pat2Set,msgPat2)) then
+             pat2Set.length:=pat2Set.length+1;
+             pat2Set.content[pat2Set.length] := msgPat2;
+          endif;
+        endif;
+      endif;
+    end;
 endruleset;
 
 ruleset i:indexType do 
-enconcat rules
+  ruleset j:indexType do 
+    rule "enconcat 3"	---pat3
+      i<=pat1Set.length & Spy_known[pat1Set.content[i]] &
+      j<=pat2Set.length & Spy_known[pat2Set.content[j]] &
+      !Spy_known[construct3By12(pat1Set.content[i],pat2Set.content[j])]
+      ==>
+      var concatMsgNo:indexType;
+      begin
+        concatMsgNo := construct3By12(pat1Set.content[i],pat2Set.content[j]);
+        Spy_known[concatMsgNo]:=true;
+        if (!exist(pat3Set,concatMsgNo)) then
+          pat3Set.length:=pat3Set.length+1;
+          pat3Set.content[pat3Set.length]:=concatMsgNo;
+        endif;
+      end;
+  endruleset;
 endruleset;
 
 --- encrypt and decrypt rules of pat: aenc(Na.Nb,pk(A)), for intruder
@@ -93,7 +137,7 @@ ruleset i:indexType do
       !Spy_known[construct7By64(pat6Set.content[i],pat4Set.content[j])]
       ==>
       var encMsgNo:indexType;
-	  encMsg:Message;
+	  ---encMsg:Message;
       begin
         if (msgs[pat4Set.content[j]].k.ag=intruder.B) then
           encMsgNo := construct7By64(pat6Set.content[i],pat4Set.content[j]);
@@ -113,11 +157,56 @@ endruleset;
 --- enconcat and deconcat rules for pat: concat(Na.Nb)
 
 ruleset i:indexType do 
-deconcat rules
+  rule "deconcat 6"	---pat6
+    i<=pat6Set.length & Spy_known[pat6Set.content[i]] &
+    !(Spy_known[msgs[pat6Set.content[i]].concatPart1] & Spy_known[msgs[pat6Set.content[i]].concatPart2])
+    ==>
+    var msgPat11,msgPat12:indexType;
+        flag_pat11,flag_pat12:boolean;
+    begin
+      if (!Spy_known[msgs[pat6Set.content[i]].concatPart1]) then
+        Spy_known[msgs[pat6Set.content[i]].concatPart1]:=true;
+        msgPat11 := msgs[pat6Set.content[i]].concatPart1;
+        isPat1(msgs[msgPat11],flag_pat11);
+        if (flag_pat11) then
+          if(!exist(pat1Set,msgPat11)) then
+             pat1Set.length:=pat1Set.length+1;
+             pat1Set.content[pat1Set.length] := msgPat11;
+          endif;
+        endif;
+      endif;
+      if (!Spy_known[msgs[pat6Set.content[i]].concatPart2]) then
+        Spy_known[msgs[pat6Set.content[i]].concatPart2]:=true;
+        msgPat12 := msgs[pat6Set.content[i]].concatPart2;
+        isPat1(msgs[msgPat12],flag_pat12);
+        if (flag_pat12) then
+          if(!exist(pat1Set,msgPat12)) then
+             pat1Set.length:=pat1Set.length+1;
+             pat1Set.content[pat1Set.length] := msgPat12;
+          endif;
+        endif;
+      endif;
+    end;
 endruleset;
 
 ruleset i:indexType do 
-enconcat rules
+  ruleset j:indexType do 
+    rule "enconcat 6"	---pat6
+      i<=pat1Set.length & Spy_known[pat1Set.content[i]] &
+      j<=pat1Set.length & Spy_known[pat1Set.content[j]] &
+      i != j & 
+      !Spy_known[construct6By11(pat1Set.content[i],pat1Set.content[j])]
+      ==>
+      var concatMsgNo:indexType;
+      begin
+        concatMsgNo := construct6By11(pat1Set.content[i],pat1Set.content[j]);
+        Spy_known[concatMsgNo]:=true;
+        if (!exist(pat6Set,concatMsgNo)) then
+          pat6Set.length:=pat6Set.length+1;
+          pat6Set.content[pat6Set.length]:=concatMsgNo;
+        endif;
+      end;
+  endruleset;
 endruleset;
 
 --- encrypt and decrypt rules of pat: aenc(Nb,pk(B)), for intruder
@@ -153,7 +242,7 @@ ruleset i:indexType do
       !Spy_known[construct8By14(pat1Set.content[i],pat4Set.content[j])]
       ==>
       var encMsgNo:indexType;
-	  encMsg:Message;
+	  ---encMsg:Message;
       begin
         if (msgs[pat4Set.content[j]].k.ag=intruder.B) then
           encMsgNo := construct8By14(pat1Set.content[i],pat4Set.content[j]);
