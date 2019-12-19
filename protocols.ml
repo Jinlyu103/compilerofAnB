@@ -609,6 +609,54 @@ and printEncRule (m,k) i i1 i2 =
   printf "    end;\n";
 ;;
 
+(* deconcat rules for concat(Na,A) and concat (Na,Nb) *)
+let rec deconcatRule msgs =
+  (*printf "  deconcat rules\n";*)
+  let i = getPatNum (`Concat msgs) in
+  let i1 = match List.nth msgs 0 with
+	   | Some m -> getPatNum m
+	   | None -> 0
+  in
+  let i2 = match List.nth msgs 1 with
+	   | Some m -> getPatNum m
+	   | None -> 0
+  in
+  printDeconcatRule msgs i i1 i2
+
+and printDeconcatRule msgs i i1 i2 =
+  printf "  rule \"deconcat %d\"	---pat%d\n" i i;
+  printf "    i<=pat%dSet.length & Spy_known[pat%dSet.content[i]] &\n    !(Spy_known[msgs[pat%dSet.content[i]].concatPart1] & Spy_known[msgs[pat%dSet.content[i]].concatPart2])\n    ==>\n" i i i i;
+  let (i1_1,i1_2) = if i1 = i2 then (11,12) else (i1,i2) in 
+  printf "    var msgPat%d,msgPat%d:indexType;\n        flag_pat%d,flag_pat%d:boolean;\n" i1_1 i1_2 i1_1 i1_2;
+  printf "    begin\n";
+  printf "      if (!Spy_known[msgs[pat%dSet.content[i]].concatPart1]) then\n" i;
+  printf "        Spy_known[msgs[pat%dSet.content[i]].concatPart1]:=true;\n" i;
+  printf "        msgPat%d := msgs[pat%dSet.content[i]].concatPart1;\n" i1_1 i;
+  printf "        isPat%d(msgs[msgPat%d],flag_pat%d);\n" i1 i1_1 i1_1;
+  printf "        if (flag_pat%d) then\n" i1_1;
+  printf "          if(!exist(pat%dSet,msgPat%d)) then\n" i1 i1_1;
+  printf "             pat%dSet.length:=pat%dSet.length+1;\n             pat%dSet.content[pat%dSet.length] := msgPat%d;\n" i1 i1 i1 i1 i1_1;
+  printf "          endif;\n";
+  printf "        endif;\n";
+  printf "      endif;\n";
+  printf "      if (!Spy_known[msgs[pat%dSet.content[i]].concatPart2]) then\n" i;
+  printf "        Spy_known[msgs[pat%dSet.content[i]].concatPart2]:=true;\n" i;
+  printf "        msgPat%d := msgs[pat%dSet.content[i]].concatPart2;\n" i1_2 i;
+  printf "        isPat%d(msgs[msgPat%d],flag_pat%d);\n" i2 i1_2 i1_2;
+  printf "        if (flag_pat%d) then\n" i1_2;
+  printf "          if(!exist(pat%dSet,msgPat%d)) then\n" i2 i1_2;
+  printf "             pat%dSet.length:=pat%dSet.length+1;\n             pat%dSet.content[pat%dSet.length] := msgPat%d;\n" i2 i2 i2 i2 i1_2;
+  printf "          endif;\n";
+  printf "        endif;\n";
+  printf "      endif;\n";
+  printf "    end;\n";
+;;
+
+(* enconcat rules for concat(Na,A) and concat(Na,Nb) *)
+let enconcatRule msgs =
+  printf "  enconcat rules\n";
+;;
+
 let print_murphiRule_byPats pat i =
   match pat with
   |`Aenc (m1,k1) -> printf "--- encrypt and decrypt rules of pat: aenc(%a,%a), for intruder\n" output_msg m1 output_msg k1; 
@@ -619,6 +667,12 @@ let print_murphiRule_byPats pat i =
 		    aencryptRule (m1,k1);
 	  	    printf "  endruleset;\nendruleset;\n\n" ;
   |`Concat msgs -> printf "--- enconcat and deconcat rules for pat: concat(%a)\n\n" output_msg (`Concat msgs);
+		   printf "ruleset i:indexType do \n";
+		   deconcatRule msgs;
+		   printf "endruleset;\n\n" ;
+		   printf "ruleset i:indexType do \n";
+		   enconcatRule msgs;
+		   printf "endruleset;\n\n" ;
   |_ -> ()
 ;;
 

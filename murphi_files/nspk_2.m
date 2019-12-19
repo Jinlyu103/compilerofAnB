@@ -1049,7 +1049,7 @@ endruleset;
 ruleset i:indexType do  --- pat3size means the capacity of pat3Set, that is indexType
   rule "deconcat3" 
     i <= pat3Set.length & Spy_known[pat3Set.content[i]] &
-    !(Spy_known[msgs[pat3Set.content[i]].concatPart1] & Spy_known[msgs[pat3Set.content[i]].concatPart2] )
+    !(Spy_known[msgs[pat3Set.content[i]].concatPart1] & Spy_known[msgs[pat3Set.content[i]].concatPart2])
     ==>
     var msgPat1, msgPat2:indexType;
         flag_pat1,flag_pat2:boolean;

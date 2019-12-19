@@ -52,6 +52,14 @@ endruleset;
 
 --- enconcat and deconcat rules for pat: concat(Na.A)
 
+ruleset i:indexType do 
+deconcat rules
+endruleset;
+
+ruleset i:indexType do 
+enconcat rules
+endruleset;
+
 --- encrypt and decrypt rules of pat: aenc(Na.Nb,pk(A)), for intruder
 ruleset i:indexType do 
   rule "decrypt 7"	---pat7
@@ -103,6 +111,14 @@ ruleset i:indexType do
 endruleset;
 
 --- enconcat and deconcat rules for pat: concat(Na.Nb)
+
+ruleset i:indexType do 
+deconcat rules
+endruleset;
+
+ruleset i:indexType do 
+enconcat rules
+endruleset;
 
 --- encrypt and decrypt rules of pat: aenc(Nb,pk(B)), for intruder
 ruleset i:indexType do 
