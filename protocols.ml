@@ -266,7 +266,6 @@ let print_atom a =
   match a with
   |`Var id -> printf "%s" id
   |`Str s  -> printf "%s" s
- (* |`Nonce na-> printf "%s" na*)
   |`Null   -> printf " "
 ;;
 
@@ -361,16 +360,16 @@ let genMsg act =
 let print_murphiRule outc actions knws =  (*printf "murphi code"*)
   let rolelist = getRolesFromKnws knws [] in (* Get role list:[A;B;...] *)
   let actsOfAllRls = getActsList actions rolelist in  (* Get act list: [(sign,msg);(sign,msg);...] *)
-  List.iteri ~f:(fun i r -> if i = 0  || i = 1 then
-                              let acts = match List.nth actsOfAllRls i with
+  List.iteri ~f:(fun i r -> (*if i = 0  || i = 1 then*)
+                            let acts = match List.nth actsOfAllRls i with
                                   | None -> []
                                   | Some a -> a
-                              in
-                              let lenActs = List.length acts in
-                              List.iteri ~f:(fun j act -> match act with
+                            in
+                            let lenActs = List.length acts in
+                            List.iteri ~f:(fun j act -> match act with
                                                         | None -> output_string outc "null"
                                                         | Some a -> trans a (genMsg a) (j+1) r lenActs knws) 
-                                          acts ) rolelist
+                                          acts ) rolelist;
 ;;
 (* generation code to encode each msg pattern *)
 (* Extracting msg patterns from actions and its sub-patterns *)
@@ -466,7 +465,7 @@ let rec getSubMsg msg =
   |`Var nonce -> [`Var nonce]
   |`Str role  -> [`Str role]
   |`Concat msgs -> let submsgs = List.concat (List.map ~f:getSubMsg msgs) in
-		   [msg]@msgs@submsgs
+		               [msg]@msgs@submsgs
   |`Aenc (m,k) -> [msg]@[m;k]@(getSubMsg m)
   |`Senc (m,k) -> [msg]@[m;k]@(getSubMsg m)
   |`Hash m -> [msg]@(getSubMsg m)
@@ -479,13 +478,13 @@ let del_duplicate org_list =
   match org_list with
   | [] -> []
   | l -> let len = List.length l in
-	 let non_duplicate = ref [] in
-	 for i = 0 to len do
-		match List.nth l i with
-		| None -> ()
-		| Some x -> if listwithout !non_duplicate x then non_duplicate := x::!non_duplicate
-	 done;
-	!non_duplicate
+         let non_duplicate = ref [] in
+         for i = 0 to len do
+           match List.nth l i with
+           | None -> ()
+           | Some x -> if listwithout !non_duplicate x then non_duplicate := x::!non_duplicate
+         done;
+         !non_duplicate
 ;;
 
 (* To get equivalent msg pattern from patlist. *)
@@ -703,27 +702,107 @@ let print_murphiRule_byPats pat i =
   |_ -> ()
 ;;
 
-let print_murphiEncodeMsg outc actions knws = 
+(* print encryption and decryption rules, enconcat and deconcat rules *)
+let print_murphiRules_EncsDecs outc actions knws = 
   match actions with
   | `Null -> output_string outc "null"
   | `Actlist arr -> let patlist = getPatList actions in    (* get all patterns from actions *)
                     let non_dup = del_duplicate patlist in (* delete duplicate *)
                     let non_equivalent = getEqvlMsgPattern non_dup in (* delete equivalent class *) 
-                    printf "Patterns:\n";
                     List.iteri ~f:(fun i pat -> print_murphiRule_byPats pat (i+1)) non_equivalent
   | `Act (seq,r1,r2,n,m) -> let patlist = getPatList actions in    (* get all patterns from actions *)
-		    	    let non_dup = del_duplicate patlist in (* delete duplicate *)
-			    let non_equivalent = getEqvlMsgPattern non_dup in (* delete equivalent class *) 
-			    printf "Patterns:\n";
-			    List.iteri ~f:(fun i pat -> print_murphiRule_byPats pat (i+1) ) non_equivalent
+		    	                  let non_dup = del_duplicate patlist in (* delete duplicate *)
+                            let non_equivalent = getEqvlMsgPattern non_dup in (* delete equivalent class *) 
+                            List.iteri ~f:(fun i pat -> print_murphiRule_byPats pat (i+1)) non_equivalent
 ;;
+
+(* 2019-12-20 *)
+(* rules for intruder to get msgs: intruderGetMsg1,intruderGetMsg2 and intruderGetMsg3;
+   rules for intruder to emit msgs: intruderEmitMsg1, intruderEmitMsg2 and intruderEmitMsg3 *)
+(* Get msgs from action *)
+let rec getMsgs actions =
+  match actions with
+  | `Null -> []
+  | `Act (seq,r1,r2,n,m) -> [m] 
+  | `Actlist arr -> List.concat (List.map ~f:getMsgs arr)
+;;
+
+let rec print_murphiRule_byMsgs m i =
+  let j = getPatNum m in
+  print_getRules i j;
+  print_emitRules i j;
+
+and print_getRules i j =
+  printf "\n---rule of intruder to get msg%d.\n" i;
+  printf "rule \"intruderGetMsg%d\" \n" i; 
+  printf "  ch[%d].empty = false\n  ==>\n" i;
+  printf "  var flag_pat%d:boolean;\n      msgNo:indexType;\n      msg:Message;\n" j;
+  printf "  begin\n";
+  printf "    msg := ch[%d].msg;\n" i; 
+  printf "    get_msgNo(msg, msgNo);\n"; 
+  printf "    isPat%d(msg,flag_pat%d);\n" j j; 
+  printf "    if (flag_pat%d) then\n" j;
+  printf "      if(!exist(pat%dSet,msgNo)) then\n" j;
+  printf "        pat%dSet.length:=pat%dSet.length+1;\n" j j;
+  printf "        pat%dSet.content[pat%dSet.length]:=msgNo;\n" j j;
+  printf "        Spy_known[msgNo] := true;\n";
+  printf "      endif;\n" ;
+  printf "    endif;\n" ;
+  printf "    ch[%d].empty := true;\n" i;
+  printf "    intruder.st := gotmsg%d;\n" i;
+  printf "  end;\n"
+
+and print_emitRules i j=
+  printf "\n---rule of intruder to emit msg%d.\n" i;
+  printf "ruleset i: msgLen do\n";
+  if i mod 2 = 1 then
+    printf "  ruleset j: bobNums do\n"
+  else printf "  ruleset j: aliceNums do\n";
+  printf "    rule \"intruderEmitMsg%d\"\n" i;
+  printf "      ch[%d].empty=true & i <= pat%dSet.length & Spy_known[pat%dSet.content[i]]\n      ==>\n" i j j;
+  printf "      begin\n";
+  printf "        if (!emit[pat%dSet.content[i]] & msgs[msgs[pat%dSet.content[i]].aencKey].k.ag=intruder.B) then\n" j j;
+  printf "          clear ch[%d];\n" i;
+  printf "          ch[%d].msg:=msgs[pat%dSet.content[i]];\n" i j;
+  printf "          ch[%d].sender:=intruderType;\n" i;
+  if i mod 2 = 1 then
+    printf "          ch[%d].receiver:=bobs[j].B;\n" i
+  else printf "          ch[%d].receiver:=alices[j].A;\n" i;
+  printf "          ch[%d].empty:=false;\n" i;
+  printf "          emit[pat%dSet.content[i]] := true;\n" j;
+  printf "          intruder.st:=emitted%d;\n" i;
+  if i mod 2 = 1 then
+    printf "          put \"ch[%d]: I->B\\n\";\n" i
+  else printf "          put \"ch[%d]: I->A\\n\";\n" i;
+  printf "          printMsg(ch[%d].msg);\n" i;
+  printf "          put \"\\n\";\n";
+  printf "        endif;\n";
+  printf "      end;\n";
+  printf "  endruleset\n";
+  printf "endruleset\n";
+;;
+
+let print_murphiRule_ofIntruder outc actions knws =
+  (* get msgs from actions: msgs
+     print get rules of each msg;
+     print emit rules of each msg. *)
+  match actions with
+  |`Null -> output_string outc "null"
+  |`Actlist arr -> let msgs = getMsgs actions in    (* get all patterns from actions *) 
+                   List.iteri ~f:(fun i m -> print_murphiRule_byMsgs m (i+1)) msgs
+  |`Act (seq,r1,r2,n,m) -> let msgs = getMsgs actions in    (* get all patterns from actions *)
+                           List.iteri ~f:(fun i m -> print_murphiRule_byMsgs m (i+1)) msgs
+
+;;
+
 (*-----------------------------------------------*)
 let trActionsToMurphi outc actions knws =
   match actions with
   |`Null -> output_string outc "null"
   |`Act (seq,r1,r2,n,m) -> print_murphiRule outc actions knws
-  |`Actlist arr -> (*print_murphiRule outc actions knws;*) 
-		   print_murphiEncodeMsg outc actions knws;(* print_murphiMsgPat: generation code to encode each msg pattern *)
+  |`Actlist arr -> (*print_murphiRule outc actions knws; *)(* print rules for roleA and roleB *)
+                   print_murphiRule_ofIntruder outc actions knws; (* print rules for intruder *)
+		               (*print_murphiRules_EncsDecs outc actions knws;*)(* encryption and decryption rules, enconcat and deconcat rules *)
 ;;
 let output_murphiCode outc pocol =
   match pocol with
