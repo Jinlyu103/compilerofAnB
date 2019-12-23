@@ -77,7 +77,7 @@ procedure lookAddPat4(Na: NonceType; Nb: NonceType; A:AgentType; Var msg:Message
   begin
    index:=0;
    lookAddPat5(Na,Nb,msg1,i1);
-   lookAddPat6(B,msg2,i2);
+   lookAddPat6(A,msg2,i2);
    for i : msgLen do
      if (msgs[i].msgType = aenc) then
        if (msgs[i].aencMsg = i1 & msgs[i].aencKey = i2) then
@@ -96,7 +96,7 @@ procedure lookAddPat4(Na: NonceType; Nb: NonceType; A:AgentType; Var msg:Message
    msg:=msgs[index];
  end;
 ---pat5: Na.Nb 
-procedure lookAddPat5(Na: NonceType; Nb: NonceType; Var msg: Message; Var num: indexType);
+procedure lookAddPat5(Na:NonceType; Nb:AgentType; Var msg:Message; Var num: indexType);
   Var msg1, msg2: Message;
   index,i1,i2:indexType;
   begin
@@ -121,13 +121,13 @@ procedure lookAddPat5(Na: NonceType; Nb: NonceType; Var msg: Message; Var num: i
    msg:=msgs[index];
  end;
 ---pat6: pk(A) 
-procedure lookAddPat6(B: AgentType; Var msg:Message; var num: indexType);
+procedure lookAddPat6(A: AgentType; Var msg:Message; var num: indexType);
  Var index : indexType;
  begin
    index:=0;
    for i: msgLen do
      if (msgs[i].msgType = key) then
-       if (msgs[i].k.encTyp = PK & msgs[i].k.ag = B) then
+       if (msgs[i].k.encTyp = PK & msgs[i].k.ag = A) then
          index:=i;
        endif;
      endif;
@@ -137,19 +137,19 @@ procedure lookAddPat6(B: AgentType; Var msg:Message; var num: indexType);
      index := msg_end;
      msgs[index].msgType := key;
      msgs[index].k.encTyp:=PK; 
-     msgs[index].k.ag:=B; 
+     msgs[index].k.ag:=A; 
    endif;
    num:=index;
    msg:=msgs[index];
   end;
 ---pat7: Nb 
-procedure lookAddPat7(Na:NonceType; Var msg:Message; Var num: indexType);
+procedure lookAddPat7(Nb:NonceType; Var msg:Message; Var num: indexType);
  Var index : indexType;
  begin
    index:=0;
    for i: msgLen do
      if(msgs[i].msgType=nonce) then
-       if(msgs[i].noncePart=Na) then
+       if(msgs[i].noncePart=Nb) then
          index:=i
        endif;
      endif
@@ -158,7 +158,7 @@ procedure lookAddPat7(Na:NonceType; Var msg:Message; Var num: indexType);
      msg_end := msg_end + 1 ;
      index := msg_end;
      msgs[index].msgType := nonce;;
-     msgs[index].noncePart:=Na; 
+     msgs[index].noncePart:=Nb; 
    endif;
    num:=index;
    msg:=msgs[index];
