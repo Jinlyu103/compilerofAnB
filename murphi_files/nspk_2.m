@@ -133,7 +133,7 @@ procedure lookAddPat1( Na:NonceType; Var msg:Message; Var num: indexType);
     index:=0;
     for i: msgLen do  --- lookup(msg)
       if (msgs[i].msgType=nonce) then 
-        if (msgs[i].noncePart=Na) then   --- why not (msgs[i].noncePart = Na )?
+        if (msgs[i].noncePart=Na) then   
           index:=i;	
         endif;
       endif;
@@ -150,7 +150,7 @@ procedure lookAddPat1( Na:NonceType; Var msg:Message; Var num: indexType);
   end;
 
 ---Pat2: A
-procedure lookAddPat2( A:AgentType; Var msg:Message; Var num: indexType); 
+procedure lookAddPat2(A:AgentType; Var msg:Message; Var num: indexType); 
   Var index: indexType;
   begin 
     index := 0;
@@ -173,7 +173,7 @@ procedure lookAddPat2( A:AgentType; Var msg:Message; Var num: indexType);
   end;
  
 ---Pat3: {Na,A}
-procedure lookAddPat3( Na:NonceType; A:AgentType; Var msg:Message; Var num: indexType); 
+procedure lookAddPat3(Na:NonceType; A:AgentType; Var msg:Message; Var num: indexType); 
   Var index,i1,i2 : indexType;
       msg1, msg2 : Message;  
   begin
