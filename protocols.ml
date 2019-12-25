@@ -788,17 +788,17 @@ let print_murphiRule_ofIntruder outc actions knws =
 
 (*synthesis of a messages of pati.*)
 let atoms2Parms atoms =
-  String.concat (List.map ~f:(fun a -> match a with
-  |`Var n -> n ^ ":NonceType;"
-  |`Str s -> s ^ ":AgentType;"
-  |`Pk role -> role ^ ":AgentType;"
+  String.concat ~sep:"; "  (List.map ~f:(fun a -> match a with
+  |`Var n -> n ^ ":NonceType"
+  |`Str s -> s ^ ":AgentType"
+  |`Pk role -> role ^ ":AgentType"
   |_ -> "" ) atoms )
 ;;
 
 let genSynthCode m i patList =
   let atoms = getAtoms m in
   printf "---pat%d: %a \nprocedure lookAddPat%d" i output_msg m i;
-  printf "(%s Var msg:Message; Var num : indexType);\n" (atoms2Parms atoms);
+  printf "(%s; Var msg:Message; Var num : indexType);\n" (atoms2Parms atoms);
   match m with
   |`Aenc(m1,k1) -> begin
                   let i1= getPatNum m1 patList in
