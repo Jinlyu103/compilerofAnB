@@ -2,9 +2,9 @@ Murphi Code:
 ---pat1: aenc{ < Na.A > }pk(B) 
 procedure lookAddPat1(Na:NonceType; A:AgentType; B:AgentType; Var msg:Message; Var num : indexType);
   Var msg1, msg2: Message;
-  index,i1,i2:indexType;
+      index,i1,i2:indexType;
   begin
-   index:=0;
+    index:=0;
    lookAddPat2(Na, A,msg1,i1);
    lookAddPat6(B,msg2,i2);
    for i : msgLen do
@@ -27,7 +27,7 @@ procedure lookAddPat1(Na:NonceType; A:AgentType; B:AgentType; Var msg:Message; V
 ---pat2: Na.A 
 procedure lookAddPat2(Na:NonceType; A:AgentType; Var msg:Message; Var num : indexType);
   Var msg1, msg2: Message;
-  index,i1,i2:indexType;
+      index,i1,i2:indexType;
   begin
    index:=0;
    lookAddPat7(Na,msg1,i1);
@@ -73,9 +73,9 @@ procedure lookAddPat3(A:AgentType; Var msg:Message; Var num : indexType);
 ---pat4: aenc{ < Na.Nb > }pk(A) 
 procedure lookAddPat4(Na:NonceType; Nb:NonceType; A:AgentType; Var msg:Message; Var num : indexType);
   Var msg1, msg2: Message;
-  index,i1,i2:indexType;
+      index,i1,i2:indexType;
   begin
-   index:=0;
+    index:=0;
    lookAddPat5(Na, Nb,msg1,i1);
    lookAddPat6(A,msg2,i2);
    for i : msgLen do
@@ -98,7 +98,7 @@ procedure lookAddPat4(Na:NonceType; Nb:NonceType; A:AgentType; Var msg:Message; 
 ---pat5: Na.Nb 
 procedure lookAddPat5(Na:NonceType; Nb:NonceType; Var msg:Message; Var num : indexType);
   Var msg1, msg2: Message;
-  index,i1,i2:indexType;
+      index,i1,i2:indexType;
   begin
    index:=0;
    lookAddPat7(Na,msg1,i1);
@@ -166,9 +166,9 @@ procedure lookAddPat7(Nb:NonceType; Var msg:Message; Var num : indexType);
 ---pat8: aenc{ < Nb > }pk(B) 
 procedure lookAddPat8(Nb:NonceType; B:AgentType; Var msg:Message; Var num : indexType);
   Var msg1, msg2: Message;
-  index,i1,i2:indexType;
+      index,i1,i2:indexType;
   begin
-   index:=0;
+    index:=0;
    lookAddPat7(Nb,msg1,i1);
    lookAddPat6(B,msg2,i2);
    for i : msgLen do
