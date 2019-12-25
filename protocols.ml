@@ -795,7 +795,7 @@ let atoms2Parms atoms =
   |_ -> "" ) atoms )
 ;;
 
-let atoms2Str atoms =
+let atom2Str atoms =
   String.concat ~sep:", "  (List.map ~f:(fun a -> match a with
   |`Var n -> n 
   |`Str s -> s 
@@ -818,7 +818,7 @@ let genSynthCode m i patList =
                   let m1Atoms = getAtoms m1 in                                            
                   printf "  Var msg1, msg2: Message;\n  index,i1,i2:indexType;\n  begin\n";
                   printf "   index:=0;\n";
-                  printf "   lookAddPat%d(%s,msg1,i1);\n" i1 (atoms2Str m1Atoms);
+                  printf "   lookAddPat%d(%s,msg1,i1);\n" i1 (atom2Str m1Atoms);
                   printf "   lookAddPat%d(%s,msg2,i2);\n" i2 keyAg;               
                   printf "   for i : msgLen do\n";
                   printf "     if (msgs[i].msgType = aenc) then\n";
