@@ -795,6 +795,14 @@ let atoms2Parms atoms =
   |_ -> "" ) atoms )
 ;;
 
+let atoms2Str atoms =
+  String.concat ~sep:", "  (List.map ~f:(fun a -> match a with
+  |`Var n -> n 
+  |`Str s -> s 
+  |`Pk role -> role 
+  |_ -> "" ) atoms )
+;;
+
 let genSynthCode m i patList =
   let atoms = getAtoms m in
   printf "---pat%d: %a \nprocedure lookAddPat%d" i output_msg m i;
@@ -807,30 +815,11 @@ let genSynthCode m i patList =
                             |`Pk role -> role
                             |_ -> "null"
                   in
-                  match m1 with
-                  |`Concat msgs -> begin
-                                  let msg1=match List.nth msgs 0 with 
-                                          |Some (`Var n) -> n
-                                          |_ -> "null"
-                                  in
-                                  let msg2=match List.nth msgs 1 with
-                                          |Some (`Var n) -> n
-                                          |Some (`Str s) -> s
-                                          |_ -> "null"
-                                  in                                            
-                                  printf "  Var msg1, msg2: Message;\n  index,i1,i2:indexType;\n  begin\n";
-                                  printf "   index:=0;\n";
-                                  printf "   lookAddPat%d(%s,%s,msg1,i1);\n" i1 msg1 msg2;
-                                  printf "   lookAddPat%d(%s,msg2,i2);\n" i2 keyAg;
-                                  end
-                  |`Var n -> begin
-                            printf "  Var msg1, msg2: Message;\n  index,i1,i2:indexType;\n  begin\n";
-                            printf "   index:=0;\n";
-                            printf "   lookAddPat%d(%s,msg1,i1);\n" i1 n;
-                            printf "   lookAddPat%d(%s,msg2,i2);\n" i2 keyAg;
-                            end      
-                  |_ -> () 
-                  end;
+                  let m1Atoms = getAtoms m1 in                                            
+                  printf "  Var msg1, msg2: Message;\n  index,i1,i2:indexType;\n  begin\n";
+                  printf "   index:=0;\n";
+                  printf "   lookAddPat%d(%s,msg1,i1);\n" i1 (atoms2Str m1Atoms);
+                  printf "   lookAddPat%d(%s,msg2,i2);\n" i2 keyAg;               
                   printf "   for i : msgLen do\n";
                   printf "     if (msgs[i].msgType = aenc) then\n";
                   printf "       if (msgs[i].aencMsg = i1 & msgs[i].aencKey = i2) then\n";
@@ -848,6 +837,7 @@ let genSynthCode m i patList =
                   printf "   num:=index;\n";
                   printf "   msg:=msgs[index];\n";
                   printf " end;\n"; 
+                  end;
   |`Concat msgs -> begin  (* concat(Na,Nb) and concat(Na,A)*)
         let (m1,i1)= match List.nth msgs 0 with
             |Some (`Var n) -> (n,getPatNum (`Var n) patList)
