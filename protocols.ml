@@ -579,7 +579,7 @@ let rec aencryptRule (m,k) patList=
 and printEncRule (m,k) i i1 i2 =
   printf "    rule \"encrypt %d\"	---pat%d\n" i i;
   printf "      i<=pat%dSet.length & Spy_known[pat%dSet.content[i]] &\n      j<=pat%dSet.length & Spy_known[pat%dSet.content[j]] &\n      !Spy_known[construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j])]\n      ==>\n" i1 i1 i2 i2 i i1 i2 i1 i2;
-  printf "      var encMsgNo:indexType;\n	  ---encMsg:Message;\n";
+  printf "      var encMsgNo:indexType;\n";
   printf "      begin\n";
   printf "        if (msgs[pat%dSet.content[j]].k.ag=intruder.B) then\n" i2;
   printf "          encMsgNo := construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j]);\n" i i1 i2 i1 i2;
