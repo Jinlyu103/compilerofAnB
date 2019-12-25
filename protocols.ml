@@ -816,8 +816,8 @@ let genSynthCode m i patList =
                             |_ -> "null"
                   in
                   let m1Atoms = getAtoms m1 in                                            
-                  printf "  Var msg1, msg2: Message;\n  index,i1,i2:indexType;\n  begin\n";
-                  printf "   index:=0;\n";
+                  printf "  Var msg1, msg2: Message;\n      index,i1,i2:indexType;\n  begin\n";
+                  printf "    index:=0;\n";
                   printf "   lookAddPat%d(%s,msg1,i1);\n" i1 (atom2Str m1Atoms);
                   printf "   lookAddPat%d(%s,msg2,i2);\n" i2 keyAg;               
                   printf "   for i : msgLen do\n";
@@ -848,7 +848,7 @@ let genSynthCode m i patList =
             |Some (`Str s) -> (s,getPatNum (`Str s) patList)
             |None|_ -> ("null",0)
         in    	
-        printf "  Var msg1, msg2: Message;\n  index,i1,i2:indexType;\n  begin\n";
+        printf "  Var msg1, msg2: Message;\n      index,i1,i2:indexType;\n  begin\n";
         printf "   index:=0;\n";
         printf "   lookAddPat%d(%s,msg1,i1);\n" i1 m1;
         printf "   lookAddPat%d(%s,msg2,i2);\n" i2 m2;
