@@ -1,0 +1,92 @@
+Murphi Code:
+rule " roleA1 "
+roleA[i].st = A1 & ch[1].empty = true 
+==>
+var msg:Message;
+    msgNo:IndexType;
+begin
+   clear msg;
+   cons1(roleA[i].Na,roleA[i].A,roleA[i].B,msg,msgNo);
+   ch[1].empty := false;
+   ch[1].msg := msg;
+   ch[1].sender := roleA[i].A;
+   ch[1].receiver := intruderType;
+   roleA[i].st := A2;
+   put "1. A -> I\n";
+   printMsg(ch[1].msg);
+end;
+rule " roleA2 "
+roleA[i].st = A2 & ch[2].empty = false & ch[2].receiver = roleA[i].A
+==>
+var msg:Message;
+    msgNo:IndexType;
+begin
+   clear msg;
+   msg := ch[2].msg;
+   destruct2(msg,roleAloc_Na,roleAloc_Nb,roleAloc_A);
+   if(roleAloc_Na=roleA[i].Na& true &roleAloc_A=roleA[i].A)then
+     ch[2].empty:=true;
+     roleA[i].st := A3;
+   endif;
+end;
+rule " roleA3 "
+roleA[i].st = A3 & ch[3].empty = true 
+==>
+var msg:Message;
+    msgNo:IndexType;
+begin
+   clear msg;
+   cons3(roleAloc_Nb,roleA[i].B,msg,msgNo);
+   ch[3].empty := false;
+   ch[3].msg := msg;
+   ch[3].sender := roleA[i].A;
+   ch[3].receiver := intruderType;
+   roleA[i].st := A1;
+   put "3. A -> I\n";
+   printMsg(ch[3].msg);
+end;
+rule " roleB1 "
+roleB[i].st = B1 & ch[1].empty = false & ch[1].receiver = roleB[i].B
+==>
+var msg:Message;
+    msgNo:IndexType;
+begin
+   clear msg;
+   msg := ch[1].msg;
+   destruct1(msg,roleBloc_Na,roleBloc_A,roleBloc_B);
+   if(true&true&roleBloc_B=roleB[i].B)then
+     ch[1].empty:=true;
+     roleB[i].st := B2;
+   endif;
+end;
+rule " roleB2 "
+roleB[i].st = B2 & ch[2].empty = true 
+==>
+var msg:Message;
+    msgNo:IndexType;
+begin
+   clear msg;
+   cons2(roleBloc_Na,roleB[i].Nb,roleBloc_A,msg,msgNo);
+   ch[2].empty := false;
+   ch[2].msg := msg;
+   ch[2].sender := roleB[i].B;
+   ch[2].receiver := intruderType;
+   roleB[i].st := B3;
+   put "2. B -> I\n";
+   printMsg(ch[2].msg);
+end;
+rule " roleB3 "
+roleB[i].st = B3 & ch[3].empty = false & ch[3].receiver = roleB[i].B
+==>
+var msg:Message;
+    msgNo:IndexType;
+begin
+   clear msg;
+   msg := ch[3].msg;
+   destruct3(msg,roleBloc_Nb,roleBloc_B);
+   if(roleBloc_Nb=roleB[i].Nb&roleBloc_B=roleB[i].B)then
+     ch[3].empty:=true;
+     roleB[i].st := B1;
+   endif;
+end;
+
