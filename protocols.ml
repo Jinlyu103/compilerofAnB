@@ -254,11 +254,11 @@ let genRuleName rolename i =
 ;;
 
 let genSendGuard rolename i =
-  printf "role%s[i].st = %s%d & ch[%d].empty = true \n==>" rolename rolename i i
+  printf "role%s[i].st = %s%d & ch[%d].empty = true \n==>\n" rolename rolename i i
 ;;
 
 let genRecvGuard rolename i =
-  printf "role%s[i].st = %s%d & ch[%d].empty = false & ch[%d].receiver = role%s[i].%s\n==>" rolename rolename i i i rolename rolename
+  printf "role%s[i].st = %s%d & ch[%d].empty = false & ch[%d].receiver = role%s[i].%s\n==>\n" rolename rolename i i i rolename rolename
 ;;
 
 let print_atom a =
@@ -283,9 +283,8 @@ let print_cons_atoms rolename i atoms =
 ;;
 
 let genSendAct rolename i atoms length =
-  printf "
-var msg:Message;
-    msgNo:IndexType;
+  printf "var msg:Message;
+              msgNo:IndexType;
 begin
    clear msg;
    cons%d(" i;
@@ -341,15 +340,23 @@ let trans act m i rolename length knws =
   let atoms = getAtoms m in
   match (sign act) with
   | Plus -> begin 
-		genRuleName rolename i;
-		genSendGuard rolename i;
-		genSendAct rolename i atoms length;
-	    end
+            if i mod 2 = 0 then (* if sign is + and i is even, means the action is roleB's sending message action*)
+              printf "roleB's sending message action.\n"
+            else begin
+              genRuleName rolename i;
+              genSendGuard rolename i;
+              genSendAct rolename i atoms length;
+            end;
+            end
   | Minus -> begin
-		genRuleName rolename i;
-		genRecvGuard rolename i;
-		genRecvAct rolename i atoms length knws;
-	     end
+            if i mod 2 = 0 then (* if sign is - and i is even, means the action is roleA's receiving message action*)
+            begin
+              genRuleName rolename i;
+              genRecvGuard rolename i;
+              genRecvAct rolename i atoms length knws;
+            end
+            else printf "roleB's receiving message action.\n"
+            end
 ;;
 
 let genMsg act = 
@@ -361,7 +368,7 @@ let print_murphiRule outc actions knws =  (*printf "murphi code"*)
   let rolelist = getRolesFromKnws knws [] in (* Get role list:[A;B;...] *)
   let actsOfAllRls = getActsList actions rolelist in  (* Get act list: [(sign,msg);(sign,msg);...] *)
   List.iteri ~f:(fun i r -> (*if i = 0  || i = 1 then*)
-                            let acts = match List.nth actsOfAllRls i with
+                            let acts = match List.nth actsOfAllRls i with (* Get the i-th act list of role_i*)
                                   | None -> []
                                   | Some a -> a
                             in
@@ -947,8 +954,8 @@ let trActionsToMurphi outc actions knws =
   match actions with
   |`Null -> output_string outc "null"
   |`Act (seq,r1,r2,n,m) -> print_murphiRule outc actions knws
-  |`Actlist arr -> print_procedures outc actions knws; (* print prcedures and functions. *)
-                   (*print_murphiRule outc actions knws; *)(* print rules for roleA and roleB *)
+  |`Actlist arr -> (*print_procedures outc actions knws;*) (* print prcedures and functions. *)
+                   print_murphiRule outc actions knws; (* print rules for roleA and roleB *)
                    (*print_murphiRule_ofIntruder outc actions knws; *)(* print rules for intruder *)
 		               (*print_murphiRules_EncsDecs outc actions knws;*)(* encryption and decryption rules, enconcat and deconcat rules *)
 ;;
