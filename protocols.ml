@@ -261,27 +261,6 @@ let genRecvGuard rolename i =
   printf "role%s[i].st = %s%d & ch[%d].empty = false & ch[%d].receiver = role%s[i].%s\n==>\n" rolename rolename i i i rolename rolename
 ;;
 
-let print_atom a =
-  match a with
-  |`Var id -> printf "%s" id
-  |`Str s  -> printf "%s" s
-  |`Pk role  -> printf "%s" role
-  |_   -> printf " "
-;;
-
-let print_cons_atoms rolename i atoms =
-  List.iteri ~f:(fun j a -> 
-		if (i = 0 && j = 0)|| j <> 0 then 
-			begin
-			printf "role%s[i]." rolename;
-			print_atom a;
-			end
-		else 
-			printf "loc_Nb";
-		printf ","
-		 ) atoms
-;;
-
 let rec genSendActofA rolename i atoms length =
   printf "var msg:Message;\n    msgNo:IndexType;\nbegin\n";
   printf "   clear msg;\n   cons%d(%s,msg,msgNo);\n" i (sendAtoms2Str rolename i atoms);
@@ -291,6 +270,7 @@ let rec genSendActofA rolename i atoms length =
   printf "   ch[%d].receiver := intruderType;\n" i;
   printf "   role%s[i].st := %s%d;\n" rolename rolename ((i mod length)+1) ; 
   printf "   put \"%d. %s -> I\\n\";\n   printMsg(ch[%d].msg);\n" i rolename i;
+  (*printf "   clear role%sloc_Nb\n" rolename;*)
   printf "end;\n";
   (* (i+1) should be (i+1) % length of the strand list *)
 
