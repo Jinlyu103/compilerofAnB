@@ -282,14 +282,9 @@ let print_cons_atoms rolename i atoms =
 		 ) atoms
 ;;
 
-let genSendAct rolename i atoms length =
-  printf "var msg:Message;
-              msgNo:IndexType;
-begin
-   clear msg;
-   cons%d(" i;
-  print_cons_atoms rolename i atoms;
-  printf "msg,msgNo);\n";
+let rec genSendActofA rolename i atoms length =
+  printf "var msg:Message;\n    msgNo:IndexType;\nbegin\n";
+  printf "   clear msg;\n   cons%d(%s,msg,msgNo);\n" i (sendAtoms2Str rolename i atoms);
   printf "   ch[%d].empty := false;\n" i;
   printf "   ch[%d].msg := msg;\n" i;
   printf "   ch[%d].sender := role%s[i].%s;\n" i rolename rolename;
@@ -298,6 +293,15 @@ begin
   printf "   put \"%d. %s -> I\\n\";\n   printMsg(ch[%d].msg);\n" i rolename i;
   printf "end;\n";
   (* (i+1) should be (i+1) % length of the strand list *)
+
+and sendAtoms2Str rolename i atoms =
+  String.concat ~sep:"," (List.map ~f:(fun a -> 
+                        let s = "role" ^ rolename ^"[i]." in
+                        match a with
+                        |`Var n -> if i = 1 then s ^ n else "loc_" ^ n
+                        |`Str r -> s ^ r
+                        |`Pk r -> s ^ r
+                        |_ -> "null" ) atoms)
 ;;
 
 let geti_th_atom atoms i =
@@ -315,37 +319,50 @@ and getKnw ks rolename =
   List.concat (List.map ~f:(fun k -> getKnws k rolename) ks)
 ;;
 
-let genRecvAct rolename i atoms length knws=
+let rec genRecvAct rolename i atoms length knws=
   let knws_ofRl = getKnws knws rolename in
-  printf "
-var loc_A loc_B:AgentIdType;
+  (*printf "var loc_A loc_B:AgentIdType;
     loc_Na,loc_Nb:NonceType;
     msgNo:IndexType;
-    msg : Message;
-begin
-   clear msg;
-   msg := ch[%d].msg;
-   destruct%d(msg,loc_Na,loc_Nb,loc_A);\n" i i;
-  printf "   if (loc_A=role%s[i]." rolename;
-  print_atom (geti_th_atom knws_ofRl 0); 
-  (* loc_A = roleA[i].A(which comes from initial knws of roleA, the same of Na of roleA[i].Na) *)
-  printf " & loc_Na=role%s[i]." rolename;
-  print_atom (geti_th_atom knws_ofRl 2);
-  printf ") then
-      ch[%d].empty:=true;\n   endif;\n" i;
-  printf "   role%s[i].st := %s%d;\nend;\n" rolename rolename ((i mod length)+1);
+    msg : Message;"*)
+  printf "var msg:Message;\n    msgNo:IndexType;\nbegin\n";
+  printf "   clear msg;\n   msg := ch[%d].msg;\n   destruct%d(msg,%s);\n" i i (recvAtoms2Str atoms); (* (recvAtoms2Str atoms) *)
+  printf "   if(%s)then\n" (atoms2Str atoms rolename);
+  printf "     ch[%d].empty:=true;\n" i;
+  printf "     role%s[i].st := %s%d;\n" rolename rolename ((i mod length)+1);
+  printf "   endif;\n";
+  printf "end;\n";
+
+and recvAtoms2Str atoms = 
+  String.concat ~sep:"," (List.map ~f:(fun a ->
+  match a with
+  |`Var n -> "loc_" ^ n
+  |`Str r -> "loc_" ^ r
+  |`Pk r -> "loc_" ^ r
+  |_ -> "null") atoms)
+
+and atoms2Str atoms rolename = 
+  String.concat ~sep:"&" (List.map ~f:(fun a ->
+  match a with
+  |`Var n -> " loc_" ^ n ^ "=role" ^ rolename^ "[i]." ^ n (* we don't want the string loc_Nb, but cannot avoid it.*)
+  |`Str r -> " loc_" ^ r ^ "=role" ^ rolename ^ "[i]." ^ r
+  |`Pk r -> " loc_" ^ r ^"=role" ^ rolename ^ "[i]." ^ r
+  |_ -> "null" ) atoms)
 ;;
 
 let trans act m i rolename length knws =
   let atoms = getAtoms m in
   match (sign act) with
   | Plus -> begin 
-            if i mod 2 = 0 then (* if sign is + and i is even, means the action is roleB's sending message action*)
-              printf "roleB's sending message action.\n"
+            if i mod 2 = 0 then begin (* if sign is + and i is even, means the action is roleB's sending message action*)
+              genRuleName rolename i;
+              genSendGuard rolename i;
+              (*genSendActofB rolename i atoms length;*)
+            end
             else begin
               genRuleName rolename i;
               genSendGuard rolename i;
-              genSendAct rolename i atoms length;
+              genSendActofA rolename i atoms length;
             end;
             end
   | Minus -> begin
@@ -355,7 +372,10 @@ let trans act m i rolename length knws =
               genRecvGuard rolename i;
               genRecvAct rolename i atoms length knws;
             end
-            else printf "roleB's receiving message action.\n"
+            else begin 
+              genRuleName rolename i;
+              genRecvGuard rolename i;
+            end;
             end
 ;;
 
