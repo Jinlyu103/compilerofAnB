@@ -328,27 +328,7 @@ and sendAtoms2Str rolename i atoms =
                         |_ -> "null" ) atoms)
 ;;
 
-let geti_th_atom atoms i =
-  match List.nth atoms i with
-  | None -> `Null
-  | Some x -> x
-;;
-(* Get initial knowledge of a certain role *)
-let rec getKnws knws rolename =
-  match knws with
-  | `Null -> []
-  | `Knowledge (r,m) -> if r = rolename then getAtoms m else []
-  | `Knowledge_list ks -> getKnw ks rolename
-and getKnw ks rolename =
-  List.concat (List.map ~f:(fun k -> getKnws k rolename) ks)
-;;
-
-let rec genRecvActofA rolename i atoms length knws=
-  let knws_ofRl = getKnws knws rolename in
-  (*printf "var loc_A loc_B:AgentIdType;
-    loc_Na,loc_Nb:NonceType;
-    msgNo:IndexType;
-    msg : Message;"*)
+let rec genRecvActofA rolename i atoms length=
   printf "var msg:Message;\n    msgNo:IndexType;\nbegin\n";
   printf "   clear msg;\n   msg := ch[%d].msg;\n   destruct%d(msg,%s);\n" i i (recvAtoms2Str atoms rolename); (* (recvAtoms2Str atoms) *)
   printf "   if(%s)then\n" (atoms2Str atoms rolename);
@@ -376,12 +356,7 @@ and atoms2Str atoms rolename =
   |_ -> "null" ) atoms)
 ;;
 
-let rec genRecvActofB rolename i atoms length knws=
-  let knws_ofRl = getKnws knws rolename in
-  (*printf "var loc_A loc_B:AgentIdType;
-    loc_Na,loc_Nb:NonceType;
-    msgNo:IndexType;
-    msg : Message;"*)
+let rec genRecvActofB rolename i atoms length=
   printf "var msg:Message;\n    msgNo:IndexType;\nbegin\n";
   printf "   clear msg;\n   msg := ch[%d].msg;\n   destruct%d(msg,%s);\n" i i (recvAtoms2Str atoms rolename); (* (recvAtoms2Str atoms) *)
   printf "   if(%s)then\n" (atoms2Str atoms rolename i);
@@ -404,7 +379,7 @@ and atoms2Str atoms rolename i =
   String.concat ~sep:"&" (List.mapi ~f:(fun j a ->
   match a with
   |`Var n -> if i <> 1 || j <> 0 then loc ^ n ^ "=role" ^ rolename^ "[i]." ^ n else "true" (* we don't want the string loc_Na, but cannot avoid it.*)
-  |`Str r -> loc ^ r ^ "=role" ^ rolename ^ "[i]." ^ r (* "true" ? *)
+  |`Str r -> "true" (* loc ^ r ^ "=role" ^ rolename ^ "[i]." ^ r ? *)
   |`Pk r -> loc ^ r ^ "=role" ^ rolename ^ "[i]." ^ r
   |_ -> "null" ) atoms)
 ;;
@@ -429,12 +404,12 @@ let trans act m i rolename length knws =
             begin
               genRuleName rolename i;
               genRecvGuard rolename i;
-              genRecvActofA rolename i atoms length knws;
+              genRecvActofA rolename i atoms length;
             end
             else begin 
               genRuleName rolename i;
               genRecvGuard rolename i;
-              genRecvActofB rolename i atoms length knws;
+              genRecvActofB rolename i atoms length;
             end;
             end
 ;;
