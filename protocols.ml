@@ -364,7 +364,7 @@ and atoms2Str atoms rolename i =
   |_ -> "null" ) atoms)
 ;;
 
-let trans act m i rolename length knws =
+let trans act m i rolename length =
   let atoms = getAtoms m in
   match (sign act) with
   | Plus -> begin 
@@ -410,7 +410,7 @@ let print_murphiRule outc actions knws =  (*printf "murphi code"*)
                             let lenActs = List.length acts in
                             List.iteri ~f:(fun j act -> match act with
                                                         | None -> output_string outc "null"
-                                                        | Some a -> trans a (genMsg a) (j+1) r lenActs knws) 
+                                                        | Some a -> trans a (genMsg a) (j+1) r lenActs) 
                                           acts ) rolelist;
 ;;
 (* generation code to encode each msg pattern *)
