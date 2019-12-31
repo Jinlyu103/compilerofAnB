@@ -267,7 +267,7 @@ let rec genSendActofA rolename i atoms length =
   printf "   ch[%d].empty := false;\n" i;
   printf "   ch[%d].msg := msg;\n" i;
   printf "   ch[%d].sender := role%s[i].%s;\n" i rolename rolename;
-  printf "   ch[%d].receiver := intruderType;\n" i;
+  printf "   ch[%d].receiver := role%s[i].B;\n" i rolename;
   printf "   role%s[i].st := %s%d;\n" rolename rolename ((i mod length)+1) ; 
   printf "   put \"%d. %s -> I\\n\";\n   printMsg(ch[%d].msg);\n" i rolename i;
   (*printf "   clear role%sloc_Nb\n" rolename;*)
@@ -291,7 +291,7 @@ let rec genSendActofB rolename i atoms length =
   printf "   ch[%d].empty := false;\n" i;
   printf "   ch[%d].msg := msg;\n" i;
   printf "   ch[%d].sender := role%s[i].%s;\n" i rolename rolename;
-  printf "   ch[%d].receiver := intruderType;\n" i;
+  printf "   ch[%d].receiver := roleBloc_A;\n" i;
   printf "   role%s[i].st := %s%d;\n" rolename rolename ((i mod length)+1) ; 
   printf "   put \"%d. %s -> I\\n\";\n   printMsg(ch[%d].msg);\n" i rolename i;
   printf "end;\n";

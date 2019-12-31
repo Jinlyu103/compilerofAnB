@@ -10,7 +10,7 @@ begin
    ch[1].empty := false;
    ch[1].msg := msg;
    ch[1].sender := roleA[i].A;
-   ch[1].receiver := intruderType;
+   ch[1].receiver := roleA[i].B;
    roleA[i].st := A2;
    put "1. A -> I\n";
    printMsg(ch[1].msg);
@@ -40,7 +40,7 @@ begin
    ch[3].empty := false;
    ch[3].msg := msg;
    ch[3].sender := roleA[i].A;
-   ch[3].receiver := intruderType;
+   ch[3].receiver := roleA[i].B;
    roleA[i].st := A1;
    put "3. A -> I\n";
    printMsg(ch[3].msg);
@@ -70,7 +70,7 @@ begin
    ch[2].empty := false;
    ch[2].msg := msg;
    ch[2].sender := roleB[i].B;
-   ch[2].receiver := intruderType;
+   ch[2].receiver := roleBloc_A;
    roleB[i].st := B3;
    put "2. B -> I\n";
    printMsg(ch[2].msg);
