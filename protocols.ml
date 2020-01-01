@@ -102,6 +102,16 @@ and getroles ks rl =
   List.concat (List.map ~f:(fun k -> getRolesFromKnws k rl ) ks)
 ;;
 
+(* get role's msg from knowledges : [msgofA;msgofB]*)
+let rec getMsgOfRoles knws mlist =
+  let rolelist = getRolesFromKnws knws [] in
+  match knws with
+  | `Null -> mlist
+  | `Knowledge (r,m) -> if listwithout mlist m then m :: mlist else mlist
+  | `Knowledge_list ks -> getMsgs ks mlist
+and getMsgs ks mlist =
+  List.concat (List.map ~f:(fun k -> getMsgOfRoles k mlist ) ks)
+;;
 (* Get strand list from actlist*)
 let rec remove ls e =
   match ls with
@@ -983,6 +993,8 @@ let output_murphiCode outc pocol =
   match pocol with
   |`Null -> output_string outc "null"
   |`Pocol (k,a) -> trActionsToMurphi outc a k
+                   (* let ms = getMsgOfRoles k [] in
+                    List.iter ~f:(fun m -> output_msg outc m; printf "\n"; ) ms*)
 ;;
 
 let genCode outc value =
