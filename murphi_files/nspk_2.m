@@ -65,14 +65,14 @@ type
     empty   : boolean;
   end;
 
-  RoleInit: record    ---发起者
+  RoleInit: record    ---发起者 roleA
     A   : AgentType;
     B   : AgentType;
     Na  : NonceType;
     st  : AliceStatus;
   end;
 
-  RoleResp: record    ---接收者
+  RoleResp: record    ---接收者 roleB
     B   : AgentType;
     Nb  : NonceType;
     st  : BobStatus;
@@ -92,7 +92,7 @@ type
   end;
 */
   msgSet: record
-    content: Array[msgLen] of indexType;
+    content: Array[msgLen] of index`Type;
     length : msgLen;
   end;
 

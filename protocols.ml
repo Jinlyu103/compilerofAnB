@@ -336,7 +336,7 @@ and atoms2Str atoms rolename =
   |_ -> "null" ) atoms)
 ;;
 
-let rec genRecvActofB rolename i atoms length=
+let rec genRecvActofB rolename i atoms length = (*Knws *)
   printf "var msg:Message;\n    msgNo:IndexType;\nbegin\n";
   printf "   clear msg;\n   msg := ch[%d].msg;\n   destruct%d(msg,%s);\n" i i (recvAtoms2Str atoms rolename); (* (recvAtoms2Str atoms) *)
   printf "   if(%s)then\n" (atoms2Str atoms rolename i);
@@ -368,29 +368,14 @@ let trans act m i rolename length =
   let atoms = getAtoms m in
   match (sign act) with
   | Plus -> begin 
-            if i mod 2 = 0 then begin (* if sign is + and i is even, means the action is roleB's sending message action*)
-              genRuleName rolename i;
-              genSendGuard rolename i;
-              genSendActofB rolename i atoms length;
-            end
-            else begin
               genRuleName rolename i;
               genSendGuard rolename i;
               genSendActofA rolename i atoms length;
-            end;
             end
   | Minus -> begin
-            if i mod 2 = 0 then (* if sign is - and i is even, means the action is roleA's receiving message action*)
-            begin
               genRuleName rolename i;
               genRecvGuard rolename i;
               genRecvActofA rolename i atoms length;
-            end
-            else begin 
-              genRuleName rolename i;
-              genRecvGuard rolename i;
-              genRecvActofB rolename i atoms length;
-            end;
             end
 ;;
 

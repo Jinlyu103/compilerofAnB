@@ -1,7 +1,7 @@
 Protocol NSPK:
 Knowledges:{
     A : <A.B.nonce(Na)>;
-    B : nonce(Nb)
+    B : <B.nonce(Nb)>
 }
 Actions:{
 [seq1] A->B (n1) : aenc{<nonce(Na).A>}pk(B);
