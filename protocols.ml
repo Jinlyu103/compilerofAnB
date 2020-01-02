@@ -349,7 +349,7 @@ let rec existInit msg atom =
   |`Aenc (m,k) -> false
   |`Senc (m,k) -> false
   |`Hash (m) -> false
-  |`Pk r -> false
+  |`Pk r -> true
   |`Sk r -> false
   |`K (r1,r2) -> false
   |_ -> false
@@ -380,7 +380,7 @@ and sendAtoms2Str rolename i atoms msgofRolename =
                         match a with
                         |`Var n -> if (existInit msgofRolename a)  then s ^ n else loc ^ n  (*if i = 1 then s ^ n else loc ^ n *)
                         |`Str r -> if (existInit msgofRolename a)  then s ^ r else loc ^ r
-                        |`Pk r -> if (existInit msgofRolename a)  then s ^ r else loc ^ r
+                        |`Pk r -> if (existInit msgofRolename (`Str r))  then s ^ r else loc ^ r
                         |_ -> "null" ) atoms)
 ;;
 
@@ -403,13 +403,15 @@ and recvAtoms2Str atoms rolename =
   |_ -> "null") atoms)
 
 and atoms2Str atoms rolename msgofRolename = 
-  let loc = "role"^rolename^"loc_" in
-  String.concat ~sep:"&" (List.map ~f:(fun  a ->
+  let loc = "role"^rolename^"loc_" in  
+  let strlist = (List.map ~f:(fun  a ->
   match a with
-  |`Var n -> if not (existInit msgofRolename a) then loc ^ n ^ "=role" ^ rolename^ "[i]." ^ n else "" (* if j <> 1 then loc ^ n ^ "=role" ^ rolename^ "[i]." ^ n else " true " *)
-  |`Str r -> loc ^ r ^ "=role" ^ rolename ^ "[i]." ^ r
+  |`Var n -> if (existInit msgofRolename a) then loc ^ n ^ "=role" ^ rolename ^ "[i]." ^ n else "true" (* if j <> 1 then loc ^ n ^ "=role" ^ rolename^ "[i]." ^ n else " true " *)
+  |`Str r -> if (existInit msgofRolename a) then loc ^ r ^ "=role" ^ rolename ^ "[i]." ^ r else "true"  (*loc ^ r ^ "=role" ^ rolename ^ "[i]." ^ r*)
   |`Pk r -> loc ^ r ^ "=role" ^ rolename ^ "[i]." ^ r
   |_ -> "null" ) atoms)
+  in
+  String.concat ~sep:"&" (remove strlist "true")
 ;;
 
 let rec genRecvActofB rolename i atoms length = (*Knws *)
