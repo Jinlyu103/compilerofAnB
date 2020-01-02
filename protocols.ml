@@ -102,15 +102,12 @@ and getroles ks rl =
   List.concat (List.map ~f:(fun k -> getRolesFromKnws k rl ) ks)
 ;;
 
-(* get role's msg from knowledges : [msgofA;msgofB]*)
-let rec getMsgOfRoles knws mlist =
-  let rolelist = getRolesFromKnws knws [] in
+(* get role's msg from knowledges : [[A,msgofA];[B,msgofB]]. [key,value] *)
+let rec getMsgOfRoles knws =
   match knws with
-  | `Null -> mlist
-  | `Knowledge (r,m) -> if listwithout mlist m then m :: mlist else mlist
-  | `Knowledge_list ks -> getMsgs ks mlist
-and getMsgs ks mlist =
-  List.concat (List.map ~f:(fun k -> getMsgOfRoles k mlist ) ks)
+  | `Null -> []
+  | `Knowledge (r,m) -> [m]
+  | `Knowledge_list knws -> List.concat (List.map ~f:(fun k -> getMsgOfRoles k) knws)
 ;;
 (* Get strand list from actlist*)
 let rec remove ls e =
@@ -214,6 +211,70 @@ let output_pocol outc value =
   | `Protocol (n,p)  -> printf "Protocol %s:\n%a\nEND" n output_pocolcontext p
 ;;
 
+(* To determine whether two msgs are equivalent? *)
+let rec allTrue boolList =
+  match boolList with 
+  | [] -> false
+  | [b] -> if b = true then true else false
+  | hd :: tl -> if hd = false then false else allTrue tl
+;;
+let rec isSamePat m1 m2 =
+  match m1 with 
+  |`Aenc(m1',k1) -> begin 
+		    match m2 with
+		    |`Aenc(m2',k2) -> if (isSamePat k1 k2) && (isSamePat m1' m2') then true else false
+		    | _ -> false
+		    end
+  |`Senc(m1',k1) -> begin 
+		    match m2 with
+		    |`Senc(m2',k2) -> if (isSamePat k1 k2) && (isSamePat m1' m2') then true else false
+		    | _ -> false
+		    end
+  |`Pk r1 	 -> begin 
+		    match m2 with 
+		    |`Pk r2 ->  true
+		    | _ -> false
+		    end
+  |`Sk r1 	 -> begin 
+		    match m2 with 
+		    |`Sk r2 -> true 
+		    | _ -> false
+		    end
+  |`K (r11,r12)	 -> begin 
+		    match m2 with 
+		    |`K (r21,r22) -> true 
+		    | _ -> false
+		    end
+  |`Var n1	 -> begin 
+		    match m2 with
+		    |`Var n2 -> true 
+		    | _ -> false
+		    end
+  |`Concat msgs1 -> begin
+		    match m2 with
+		    |`Concat msgs2 -> isSameList msgs1 msgs2
+  		    | _ -> false
+		    end
+  |`Hash m1'	 -> begin
+		    match m2 with
+		    |`Hash m2' -> if isSamePat m1' m2' then true else false
+		    | _ -> false 
+		    end
+  |`Str s1	 -> begin 
+		    match m2 with
+		    |`Str s2 -> true
+		    | _ -> false
+		    end
+ | _ -> false
+
+and isSameList msgs1 msgs2 =
+  let len1 = List.length msgs1 in
+  let len2 = List.length msgs2 in
+  if len1 <> len2 then false 
+  else let boolList = List.map2_exn ~f:isSamePat msgs1 msgs2 in
+	if allTrue boolList then true else false
+;;
+
 (* part 4 print murphi rule *)
 let rec getActsList actions rolelist = 
   match actions with
@@ -271,27 +332,55 @@ let genRecvGuard rolename i =
   printf "role%s[i].st = %s%d & ch[%d].empty = false & ch[%d].receiver = role%s[i].%s\n==>\n" rolename rolename i i i rolename rolename
 ;;
 
-let rec genSendActofA rolename i atoms length =
+let rec existInit msg atom =
+  match msg with
+  |`Null -> false
+  |`Var n -> if isSamePat msg atom then 
+                match atom with
+                |`Var n1 -> if n = n1 then true else false
+                |_ -> false
+              else false
+  |`Str r -> if isSamePat msg atom then 
+              match atom with
+              |`Str r1 -> if r = r1 then true else false
+              |_ -> false
+            else false
+  |`Concat msgs -> existInMsgs msgs atom
+  |`Aenc (m,k) -> false
+  |`Senc (m,k) -> false
+  |`Hash (m) -> false
+  |`Pk r -> false
+  |`Sk r -> false
+  |`K (r1,r2) -> false
+  |_ -> false
+
+and existInMsgs msgs atom =
+  let boolList = List.map ~f:(fun msg -> existInit msg atom ) msgs in
+  match List.reduce ~f:(||) boolList with
+  |Some b -> b
+  |None -> false 
+;;
+
+let rec genSendActofA rolename i atoms length msgofRolename =
   printf "var msg:Message;\n    msgNo:IndexType;\nbegin\n";
-  printf "   clear msg;\n   cons%d(%s,msg,msgNo);\n" i (sendAtoms2Str rolename i atoms);
+  printf "   clear msg;\n   cons%d(%s,msg,msgNo);\n" i (sendAtoms2Str rolename i atoms msgofRolename);
   printf "   ch[%d].empty := false;\n" i;
   printf "   ch[%d].msg := msg;\n" i;
   printf "   ch[%d].sender := role%s[i].%s;\n" i rolename rolename;
   printf "   ch[%d].receiver := role%s[i].B;\n" i rolename;
   printf "   role%s[i].st := %s%d;\n" rolename rolename ((i mod length)+1) ; 
   printf "   put \"%d. %s -> I\\n\";\n   printMsg(ch[%d].msg);\n" i rolename i;
-  (*printf "   clear role%sloc_Nb\n" rolename;*)
   printf "end;\n";
   (* (i+1) should be (i+1) % length of the strand list *)
 
-and sendAtoms2Str rolename i atoms =
+and sendAtoms2Str rolename i atoms msgofRolename =
   let s = "role" ^ rolename ^"[i]." in
   let loc = "role"^rolename^"loc_" in
   String.concat ~sep:"," (List.map ~f:(fun a ->                         
                         match a with
-                        |`Var n -> if i = 1 then s ^ n else loc ^ n
-                        |`Str r -> s ^ r
-                        |`Pk r -> s ^ r
+                        |`Var n -> if (existInit msgofRolename a)  then s ^ n else loc ^ n  (*if i = 1 then s ^ n else loc ^ n *)
+                        |`Str r -> if (existInit msgofRolename a)  then s ^ r else loc ^ r
+                        |`Pk r -> if (existInit msgofRolename a)  then s ^ r else loc ^ r
                         |_ -> "null" ) atoms)
 ;;
 
@@ -374,13 +463,13 @@ and atoms2Str atoms rolename i =
   |_ -> "null" ) atoms)
 ;;
 
-let trans act m i rolename length =
+let trans act m i rolename length msgOfrolename =
   let atoms = getAtoms m in
   match (sign act) with
   | Plus -> begin 
               genRuleName rolename i;
               genSendGuard rolename i;
-              genSendActofA rolename i atoms length;
+              genSendActofA rolename i atoms length msgOfrolename;
             end
   | Minus -> begin
               genRuleName rolename i;
@@ -397,15 +486,20 @@ let genMsg act =
 let print_murphiRule outc actions knws =  (*printf "murphi code"*)
   let rolelist = getRolesFromKnws knws [] in (* Get role list:[A;B;...] *)
   let actsOfAllRls = getActsList actions rolelist in  (* Get act list: [(sign,msg);(sign,msg);...] *)
+  let initKnws = getMsgOfRoles knws in 
   List.iteri ~f:(fun i r -> (*if i = 0  || i = 1 then*)
                             let acts = match List.nth actsOfAllRls i with (* Get the i-th act list of role_i*)
-                                  | None -> []
-                                  | Some a -> a
+                                      | None -> []
+                                      | Some a -> a
+                            in
+                            let msgofRole = match List.nth initKnws i with (* Get the i-th msg list of role_i*)
+                                            |None -> `Null
+                                            |Some msg -> msg
                             in
                             let lenActs = List.length acts in
                             List.iteri ~f:(fun j act -> match act with
                                                         | None -> output_string outc "null"
-                                                        | Some a -> trans a (genMsg a) (j+1) r lenActs) 
+                                                        | Some a -> trans a (genMsg a) (j+1) r lenActs msgofRole) 
                                           acts ) rolelist;
 ;;
 (* generation code to encode each msg pattern *)
@@ -430,69 +524,7 @@ let consMsg m i =
   printf " procedure consMsg%d(%a\n   var msg: Message;\n    num: indexType;\n    num1,num2: indexType;\nbegin %a end" i (outConsPara m) encodeBody m 1;   (* default 1*)
 ;;
 *)
-(* To determine whether two msgs are equivalent? *)
-let rec allTrue boolList =
-  match boolList with 
-  | [] -> false
-  | [b] -> if b = true then true else false
-  | hd :: tl -> if hd = false then false else allTrue tl
-;;
-let rec isSamePat m1 m2 =
-  match m1 with 
-  |`Aenc(m1',k1) -> begin 
-		    match m2 with
-		    |`Aenc(m2',k2) -> if (isSamePat k1 k2) && (isSamePat m1' m2') then true else false
-		    | _ -> false
-		    end
-  |`Senc(m1',k1) -> begin 
-		    match m2 with
-		    |`Senc(m2',k2) -> if (isSamePat k1 k2) && (isSamePat m1' m2') then true else false
-		    | _ -> false
-		    end
-  |`Pk r1 	 -> begin 
-		    match m2 with 
-		    |`Pk r2 ->  true
-		    | _ -> false
-		    end
-  |`Sk r1 	 -> begin 
-		    match m2 with 
-		    |`Sk r2 -> true 
-		    | _ -> false
-		    end
-  |`K (r11,r12)	 -> begin 
-		    match m2 with 
-		    |`K (r21,r22) -> true 
-		    | _ -> false
-		    end
-  |`Var n1	 -> begin 
-		    match m2 with
-		    |`Var n2 -> true 
-		    | _ -> false
-		    end
-  |`Concat msgs1 -> begin
-		    match m2 with
-		    |`Concat msgs2 -> isSameList msgs1 msgs2
-  		    | _ -> false
-		    end
-  |`Hash m1'	 -> begin
-		    match m2 with
-		    |`Hash m2' -> if isSamePat m1' m2' then true else false
-		    | _ -> false 
-		    end
-  |`Str s1	 -> begin 
-		    match m2 with
-		    |`Str s2 -> true
-		    | _ -> false
-		    end
- | _ -> false
 
-and isSameList msgs1 msgs2 =
-  let len1 = List.length msgs1 in
-  let len2 = List.length msgs2 in
-  if len1 <> len2 then false 
-  else let boolList = List.map2_exn ~f:isSamePat msgs1 msgs2 in
-	if allTrue boolList then true else false
-;;
 
 (* Extract msg from action *)
 (*let extractMsg (seq,r1,r2,n,m) = m ;;*)
