@@ -384,29 +384,6 @@ and sendAtoms2Str rolename i atoms msgofRolename =
                         |_ -> "null" ) atoms)
 ;;
 
-let rec genSendActofB rolename i atoms length =
-  printf "var msg:Message;\n    msgNo:IndexType;\nbegin\n";
-  printf "   clear msg;\n   cons%d(%s,msg,msgNo);\n" i (sendAtoms2Str rolename i atoms);
-  printf "   ch[%d].empty := false;\n" i;
-  printf "   ch[%d].msg := msg;\n" i;
-  printf "   ch[%d].sender := role%s[i].%s;\n" i rolename rolename;
-  printf "   ch[%d].receiver := roleBloc_A;\n" i;
-  printf "   role%s[i].st := %s%d;\n" rolename rolename ((i mod length)+1) ; 
-  printf "   put \"%d. %s -> I\\n\";\n   printMsg(ch[%d].msg);\n" i rolename i;
-  printf "end;\n";
-  (* (i+1) should be (i+1) % length of the strand list *)
-
-and sendAtoms2Str rolename i atoms =
-  let s = "role" ^ rolename ^"[i]." in
-  let loc = "role"^rolename^"loc_" in
-  String.concat ~sep:"," (List.mapi ~f:(fun j a ->                         
-                        match a with
-                        |`Var n -> if i = 2 && j = 1 then s ^ n else loc ^ n
-                        |`Str r -> loc ^ r
-                        |`Pk r -> loc ^ r
-                        |_ -> "null" ) atoms)
-;;
-
 let rec genRecvActofA rolename i atoms length=
   printf "var msg:Message;\n    msgNo:IndexType;\nbegin\n";
   printf "   clear msg;\n   msg := ch[%d].msg;\n   destruct%d(msg,%s);\n" i i (recvAtoms2Str atoms rolename); (* (recvAtoms2Str atoms) *)
