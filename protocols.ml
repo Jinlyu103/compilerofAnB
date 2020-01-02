@@ -384,10 +384,10 @@ and sendAtoms2Str rolename i atoms msgofRolename =
                         |_ -> "null" ) atoms)
 ;;
 
-let rec genRecvActofA rolename i atoms length=
+let rec genRecvActofA rolename i atoms length msgofRolename =
   printf "var msg:Message;\n    msgNo:IndexType;\nbegin\n";
   printf "   clear msg;\n   msg := ch[%d].msg;\n   destruct%d(msg,%s);\n" i i (recvAtoms2Str atoms rolename); (* (recvAtoms2Str atoms) *)
-  printf "   if(%s)then\n" (atoms2Str atoms rolename);
+  printf "   if(%s)then\n" (atoms2Str atoms rolename msgofRolename);
   printf "     ch[%d].empty:=true;\n" i;
   printf "     role%s[i].st := %s%d;\n" rolename rolename ((i mod length)+1);
   printf "   endif;\n";
@@ -402,11 +402,11 @@ and recvAtoms2Str atoms rolename =
   |`Pk r -> loc ^ r
   |_ -> "null") atoms)
 
-and atoms2Str atoms rolename = 
+and atoms2Str atoms rolename msgofRolename = 
   let loc = "role"^rolename^"loc_" in
-  String.concat ~sep:"&" (List.mapi ~f:(fun j a ->
+  String.concat ~sep:"&" (List.map ~f:(fun  a ->
   match a with
-  |`Var n -> if j <> 1 then loc ^ n ^ "=role" ^ rolename^ "[i]." ^ n else " true " 
+  |`Var n -> if not (existInit msgofRolename a) then loc ^ n ^ "=role" ^ rolename^ "[i]." ^ n else "" (* if j <> 1 then loc ^ n ^ "=role" ^ rolename^ "[i]." ^ n else " true " *)
   |`Str r -> loc ^ r ^ "=role" ^ rolename ^ "[i]." ^ r
   |`Pk r -> loc ^ r ^ "=role" ^ rolename ^ "[i]." ^ r
   |_ -> "null" ) atoms)
@@ -451,7 +451,7 @@ let trans act m i rolename length msgOfrolename =
   | Minus -> begin
               genRuleName rolename i;
               genRecvGuard rolename i;
-              genRecvActofA rolename i atoms length;
+              genRecvActofA rolename i atoms length msgOfrolename;
             end
 ;;
 
