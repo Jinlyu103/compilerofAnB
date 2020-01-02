@@ -212,12 +212,6 @@ let output_pocol outc value =
 ;;
 
 (* To determine whether two msgs are equivalent? *)
-let rec allTrue boolList =
-  match boolList with 
-  | [] -> false
-  | [b] -> if b = true then true else false
-  | hd :: tl -> if hd = false then false else allTrue tl
-;;
 let rec isSamePat m1 m2 =
   match m1 with 
   |`Aenc(m1',k1) -> begin 
@@ -272,7 +266,9 @@ and isSameList msgs1 msgs2 =
   let len2 = List.length msgs2 in
   if len1 <> len2 then false 
   else let boolList = List.map2_exn ~f:isSamePat msgs1 msgs2 in
-	if allTrue boolList then true else false
+	match List.reduce ~f:(&&) boolList with
+  |Some b -> b
+  |None -> false 
 ;;
 
 (* part 4 print murphi rule *)
@@ -361,7 +357,7 @@ and existInMsgs msgs atom =
   |None -> false 
 ;;
 
-let rec genSendActofA rolename i atoms length msgofRolename =
+let rec genSendAct rolename i atoms length msgofRolename =
   printf "var msg:Message;\n    msgNo:IndexType;\nbegin\n";
   printf "   clear msg;\n   cons%d(%s,msg,msgNo);\n" i (sendAtoms2Str rolename i atoms msgofRolename);
   printf "   ch[%d].empty := false;\n" i;
@@ -384,7 +380,7 @@ and sendAtoms2Str rolename i atoms msgofRolename =
                         |_ -> "null" ) atoms)
 ;;
 
-let rec genRecvActofA rolename i atoms length msgofRolename =
+let rec genRecvAct rolename i atoms length msgofRolename =
   printf "var msg:Message;\n    msgNo:IndexType;\nbegin\n";
   printf "   clear msg;\n   msg := ch[%d].msg;\n   destruct%d(msg,%s);\n" i i (recvAtoms2Str atoms rolename); (* (recvAtoms2Str atoms) *)
   printf "   if(%s)then\n" (atoms2Str atoms rolename msgofRolename);
@@ -414,46 +410,18 @@ and atoms2Str atoms rolename msgofRolename =
   String.concat ~sep:"&" (remove strlist "true")
 ;;
 
-let rec genRecvActofB rolename i atoms length = (*Knws *)
-  printf "var msg:Message;\n    msgNo:IndexType;\nbegin\n";
-  printf "   clear msg;\n   msg := ch[%d].msg;\n   destruct%d(msg,%s);\n" i i (recvAtoms2Str atoms rolename); (* (recvAtoms2Str atoms) *)
-  printf "   if(%s)then\n" (atoms2Str atoms rolename i);
-  printf "     ch[%d].empty:=true;\n" i;
-  printf "     role%s[i].st := %s%d;\n" rolename rolename ((i mod length)+1);
-  printf "   endif;\n";
-  printf "end;\n";
-
-and recvAtoms2Str atoms rolename = 
-  let loc = "role"^rolename^"loc_" in
-  String.concat ~sep:"," (List.map ~f:(fun a ->
-  match a with
-  |`Var n -> loc ^ n
-  |`Str r -> loc ^ r
-  |`Pk r -> loc ^ r
-  |_ -> "null") atoms)
-
-and atoms2Str atoms rolename i = 
-  let loc = "role"^rolename^"loc_" in
-  String.concat ~sep:"&" (List.mapi ~f:(fun j a ->
-  match a with
-  |`Var n -> if i <> 1 || j <> 0 then loc ^ n ^ "=role" ^ rolename^ "[i]." ^ n else "true" (* we don't want the string loc_Na, but cannot avoid it.*)
-  |`Str r -> "true" (* loc ^ r ^ "=role" ^ rolename ^ "[i]." ^ r ? *)
-  |`Pk r -> loc ^ r ^ "=role" ^ rolename ^ "[i]." ^ r
-  |_ -> "null" ) atoms)
-;;
-
 let trans act m i rolename length msgOfrolename =
   let atoms = getAtoms m in
   match (sign act) with
   | Plus -> begin 
               genRuleName rolename i;
               genSendGuard rolename i;
-              genSendActofA rolename i atoms length msgOfrolename;
+              genSendAct rolename i atoms length msgOfrolename;
             end
   | Minus -> begin
               genRuleName rolename i;
               genRecvGuard rolename i;
-              genRecvActofA rolename i atoms length msgOfrolename;
+              genRecvAct rolename i atoms length msgOfrolename;
             end
 ;;
 

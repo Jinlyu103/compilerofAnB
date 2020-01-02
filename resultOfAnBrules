@@ -24,7 +24,7 @@ begin
    clear msg;
    msg := ch[2].msg;
    destruct2(msg,roleAloc_Na,roleAloc_Nb,roleAloc_A);
-   if(roleAloc_Na=roleA[i].Na& true &roleAloc_A=roleA[i].A)then
+   if(roleAloc_Na=roleA[i].Na&roleAloc_A=roleA[i].A)then
      ch[2].empty:=true;
      roleA[i].st := A3;
    endif;
@@ -54,7 +54,7 @@ begin
    clear msg;
    msg := ch[1].msg;
    destruct1(msg,roleBloc_Na,roleBloc_A,roleBloc_B);
-   if(true&true&roleBloc_B=roleB[i].B)then
+   if(roleBloc_B=roleB[i].B)then
      ch[1].empty:=true;
      roleB[i].st := B2;
    endif;
@@ -70,7 +70,7 @@ begin
    ch[2].empty := false;
    ch[2].msg := msg;
    ch[2].sender := roleB[i].B;
-   ch[2].receiver := roleBloc_A;
+   ch[2].receiver := roleB[i].B;
    roleB[i].st := B3;
    put "2. B -> I\n";
    printMsg(ch[2].msg);
