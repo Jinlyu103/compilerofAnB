@@ -980,9 +980,9 @@ let trActionsToMurphi outc actions knws =
 let rec output_env outc env =
   match env with
   |`Null -> output_string outc "null"
-  |`Env_rlist rlist -> printf "agents: %a\n" output_msg rlist
-  |`Env_nlist nlist -> printf "nonces: %a\n" output_msg nlist
-  |`Env_agent (r,m) -> printf "facts:\n%s: <%a>\n" r output_msg m
+  |`Env_rlist rlist -> printf "print the definition of agents:\n %a\n" output_msg rlist
+  |`Env_nlist nlist -> printf "print the definition of nonces:\n %a\n" output_msg nlist
+  |`Env_agent (r,m) -> printf "print the facts:\n%s: <%a>\n" r output_msg m
   |`Envlist envs -> List.iter ~f:(fun e -> printf "%a\n" output_env e) envs
 ;;
 
