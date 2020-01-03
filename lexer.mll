@@ -55,6 +55,7 @@ rule read =
   | "senc" {SENC}
   | "Actions:" {ACTIONS}
   | "Goals:" {GOALS}
+  | "Environment:" {ENVIRONMENT}
   | "Knowledges:" {KNOWLEDGES}
   | "Protocol" {PROTOCOL}
   | "end" {END}

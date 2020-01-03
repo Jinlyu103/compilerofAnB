@@ -32,6 +32,7 @@
 %token INJ
 %token ON
 %token EOF
+%token ENVRIONMENT
 
 %start <Protocols.protocols option> prog
 
@@ -85,20 +86,10 @@ action:
 
 action_list:
    acts = separated_list(SEMICOLON, action)    { acts } ;
-(*
-actions:
-  | ACTIONS;LEFT_BRACE;actlist = action_list;RIGHT_BRACE { actlist };
 
-action:
-  | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE;r1=IDENT; SENDTO ; r2=IDENT;LEFT_BRACK;n=IDENT;RIGHT_BRACK;COLON;m=message { (seq,r1,r2,n,m) };
-
-action_list:
-  acts = separated_list(SEMICOLON, action)  { acts } ;
-*)
 message: 
   | id=IDENT { `Str id}
   | NONCE;LEFT_BRACK;id=IDENT;RIGHT_BRACK {`Var id }
-  (*| v1=message;PERIOD;v2=message{ `Concat (v1,v2)}*)
   | PK;LEFT_BRACK;rlnm=IDENT;RIGHT_BRACK { `Pk rlnm }
   | SK;LEFT_BRACK;rlnm=IDENT;RIGHT_BRACK { `Sk rlnm }
   | K;LEFT_BRACK;rlnm1=IDENT;COMMA;rlnm2=IDENT;RIGHT_BRACK { `K (rlnm1,rlnm2)}
