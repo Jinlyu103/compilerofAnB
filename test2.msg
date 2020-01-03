@@ -9,11 +9,11 @@ Actions:{
 [seq3] A->B (n3) : aenc{nonce(Nb)}pk(B)
 }
 Environment:{
-[agent] Alice,Bob,Intruder;
+[agent] <Alice.Bob.Intruder>;
 [exposed] Intruder;
-[nonce] A1Na, B1Nb, B2Nb;
-[agent1] A1 : <Alice.Intruder.A1Na>;
-[agent2] B1 : <Bob.B1Nb>;
-[agent3] B2 : <Intruder.B2Nb>
+[nonces] <nonce(A1Na).nonce(B1Nb).nonce(B2Nb)>;
+[agent1] A1 : <Alice.Intruder.nonce(A1Na)>;
+[agent2] B1 : <Bob.nonce(B1Nb)>;
+[agent3] B2 : <Intruder.nonce(B2Nb)>
 }
 end

@@ -40,8 +40,16 @@ type knowledge = [
   | `Null
 ];;
 
+type environment = [
+  |`Env_rlist of message
+  |`Env_nlist of message
+  |`Env_agent of roleName * message
+  |`Envlist of environment list
+  |`Null
+]
+
 type pocolcontext = [
-  | `Pocol of knowledge * action
+  | `Pocol of knowledge * action * environment 
   | `Null
 ];;
 
@@ -968,10 +976,21 @@ let trActionsToMurphi outc actions knws =
                    (*print_murphiRule_ofIntruder outc actions knws; *)(* print rules for intruder *)
 		               (*print_murphiRules_EncsDecs outc actions knws;*)(* encryption and decryption rules, enconcat and deconcat rules *)
 ;;
+
+let rec output_env outc env =
+  match env with
+  |`Null -> output_string outc "null"
+  |`Env_rlist rlist -> printf "%a\n" output_msg rlist
+  |`Env_nlist nlist -> printf "%a\n" output_msg nlist
+  |`Env_agent (r,m) -> printf "%s: <%a>\n" r output_msg m
+  |`Envlist envs -> List.iter ~f:(fun e -> printf "%a\n" output_env e) envs
+;;
+
 let output_murphiCode outc pocol =
   match pocol with
   |`Null -> output_string outc "null"
-  |`Pocol (k,a) -> trActionsToMurphi outc a k
+  |`Pocol (k,a,env) -> trActionsToMurphi outc a k;
+                        output_env outc env
                    (* let ms = getMsgOfRoles k [] in
                     List.iter ~f:(fun m -> output_msg outc m; printf "\n"; ) ms*)
 ;;

@@ -32,7 +32,7 @@
 %token INJ
 %token ON
 %token EOF
-%token ENVRIONMENT
+%token ENVIRONMENT
 
 %start <Protocols.protocols option> prog
 
@@ -46,7 +46,7 @@ protocols:
   | PROTOCOL; name=IDENT; COLON ; p=pocolcontext ; END { `Protocol (name,p)};
 
 pocolcontext:
-  | k=knowledges;a=actions { `Pocol (k,a) }
+  | k=knowledges;a=actions;env=envrionment { `Pocol (k,a,env) }
 
 knowledges:
   | KNOWLEDGES; knwlist=knowledge; { knwlist };
@@ -57,6 +57,18 @@ knowledge:
 
 knowledge_list:
   knws = separated_list(SEMICOLON, knowledge)    { knws } ;
+
+envrionment:
+  | ENVIRONMENT; envlist = envs; { envlist }
+
+envs:
+  | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE; rlist=message {`Env_rlist rlist }
+  | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE; nlist=message {`Env_nlist nlist }
+  | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE; r=IDENT; COLON; m=message { `Env_agent (r,m)}
+  | LEFT_BRACE; envs = env_list; RIGHT_BRACE {`Envlist envs }
+
+env_list:
+ envs = separated_list(SEMICOLON, envs) {envs} 
 
 goals:
   | GOALS; goallist=goal; { goallist };
@@ -76,7 +88,14 @@ role:
 
 rolelist:
   rlist = separated_nonempty_list(PERIOD, role)    { rlist } ;
+(*
+nonce:
+  | NONCE;LEFT_BRACK;id=IDENT;RIGHT_BRACK {`Var id }
+  | LEFT_ANGLEBARCK;nlist=noncelist;RIGHT_ANGLEBARCK { `Identifier_list  nlist}
 
+noncelist:
+  nlist = separated_nonempty_list(PERIOD, nonce) {nlist}
+*)
 actions:
   | ACTIONS; actlist= action;  { actlist };
 
