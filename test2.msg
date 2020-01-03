@@ -11,7 +11,7 @@ Actions:{
 Environment:{
 [agent] <Alice.Bob.Intruder>;
 [exposed] Intruder;
-[nonces] <nonce(A1Na).nonce(B1Nb).nonce(B2Nb)>;
+[nonces] {<nonce(A1Na).nonce(B1Nb).nonce(B2Nb)>};
 [agent1] A1 : <Alice.Intruder.nonce(A1Na)>;
 [agent2] B1 : <Bob.nonce(B1Nb)>;
 [agent3] B2 : <Intruder.nonce(B2Nb)>

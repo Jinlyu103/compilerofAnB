@@ -63,7 +63,7 @@ envrionment:
 
 envs:
   | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE; rlist=message {`Env_rlist rlist }
-  | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE; nlist=message {`Env_nlist nlist }
+  | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE; LEFT_BRACE;nlist=message;RIGHT_BRACE {`Env_nlist nlist }
   | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE; r=IDENT; COLON; m=message { `Env_agent (r,m)}
   | LEFT_BRACE; envs = env_list; RIGHT_BRACE {`Envlist envs }
 
