@@ -1004,8 +1004,8 @@ let print_startstate r num m =
 
 let rec printMuriphiStart outc env =
   match env with
-  (*|`Null -> output_string outc "null"
-  |`Env_rlist rlist -> printf "print the definition of agents:\n %a\n" output_msg rlist
+  |`Null -> output_string outc "null"
+  (*|`Env_rlist rlist -> printf "print the definition of agents:\n %a\n" output_msg rlist
   |`Env_nlist nlist -> printf "print the definition of nonces:\n %a\n" output_msg nlist*)
   |`Env_agent (r,num,m) -> (*printf "print the facts:\n%s: <%a>\n" r output_msg m;*)
                        print_startstate r num m;(* print startstates *)
