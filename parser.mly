@@ -47,7 +47,7 @@ protocols:
   | PROTOCOL; name=IDENT; COLON ; p=pocolcontext ; END { `Protocol (name,p)};
 
 pocolcontext:
-  | k=knowledges;a=actions;env=envrionment { `Pocol (k,a,env) }
+  | k=knowledges;a=actions;env=envrionment; { `Pocol (k,a,env) }
 
 knowledges:
   | KNOWLEDGES; knwlist=knowledge; { knwlist };
@@ -63,21 +63,21 @@ envrionment:
   | ENVIRONMENT; envlist = envs; { envlist }
 
 envs:
-  | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE; rlist=message {`Env_rlist rlist }
-  | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE; LEFT_BRACE;nlist=message;RIGHT_BRACE {`Env_nlist nlist }
+  (*| LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE; rlist=message {`Env_rlist rlist }
+  | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE; LEFT_BRACE;nlist=message;RIGHT_BRACE {`Env_nlist nlist }*)
   | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE; r=IDENT; LEFT_MIDBRACE; num = INT; RIGHT_MIDBRACE; COLON; m=message { `Env_agent (r,num,m)} (* add the attribute num *)
   | LEFT_BRACE; envs = env_list; RIGHT_BRACE {`Envlist envs }
-
+;
 env_list:
  envs = separated_list(SEMICOLON, envs) {envs} 
-
+;
 goals:
   | GOALS; goallist=goal; { goallist };
   
 goal:
   | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE ; m=message; SECRETOF ; rlist=role { `Secretgoal (seq,m,rlist)}
   | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE ; r1=IDENT;NINJ;r2=IDENT;ON; msglist=message { `Agreegoal (seq,r1,r2,msglist)}
-  | LEFT_BRACE; gols = goal_list; RIGHT_BRACE { `Goallist gols};
+  | LEFT_BRACE; gols = goal_list; RIGHT_BRACE {`Goallist gols };
 
 goal_list:
   gols = separated_list(SEMICOLON, goal)    { gols } ;

@@ -41,12 +41,19 @@ type knowledge = [
 ];;
 
 type environment = [
-  |`Env_rlist of message
-  |`Env_nlist of message
+  (*|`Env_rlist of message
+  |`Env_nlist of message*)
   |`Env_agent of roleName * int * message
   |`Envlist of environment list
   |`Null
 ]
+
+type goal = [
+  |`Secretgoal of identifier * message * roleName_list
+  |`Agreegoal of identifier * roleName * roleName * message
+  |`Goallist of goal list
+  |`Null
+];;
 
 type pocolcontext = [
   | `Pocol of knowledge * action * environment 
@@ -967,14 +974,41 @@ let print_procedures outc actions knws =
 ;;
 
 (*-----------------------------------------------*)
+(* records of roleA and roleB*)
+let printRecords outc r m =
+  match m with
+  |`Concat msgs -> begin
+                  List.iteri ~f:(fun i m1 -> 
+                  match m1 with
+                  |`Str r -> printf " %s : AgentType;\n" r
+                  |`Var n -> printf " %s : NonceType;\n" n 
+                  |_ -> printf "null\n") msgs;
+                  printf " st : %sStatus;\n" r;
+                  end
+  |_ -> printf "null\n"
+;;
+
+let rec printMurphiRecords outc knw =
+  match knw with
+  |`Null -> output_string outc "null"
+  | `Knowledge (r,m) -> printf "Role%s : record\n" r;
+                        printRecords outc r m;
+                        printf "end;\n";
+  | `Knowledge_list knws -> List.iter ~f:(fun k -> printMurphiRecords outc k) knws
+;;
+
+(*procedures and functions 
+  rules of roleA and roleB
+  rules of intruder
+  rules of encryption/decryption/enconcat/deconcat*)
 let trActionsToMurphi outc actions knws =
   match actions with
   |`Null -> output_string outc "null"
   |`Act (seq,r1,r2,n,m) -> print_murphiRule outc actions knws
-  |`Actlist arr -> (*print_procedures outc actions knws;*) (* print prcedures and functions. *)
+  |`Actlist arr -> print_procedures outc actions knws; (* print prcedures and functions. *)
                    print_murphiRule outc actions knws; (* print rules for roleA and roleB *)
                    (*print_murphiRule_ofIntruder outc actions knws; *)(* print rules for intruder *)
-		               (*print_murphiRules_EncsDecs outc actions knws;*)(* encryption and decryption rules, enconcat and deconcat rules *)
+		               print_murphiRules_EncsDecs outc actions knws;(* encryption and decryption rules, enconcat and deconcat rules *)
 ;;
 
 let print_startstate r num m =
@@ -998,15 +1032,15 @@ let print_startstate r num m =
                       |`Str role -> printf "  %s[%d].B = %s;\n" r num role 
                       |_ -> printf "null\n" ) msgs;
                       printf "  %s[%d].st = B1;\n" r num; 
-                    end                     
+                    end                  
   | _ -> printf "null\n"
 ;;
-
+(*startstate of roleA and role B*)
 let rec printMuriphiStart outc env =
   match env with
   |`Null -> output_string outc "null"
   (*|`Env_rlist rlist -> printf "print the definition of agents:\n %a\n" output_msg rlist
-  |`Env_nlist nlist -> printf "print the definition of nonces:\n %a\n" output_msg nlist*)
+        |`Env_nlist nlist -> printf "print the definition of nonces:\n %a\n" output_msg nlist*)
   |`Env_agent (r,num,m) -> (*printf "print the facts:\n%s: <%a>\n" r output_msg m;*)
                        print_startstate r num m;(* print startstates *)
   |`Envlist envs -> List.iter ~f:(fun e -> printf "%a" printMuriphiStart e) envs
@@ -1016,7 +1050,7 @@ let rec printMuriphiStart outc env =
 let output_murphiCode outc pocol =
   match pocol with
   |`Null -> output_string outc "null"
-  |`Pocol (k,a,env) ->  (*print records of roleA and roleB by knws*)
+  |`Pocol (k,a,env) ->  printMurphiRecords outc k;(*print records of roleA and roleB by knws*)
                         trActionsToMurphi outc a k;
                         output_string outc "startstate\n";
                         printMuriphiStart outc env;
@@ -1028,7 +1062,7 @@ let output_murphiCode outc pocol =
 let genCode outc value =
   match value with
   |`Null -> output_string outc "null"
-  |`Protocol (n,p) -> printf "Murphi Code:\n%a" output_murphiCode p
+  |`Protocol (n,p) -> printf "---Murphi Code:\n%a" output_murphiCode p
 ;;
 
 
