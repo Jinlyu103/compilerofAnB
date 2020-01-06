@@ -107,7 +107,7 @@ action_list:
    acts = separated_list(SEMICOLON, action)    { acts } ;
 
 message: 
-  | id=IDENT { `Str id}
+  | id=IDENT { `Str id }
   | NONCE;LEFT_BRACK;id=IDENT;RIGHT_BRACK {`Var id }
   | PK;LEFT_BRACK;rlnm=IDENT;RIGHT_BRACK { `Pk rlnm }
   | SK;LEFT_BRACK;rlnm=IDENT;RIGHT_BRACK { `Sk rlnm }
