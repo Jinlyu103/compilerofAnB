@@ -28,6 +28,7 @@ let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
 let str = "'" id "'"
 
 (* part 4 *)
+(* Attention to the int type *)
 rule read =
   parse
   | white    { read lexbuf  }

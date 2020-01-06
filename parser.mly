@@ -1,7 +1,7 @@
 %token <string> IDENT
 %token <string> USTR
 %token <string> STRING
-%token <int> INT
+%token <int> INT (* parse integers *)
 %token LEFT_BRACE
 %token RIGHT_BRACE
 %token LEFT_BRACK
@@ -65,7 +65,7 @@ envrionment:
 envs:
   | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE; rlist=message {`Env_rlist rlist }
   | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE; LEFT_BRACE;nlist=message;RIGHT_BRACE {`Env_nlist nlist }
-  | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE; r=IDENT; LEFT_MIDBRACE; num = INT; RIGHT_MIDBRACE; COLON; m=message { `Env_agent (r,num,m)}
+  | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE; r=IDENT; LEFT_MIDBRACE; num = INT; RIGHT_MIDBRACE; COLON; m=message { `Env_agent (r,num,m)} (* add the attribute num *)
   | LEFT_BRACE; envs = env_list; RIGHT_BRACE {`Envlist envs }
 
 env_list:

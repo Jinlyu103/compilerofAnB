@@ -984,39 +984,42 @@ let print_startstate r num m =
                    begin
                       List.iteri ~f:(fun i m -> 
                                 match m with
-                                |`Var n -> printf "%s[%d].Na = %s;\n" r num n
-                                |`Str role -> if i = 0 then printf "%s[%d].A = %s;\n" r num role
-                                              else  printf "%s[%d].B = %s;\n" r num role 
+                                |`Var n -> printf "  %s[%d].Na = %s;\n" r num n
+                                |`Str role -> if i = 0 then printf "  %s[%d].A = %s;\n" r num role
+                                              else  printf "  %s[%d].B = %s;\n" r num role 
                                 |_ -> printf "null\n") msgs;
-                      printf "%s[%d].st = A1;\n" r num;  
+                      printf "  %s[%d].st = A1;\n" r num;  
                    end                             
                     else
                     begin
                       List.iteri ~f:(fun i m -> 
                       match m with
-                      |`Var n -> printf "%s[%d].Na = %s;\n" r num n
-                      |`Str role -> printf "%s[%d].B = %s;\n" r num role 
+                      |`Var n -> printf "  %s[%d].Nb = %s;\n" r num n
+                      |`Str role -> printf "  %s[%d].B = %s;\n" r num role 
                       |_ -> printf "null\n" ) msgs;
-                      printf "%s[%d].st = B1;\n " r num; 
+                      printf "  %s[%d].st = B1;\n" r num; 
                     end                     
   | _ -> printf "null\n"
 ;;
 
 let rec output_env outc env =
   match env with
-  |`Null -> output_string outc "null"
+  (*|`Null -> output_string outc "null"
   |`Env_rlist rlist -> printf "print the definition of agents:\n %a\n" output_msg rlist
-  |`Env_nlist nlist -> printf "print the definition of nonces:\n %a\n" output_msg nlist
+  |`Env_nlist nlist -> printf "print the definition of nonces:\n %a\n" output_msg nlist*)
   |`Env_agent (r,num,m) -> (*printf "print the facts:\n%s: <%a>\n" r output_msg m;*)
                        print_startstate r num m;(* print startstates *)
-  |`Envlist envs -> List.iter ~f:(fun e -> printf "%a\n" output_env e) envs
+  |`Envlist envs -> List.iter ~f:(fun e -> printf "%a" output_env e) envs
+  |_ -> output_string outc "null"
 ;;
 
 let output_murphiCode outc pocol =
   match pocol with
   |`Null -> output_string outc "null"
   |`Pocol (k,a,env) -> trActionsToMurphi outc a k;
-                        output_env outc env
+                        output_string outc "startstate\n";
+                        output_env outc env;
+                        output_string outc "end;\n"
                    (* let ms = getMsgOfRoles k [] in
                     List.iter ~f:(fun m -> output_msg outc m; printf "\n"; ) ms*)
 ;;
