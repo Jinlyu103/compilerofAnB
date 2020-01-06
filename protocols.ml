@@ -117,7 +117,7 @@ and getroles ks rl =
   List.concat (List.map ~f:(fun k -> getRolesFromKnws k rl ) ks)
 ;;
 
-(* get role's msg from knowledges : [[A,msgofA];[B,msgofB]]. [key,value] *)
+(* get role's msg from knowledges : [msgofA;msgofB] *)
 let rec getMsgOfRoles knws =
   match knws with
   | `Null -> []
@@ -1011,7 +1011,7 @@ let trActionsToMurphi outc actions knws =
 		               print_murphiRules_EncsDecs outc actions knws;(* encryption and decryption rules, enconcat and deconcat rules *)
 ;;
 
-let print_startstate r num m =
+let print_startstate1 r num m =
   match m with
   |`Concat msgs -> let len = List.length msgs in
                    if len = 3 then
@@ -1035,15 +1035,31 @@ let print_startstate r num m =
                     end                  
   | _ -> printf "null\n"
 ;;
+
+let print_startstate r num m knws =
+  let msgOfKnws = getMsgOfRoles knws in
+  List.iter ~f:(fun m1 -> if isSamePat m m1 then
+                            match (m,m1) with
+                            |(`Concat msgs,`Concat msgs1) -> let strs = (List.map2_exn ~f:(fun m' m1' -> 
+                                                                match (m',m1') with
+                                                                |(`Var n,`Var n1) -> r^"["^(string_of_int num)^"]."^n1^" = "^n^";\n"
+                                                                |(`Str role,`Str role1) -> r^"["^(string_of_int num)^"]."^ role1^" = "^role^";\n" 
+                                                                |_ -> "error: mismatching!\n") msgs msgs1) 
+                                                              in
+                                                              List.iter ~f:(fun s -> printf "  %s" s) strs;
+                                                              printf "  %s[%d].st = %s1;\n" r num r
+                            |_ -> printf "null\n"
+                          else printf "" ) msgOfKnws
+;;
 (*startstate of roleA and role B*)
-let rec printMuriphiStart outc env =
+let rec printMuriphiStart outc env k =
   match env with
   |`Null -> output_string outc "null"
   (*|`Env_rlist rlist -> printf "print the definition of agents:\n %a\n" output_msg rlist
         |`Env_nlist nlist -> printf "print the definition of nonces:\n %a\n" output_msg nlist*)
   |`Env_agent (r,num,m) -> (*printf "print the facts:\n%s: <%a>\n" r output_msg m;*)
-                       print_startstate r num m;(* print startstates *)
-  |`Envlist envs -> List.iter ~f:(fun e -> printf "%a" printMuriphiStart e) envs
+                       print_startstate r num m k;(* print startstates *)
+  |`Envlist envs -> List.iter ~f:(fun e -> printMuriphiStart outc e k) envs
   |_ -> output_string outc "null"
 ;;
 
@@ -1053,7 +1069,7 @@ let output_murphiCode outc pocol =
   |`Pocol (k,a,env) ->  printMurphiRecords outc k;(*print records of roleA and roleB by knws*)
                         trActionsToMurphi outc a k;
                         output_string outc "startstate\n";
-                        printMuriphiStart outc env;
+                        printMuriphiStart outc env k;
                         output_string outc "end;\n"
                    (* let ms = getMsgOfRoles k [] in
                     List.iter ~f:(fun m -> output_msg outc m; printf "\n"; ) ms*)
