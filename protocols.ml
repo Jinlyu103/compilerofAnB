@@ -228,62 +228,26 @@ let output_pocol outc value =
 
 (* To determine whether two msgs are equivalent? *)
 let rec isSamePat m1 m2 =
-  match m1 with 
-  |`Aenc(m1',k1) -> begin 
-		    match m2 with
-		    |`Aenc(m2',k2) -> if (isSamePat k1 k2) && (isSamePat m1' m2') then true else false
-		    | _ -> false
-		    end
-  |`Senc(m1',k1) -> begin 
-		    match m2 with
-		    |`Senc(m2',k2) -> if (isSamePat k1 k2) && (isSamePat m1' m2') then true else false
-		    | _ -> false
-		    end
-  |`Pk r1 	 -> begin 
-		    match m2 with 
-		    |`Pk r2 ->  true
-		    | _ -> false
-		    end
-  |`Sk r1 	 -> begin 
-		    match m2 with 
-		    |`Sk r2 -> true 
-		    | _ -> false
-		    end
-  |`K (r11,r12)	 -> begin 
-		    match m2 with 
-		    |`K (r21,r22) -> true 
-		    | _ -> false
-		    end
-  |`Var n1	 -> begin 
-		    match m2 with
-		    |`Var n2 -> true 
-		    | _ -> false
-		    end
-  |`Concat msgs1 -> begin
-		    match m2 with
-		    |`Concat msgs2 -> isSameList msgs1 msgs2
-  		    | _ -> false
-		    end
-  |`Hash m1'	 -> begin
-		    match m2 with
-		    |`Hash m2' -> if isSamePat m1' m2' then true else false
-		    | _ -> false 
-		    end
-  |`Str s1	 -> begin 
-		    match m2 with
-		    |`Str s2 -> true
-		    | _ -> false
-		    end
- | _ -> false
+  match (m1,m2) with
+  | (`Aenc(m1',k1'),`Aenc(m2',k2')) -> if (isSamePat k1' k2') && (isSamePat m1' m2') then true else false
+  | (`Senc(m1',k1'),`Senc(m2',k2')) -> if (isSamePat k1' k2') && (isSamePat m1' m2') then true else false
+  | (`Pk r1,`Pk r2) -> true
+  | (`Sk r1,`Sk r2) -> true
+  | (`K(r11,r12),`K(r21,r22)) -> true
+  | (`Var n1,`Var n2) -> true
+  | (`Concat msgs1,`Concat msgs2) -> isSameList msgs1 msgs2
+  | (`Hash m1',`Hash m2') -> if (isSamePat m1' m2') then true else false
+  | (`Str r1,`Str r2) -> true
+  | _ -> false
 
-and isSameList msgs1 msgs2 =
+and isSameList msgs1 msgs2 = 
   let len1 = List.length msgs1 in
   let len2 = List.length msgs2 in
   if len1 <> len2 then false 
   else let boolList = List.map2_exn ~f:isSamePat msgs1 msgs2 in
-	match List.reduce ~f:(&&) boolList with
-  |Some b -> b
-  |None -> false 
+  match List.reduce ~f:(&&) boolList with
+  | Some b -> b
+  | None -> false 
 ;;
 
 (* part 4 print murphi rule *)
@@ -1057,8 +1021,7 @@ let rec printMuriphiStart outc env k =
   |`Null -> output_string outc "null"
   (*|`Env_rlist rlist -> printf "print the definition of agents:\n %a\n" output_msg rlist
         |`Env_nlist nlist -> printf "print the definition of nonces:\n %a\n" output_msg nlist*)
-  |`Env_agent (r,num,m) -> (*printf "print the facts:\n%s: <%a>\n" r output_msg m;*)
-                       print_startstate r num m k;(* print startstates *)
+  |`Env_agent (r,num,m) -> print_startstate r num m k;(* print startstates *)
   |`Envlist envs -> List.iter ~f:(fun e -> printMuriphiStart outc e k) envs
   |_ -> output_string outc "null"
 ;;
