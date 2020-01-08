@@ -49,7 +49,8 @@ type environment = [
 ]
 
 type goal = [
-  |`Secretgoal of identifier * message * roleName_list
+  (*|`Secretgoal of identifier * message * roleName_list*)
+  |`Secretgoal of identifier * message
   |`Agreegoal of identifier * roleName * roleName * message
   |`Goallist of goal list
   |`Null
@@ -1029,7 +1030,7 @@ let rec printMuriphiStart outc env k =
 let printGoal2Murphi outc g =
   match g with
   |`Null -> output_string outc "null\n"
-  |`Secretgoal (seq,m,rlist) -> output_string outc "secretgoal\n"
+  |`Secretgoal (seq,m) -> output_string outc "secretgoal\n"
   |`Agreegoal (seq,r1,r2,msglist) -> output_string outc "agreegoal\n"
   |`Goallist gols -> output_string outc "goallist\n"
 ;;
@@ -1037,12 +1038,12 @@ let printGoal2Murphi outc g =
 let output_murphiCode outc pocol =
   match pocol with
   |`Null -> output_string outc "null"
-  |`Pocol (k,a,env,g) ->(*printMurphiRecords outc k;(*print records of roleA and roleB by knws*)
+  |`Pocol (k,a,env,g) ->printMurphiRecords outc k;(*print records of roleA and roleB by knws*)
                         trActionsToMurphi outc a k;
                         output_string outc "startstate\n";
                         printMuriphiStart outc env k;
-                        output_string outc "end;\n"*)
-                        printGoal2Murphi outc g
+                        output_string outc "end;\n"
+                        (*printGoal2Murphi outc g*)
                    (* let ms = getMsgOfRoles k [] in
                     List.iter ~f:(fun m -> output_msg outc m; printf "\n"; ) ms*)
 ;;

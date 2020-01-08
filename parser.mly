@@ -75,7 +75,8 @@ goals:
   | GOALS; goallist=goal; { goallist };
   
 goal:
-  | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE ; m=message; SECRETOF ; rlist=role { `Secretgoal (seq,m,rlist)}
+  (*| LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE ; m=message; SECRETOF ; rlist=role { `Secretgoal (seq,m,rlist)}*)
+  | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE ; m=message { `Secretgoal (seq,m)}
   | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE ; r1=IDENT;NINJ;r2=IDENT;ON; msglist=message { `Agreegoal (seq,r1,r2,msglist)}
   | LEFT_BRACE; gols = goal_list; RIGHT_BRACE {`Goallist gols };
 
