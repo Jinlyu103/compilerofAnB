@@ -1328,6 +1328,16 @@ invariant "sec"
 end;
 
 /*
+invariant "sec"
+	forall: i,j:bobsNum do
+	   i <> j -> B[i].Nb <> B[j].Nb
+end;
+
+invariant "auth"
+
+*/
+
+/*
 invariant "auth"
   forall i:eventNums do
     forall j:eventNums do

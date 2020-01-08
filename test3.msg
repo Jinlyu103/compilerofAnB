@@ -4,7 +4,7 @@ Knowledges:{
     B : <B.nonce(Nb)>
 }
 Actions:{
-[seq1] A->B (n1) : aenc{<nonce(Na).A>}pk(B);
+[seq1] A->B (n1) : aenc{<nonce(Na).A.timestamp(107)>}pk(B);
 [seq2] B->A (n2) : aenc{<nonce(Na).nonce(Nb)>}pk(A);
 [seq3] A->B (n3) : aenc{nonce(Nb)}pk(B)
 }
@@ -14,8 +14,8 @@ Environment:{
 [agent3] B [2] : <Intruder.nonce(B2Nb)>
 }
 Goals:{
-[secrecy] m secret of <A.B>;
-[secrecy] m secret of <A.B>;
-[weakB] B non-injectively agrees with A on m
+[sec] nonce(Nb);
+
+[auth] event array
 }
 end
