@@ -553,8 +553,5 @@ startstate
   B[1].B = Bob;
   B[1].Nb = B1Nb;
   B[1].st = B1;
-  B[2].B = Intruder;
-  B[2].Nb = B2Nb;
-  B[2].st = B1;
 end;
 

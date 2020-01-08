@@ -10,7 +10,10 @@ Actions:{
 }
 Environment:{
 [agent1] A [1] : <Alice.Intruder.nonce(A1Na)>;
-[agent2] B [1] : <Bob.nonce(B1Nb)>;
------[agent3] B [2] : <Intruder.nonce(B2Nb)>
+[agent2] B [1] : <Bob.nonce(B1Nb)>
+}
+Goals:{
+[sec] nonce(Nb) secret of A;
+[auth] nonce(Na) secret of A
 }
 end

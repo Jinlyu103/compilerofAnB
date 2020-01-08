@@ -56,7 +56,7 @@ type goal = [
 ];;
 
 type pocolcontext = [
-  | `Pocol of knowledge * action * environment 
+  | `Pocol of knowledge * action * environment * goal
   | `Null
 ];;
 
@@ -1026,14 +1026,23 @@ let rec printMuriphiStart outc env k =
   |_ -> output_string outc "null"
 ;;
 
+let printGoal2Murphi outc g =
+  match g with
+  |`Null -> output_string outc "null\n"
+  |`Secretgoal (seq,m,rlist) -> output_string outc "secretgoal\n"
+  |`Agreegoal (seq,r1,r2,msglist) -> output_string outc "agreegoal\n"
+  |`Goallist gols -> output_string outc "goallist\n"
+;;
+
 let output_murphiCode outc pocol =
   match pocol with
   |`Null -> output_string outc "null"
-  |`Pocol (k,a,env) ->  printMurphiRecords outc k;(*print records of roleA and roleB by knws*)
+  |`Pocol (k,a,env,g) ->(*printMurphiRecords outc k;(*print records of roleA and roleB by knws*)
                         trActionsToMurphi outc a k;
                         output_string outc "startstate\n";
                         printMuriphiStart outc env k;
-                        output_string outc "end;\n"
+                        output_string outc "end;\n"*)
+                        printGoal2Murphi outc g
                    (* let ms = getMsgOfRoles k [] in
                     List.iter ~f:(fun m -> output_msg outc m; printf "\n"; ) ms*)
 ;;

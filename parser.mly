@@ -47,7 +47,7 @@ protocols:
   | PROTOCOL; name=IDENT; COLON ; p=pocolcontext ; END { `Protocol (name,p)};
 
 pocolcontext:
-  | k=knowledges;a=actions;env=envrionment; { `Pocol (k,a,env) }
+  | k=knowledges;a=actions;env=envrionment; g = goals; { `Pocol (k,a,env,g) }
 
 knowledges:
   | KNOWLEDGES; knwlist=knowledge; { knwlist };
