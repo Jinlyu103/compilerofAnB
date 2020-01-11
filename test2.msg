@@ -13,7 +13,7 @@ Environment:{
 [agent2] B [1] : <Bob.nonce(B1Nb)>
 }
 Goals:{
-[sec] nonce(Nb);
-[auth] nonce(Na)
+[sec1] nonce(Nb);
+[sec2] nonce(Na)
 }
 end

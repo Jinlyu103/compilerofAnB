@@ -1038,7 +1038,9 @@ let printGoal2Murphi outc g =
 let output_murphiCode outc pocol =
   match pocol with
   |`Null -> output_string outc "null"
-  |`Pocol (k,a,env,g) ->printMurphiRecords outc k;(*print records of roleA and roleB by knws*)
+  |`Pocol (k,a,env,g) ->(*print murphi const/type*)
+                        printMurphiRecords outc k;(*print records of roleA and roleB by knws*)
+                        (*print murphi vars *)
                         trActionsToMurphi outc a k;
                         output_string outc "startstate\n";
                         printMuriphiStart outc env k;
