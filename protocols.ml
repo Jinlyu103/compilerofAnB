@@ -1027,12 +1027,30 @@ let rec printMuriphiStart outc env k =
   |_ -> output_string outc "null"
 ;;
 
-let printGoal2Murphi outc g =
+let rec printGoal2Murphi outc g =
   match g with
   |`Null -> output_string outc "null\n"
-  |`Secretgoal (seq,m) -> output_string outc "secretgoal\n"
-  |`Agreegoal (seq,r1,r2,msglist) -> output_string outc "agreegoal\n"
-  |`Goallist gols -> output_string outc "goallist\n"
+  |`Secretgoal (seq,m) -> printSecGoal (seq,m)
+  |`Agreegoal (seq,r1,r2,m) -> printAgreeGoal (seq,r1,r2,m)
+  |`Goallist gols -> List.iter ~f:(fun g -> printGoal2Murphi outc g) gols
+
+and printSecGoal (seq,m) =
+  printf "invariant \"%s\"\n" seq;
+  printf "  forall: i:msgLen do\n";
+  printf "    (msgs[i].msgType=nonce & msgs[i].noncePart = %a)\n" output_msg m;
+  printf "     ->\n";
+  printf "      Spy_known[i] = false\nend;\n"
+
+and printAgreeGoal (seq,r1,r2,m) =
+  printf "invariant \"%s\"\n" seq;
+  printf "  forall i:eventNums do \n";
+  printf "    forall j:eventNums do \n";
+  printf "      (systemEvent[i].eveType = receive & \n";
+  printf "       systemEvent[i].msg.noncePart = %a) \n" output_msg m;
+  printf "      ->\n";
+  printf "      systemEvent[i].eveType = send & \n";
+  printf "      systemEvent[i].receiver = systemEvent[j].receiver) \n";
+  printf "      systemEvent[i].msg.nonceType = systemEvent[j].msg.nonceType) \nend;\n";
 ;;
 
 let output_murphiCode outc pocol =
@@ -1044,8 +1062,8 @@ let output_murphiCode outc pocol =
                         trActionsToMurphi outc a k;
                         output_string outc "startstate\n";
                         printMuriphiStart outc env k;
-                        output_string outc "end;\n"
-                        (*printGoal2Murphi outc g*)
+                        output_string outc "end;\n";
+                        printGoal2Murphi outc g
                    (* let ms = getMsgOfRoles k [] in
                     List.iter ~f:(fun m -> output_msg outc m; printf "\n"; ) ms*)
 ;;

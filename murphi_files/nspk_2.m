@@ -1334,6 +1334,15 @@ invariant "sec"
 end;
 
 invariant "auth"
+  forall i:eventNums do
+    forall j:eventNums do	
+	(systemEvent[i].eveType = receive & 
+	 systemEvent[i].msg <> null)
+	->
+	systemEvent[j].eveType = send &
+	systemEvent[j].receiver = systemEvent[i].receiver & 
+	systemEvent[j].msg.noncePart = systemEvent[i].msg.noncePart
+end;
 
 */
 
