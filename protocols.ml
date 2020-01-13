@@ -1053,10 +1053,35 @@ and printAgreeGoal (seq,r1,r2,m) =
   printf "      systemEvent[i].msg.nonceType = systemEvent[j].msg.nonceType) \nend;\n";
 ;;
 
+let printMurphiConsAndType ()=
+  (* print const *)
+  printf "const\n";
+  printf "  roleANum:1;\n";
+  printf "  roleBNum:1;\n";
+  printf "  totalFact:20;\n";
+  printf "  chanNum:3;\n";
+  printf "  eventNum:30;\n";
+
+  (* print type *)
+  printf "type\n";
+  printf "  indexType:0..totalFact;\n";
+  printf "  roleANums:1..roleANum;\n";
+  printf "  roleBNums:1..roleBNum;\n";
+  printf "  msgLen:0..totalFact;\n";
+  printf "  chanNums:1..chanNum;\n";
+  printf "  eventNums:0..eventNum;\n";
+  printf "  AgentType : enum{Alice,Bob,intruderType};\n";
+  printf "  NonceType : enum{Na,Nb};\n";
+  printf "  EncryptType : enum{PK,SK,Symk};\n";
+  printf "  KeyType: record \n";
+  printf "    encType: EncryptType; \n";  
+  printf "    ag: AgentType; \n  end;\n";  
+;;
+
 let output_murphiCode outc pocol =
   match pocol with
   |`Null -> output_string outc "null"
-  |`Pocol (k,a,env,g) ->(*print murphi const/type*)
+  |`Pocol (k,a,env,g) ->printMurphiConsAndType ();(*print murphi const/type*)
                         printMurphiRecords outc k;(*print records of roleA and roleB by knws*)
                         (*print murphi vars *)
                         trActionsToMurphi outc a k;

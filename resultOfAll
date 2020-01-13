@@ -1,4 +1,24 @@
 ---Murphi Code:
+const
+  roleANum:1;
+  roleBNum:1;
+  totalFact:20;
+  chanNum:3;
+  eventNum:30;
+type
+  indexType:0..totalFact;
+  roleANums:1..roleANum;
+  roleBNums:1..roleBNum;
+  msgLen:0..totalFact;
+  chanNums:1..chanNum;
+  eventNums:0..eventNum;
+  AgentType : enum{Alice,Bob,intruderType};
+  NonceType : enum{Na,Nb};
+  EncryptType : enum{PK,SK,Symk};
+  KeyType: record 
+    encType: EncryptType; 
+    ag: AgentType; 
+  end;
 RoleA : record
  A : AgentType;
  B : AgentType;
@@ -553,5 +573,27 @@ startstate
   B[1].B = Bob;
   B[1].Nb = B1Nb;
   B[1].st = B1;
+end;
+invariant "sec1"
+  forall: i:msgLen do
+    (msgs[i].msgType=nonce & msgs[i].noncePart = Nb)
+     ->
+      Spy_known[i] = false
+end;
+invariant "sec2"
+  forall: i:msgLen do
+    (msgs[i].msgType=nonce & msgs[i].noncePart = Na)
+     ->
+      Spy_known[i] = false
+end;
+invariant "auth1"
+  forall i:eventNums do 
+    forall j:eventNums do 
+      (systemEvent[i].eveType = receive & 
+       systemEvent[i].msg.noncePart = Na) 
+      ->
+      systemEvent[i].eveType = send & 
+      systemEvent[i].receiver = systemEvent[j].receiver) 
+      systemEvent[i].msg.nonceType = systemEvent[j].msg.nonceType) 
 end;
 
