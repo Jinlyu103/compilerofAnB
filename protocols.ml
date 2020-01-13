@@ -945,10 +945,10 @@ let printRecords outc r m =
   |`Concat msgs -> begin
                   List.iteri ~f:(fun i m1 -> 
                   match m1 with
-                  |`Str r -> printf " %s : AgentType;\n" r
-                  |`Var n -> printf " %s : NonceType;\n" n 
+                  |`Str r -> printf "   %s : AgentType;\n" r
+                  |`Var n -> printf "   %s : NonceType;\n" n 
                   |_ -> printf "null\n") msgs;
-                  printf " st : %sStatus;\n" r;
+                  printf "   st : %sStatus;\n" r;
                   end
   |_ -> printf "null\n"
 ;;
@@ -956,9 +956,9 @@ let printRecords outc r m =
 let rec printMurphiRecords outc knw =
   match knw with
   |`Null -> output_string outc "null"
-  | `Knowledge (r,m) -> printf "Role%s : record\n" r;
+  | `Knowledge (r,m) -> printf "  Role%s : record\n" r;
                         printRecords outc r m;
-                        printf "end;\n";
+                        printf "  end;\n";
   | `Knowledge_list knws -> List.iter ~f:(fun k -> printMurphiRecords outc k) knws
 ;;
 
@@ -1053,7 +1053,7 @@ and printAgreeGoal (seq,r1,r2,m) =
   printf "      systemEvent[i].msg.nonceType = systemEvent[j].msg.nonceType) \nend;\n";
 ;;
 
-let printMurphiConsAndType ()=
+let printMurphiConsAndType outc k =
   (* print const *)
   printf "const\n";
   printf "  roleANum:1;\n";
@@ -1076,14 +1076,39 @@ let printMurphiConsAndType ()=
   printf "  KeyType: record \n";
   printf "    encType: EncryptType; \n";  
   printf "    ag: AgentType; \n  end;\n";  
+  printf "  AStatus : enum {A1,A2,A3};\n"; (* the status should be derived by A's strand *)
+  printf "  BStatus : enum {B1,B2,B3};\n"; (* the status should be derived by B's strand *)
+  printf "  MsgType : enum {null,agent,nonce,key,aenc,senc,concat,hash};\n"; (* message type *)
+  printf "  Message: record\n";
+  printf "    msgType : MsgType;\n";
+  printf "    ag : AgentType;\n";
+  printf "    noncePart : NonceType;\n";
+  printf "    k : KeyType;\n";
+  printf "    aencMsg : indexType;\n";
+  printf "    aencKey : indexType;\n";
+  printf "    sencMsg : indexType;\n";
+  printf "    sencKey : indexType;\n";
+  printf "    concatPart1 : indexType;\n";
+  printf "    concatPart2 : indexType;\n  end;\n";
+  printf "  Channel: record\n";
+  printf "    msg : Message;\n";
+  printf "    sender : AgentType;\n";
+  printf "    receiver : AgentType;\n";
+  printf "    empty : boolean;\n  end;\n";
+
+  printMurphiRecords outc k;(*print records of roleA and roleB by knws*)
+
+  printf "  msgSet: record\n";
+  printf "    content : Array[msgLen] of indexType;\n";
+  printf "    length : msgLen;\n  end;\n";
+
+  (*print murphi vars *)
 ;;
 
 let output_murphiCode outc pocol =
   match pocol with
   |`Null -> output_string outc "null"
-  |`Pocol (k,a,env,g) ->printMurphiConsAndType ();(*print murphi const/type*)
-                        printMurphiRecords outc k;(*print records of roleA and roleB by knws*)
-                        (*print murphi vars *)
+  |`Pocol (k,a,env,g) ->printMurphiConsAndType outc k;(*print murphi const/type*)
                         trActionsToMurphi outc a k;
                         output_string outc "startstate\n";
                         printMuriphiStart outc env k;

@@ -19,17 +19,42 @@ type
     encType: EncryptType; 
     ag: AgentType; 
   end;
-RoleA : record
- A : AgentType;
- B : AgentType;
- Na : NonceType;
- st : AStatus;
-end;
-RoleB : record
- B : AgentType;
- Nb : NonceType;
- st : BStatus;
-end;
+  AStatus : enum {A1,A2,A3};
+  BStatus : enum {B1,B2,B3};
+  MsgType : enum {null,agent,nonce,key,aenc,senc,concat,hash};
+  Message: record
+    msgType : MsgType;
+    ag : AgentType;
+    noncePart : NonceType;
+    k : KeyType;
+    aencMsg : indexType;
+    aencKey : indexType;
+    sencMsg : indexType;
+    sencKey : indexType;
+    concatPart1 : indexType;
+    concatPart2 : indexType;
+  end;
+  Channel: record
+    msg : Message;
+    sender : AgentType;
+    receiver : AgentType;
+    empty : boolean;
+  end;
+  RoleA : record
+   A : AgentType;
+   B : AgentType;
+   Na : NonceType;
+   st : AStatus;
+  end;
+  RoleB : record
+   B : AgentType;
+   Nb : NonceType;
+   st : BStatus;
+  end;
+  msgSet: record
+    content : Array[msgLen] of indexType;
+    length : msgLen;
+  end;
 ---pat1: aenc{ < Na.A > }pk(B) 
 procedure lookAddPat1(Na:NonceType; A:AgentType; B:AgentType; Var msg:Message; Var num : indexType);
   Var msg1, msg2: Message;

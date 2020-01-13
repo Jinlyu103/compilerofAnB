@@ -92,7 +92,7 @@ type
   end;
 */
   msgSet: record
-    content: Array[msgLen] of index`Type;
+    content: Array[msgLen] of indexType;
     length : msgLen;
   end;
 
