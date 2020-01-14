@@ -1,22 +1,86 @@
 ---Murphi Code:
-type -----
-RoleA : record
- A : AgentType;
- B : AgentType;
- Na : NonceType;
- st : AStatus;
-end;
-RoleB : record
- B : AgentType;
- Nb : NonceType;
- st : BStatus;
-end;
+const
+  roleANum:1;
+  roleBNum:1;
+  totalFact:20;
+  chanNum:3;
+  eventNum:30;
+type
+  indexType:0..totalFact;
+  roleANums:1..roleANum;
+  roleBNums:1..roleBNum;
+  msgLen:0..totalFact;
+  chanNums:1..chanNum;
+  eventNums:0..eventNum;
+  AgentType : enum{Alice,Bob,intruderType};
+  NonceType : enum{Na,Nb};
+  EncryptType : enum{PK,SK,Symk};
+  KeyType: record 
+    encType: EncryptType; 
+    ag: AgentType; 
+  end;
+  AStatus : enum {A1,A2,A3};
+  BStatus : enum {B1,B2,B3};
+  MsgType : enum {null,agent,nonce,key,aenc,senc,concat,hash};
+  Message: record
+    msgType : MsgType;
+    ag : AgentType;
+    noncePart : NonceType;
+    k : KeyType;
+    aencMsg : indexType;
+    aencKey : indexType;
+    sencMsg : indexType;
+    sencKey : indexType;
+    concatPart1 : indexType;
+    concatPart2 : indexType;
+  end;
+  Channel: record
+    msg : Message;
+    sender : AgentType;
+    receiver : AgentType;
+    empty : boolean;
+  end;
+
+  RoleA : record
+   A : AgentType;
+   B : AgentType;
+   Na : NonceType;
+   st : AStatus;
+  end;
+  RoleB : record
+   B : AgentType;
+   Nb : NonceType;
+   st : BStatus;
+  end;
+  msgSet: record
+    content : Array[msgLen] of indexType;
+    length : msgLen;
+  end;
+
+var
+  ch : Array[chanNums] of Channel;
+  roleA : Array[roleANums] of RoleA;
+  roleB : Array[roleBNums] of RoleB;
+  msgs : Array[indexType] of Message;
+  msg_end: indexType;
+
+  pat1Set: msgSet;
+  pat2Set: msgSet;
+  pat3Set: msgSet;
+  pat4Set: msgSet;
+  pat5Set: msgSet;
+  pat6Set: msgSet;
+  pat7Set: msgSet;
+  pat8Set: msgSet;
+
+  Spy_known: Array[indexType] of boolean;
+
 ---pat1: aenc{ < Na.A > }pk(B) 
 procedure lookAddPat1(Na:NonceType; A:AgentType; B:AgentType; Var msg:Message; Var num : indexType);
   Var msg1, msg2: Message;
       index,i1,i2:indexType;
   begin
-    index:=0;
+   index:=0;
    lookAddPat2(Na, A,msg1,i1);
    lookAddPat6(B,msg2,i2);
    for i : msgLen do
@@ -36,6 +100,22 @@ procedure lookAddPat1(Na:NonceType; A:AgentType; B:AgentType; Var msg:Message; V
    num:=index;
    msg:=msgs[index];
  end;
+---pat1: aenc{ < Na.A > }pk(B) 
+procedure isPat1(msg:Message; Var flag:boolean);
+  var flag1,flagPart1,flagPart2 : boolean;
+  begin
+    flag1 := false;
+    flagPart1 := false;
+    flagPart2 := false;
+    if (msg.msgType = aenc) then
+      isPat2(msgs[msg.aencMsg],flagPart1);
+      isPat6(msgs[msg.aencKey],flagPart2);
+      if (flagPart1 & flagPart2) then 
+        flag1 := true;
+      endif;
+    endif;
+    flag := flag1;
+  end;
 ---pat2: Na.A 
 procedure lookAddPat2(Na:NonceType; A:AgentType; Var msg:Message; Var num : indexType);
   Var msg1, msg2: Message;
@@ -61,6 +141,18 @@ procedure lookAddPat2(Na:NonceType; A:AgentType; Var msg:Message; Var num : inde
    num:=index;
    msg:=msgs[index];
  end;
+---pat2: Na.A 
+procedure isPat2(msg:Message; Var flag:boolean);
+  var flag1 : boolean;
+  begin
+    flag1 := false;
+    if (msg.msgType = concat) then 
+      if (msgs[msg.concatPart1].msgType=nonce & msgs[msg.concatPart2].msgType=agent) then 
+        flag1 := true;
+      endif;
+    endif;
+    flag := flag1;
+  end;
 ---pat3: A 
 procedure lookAddPat3(A:AgentType; Var msg:Message; Var num : indexType);
  Var index : indexType;
@@ -82,12 +174,22 @@ procedure lookAddPat3(A:AgentType; Var msg:Message; Var num : indexType);
    num:=index;
    msg:=msgs[index];
   end;
+---pat3: A 
+procedure isPat3(msg:Message; Var flag:boolean);
+  var flag1 : boolean;
+  begin
+    flag1 := false;
+    if (msg.msgType = agent) then
+      flag1 := true;
+    endif;
+    flag := flag1;
+  end;
 ---pat4: aenc{ < Na.Nb > }pk(A) 
 procedure lookAddPat4(Na:NonceType; Nb:NonceType; A:AgentType; Var msg:Message; Var num : indexType);
   Var msg1, msg2: Message;
       index,i1,i2:indexType;
   begin
-    index:=0;
+   index:=0;
    lookAddPat5(Na, Nb,msg1,i1);
    lookAddPat6(A,msg2,i2);
    for i : msgLen do
@@ -107,6 +209,22 @@ procedure lookAddPat4(Na:NonceType; Nb:NonceType; A:AgentType; Var msg:Message; 
    num:=index;
    msg:=msgs[index];
  end;
+---pat4: aenc{ < Na.Nb > }pk(A) 
+procedure isPat4(msg:Message; Var flag:boolean);
+  var flag1,flagPart1,flagPart2 : boolean;
+  begin
+    flag1 := false;
+    flagPart1 := false;
+    flagPart2 := false;
+    if (msg.msgType = aenc) then
+      isPat5(msgs[msg.aencMsg],flagPart1);
+      isPat6(msgs[msg.aencKey],flagPart2);
+      if (flagPart1 & flagPart2) then 
+        flag1 := true;
+      endif;
+    endif;
+    flag := flag1;
+  end;
 ---pat5: Na.Nb 
 procedure lookAddPat5(Na:NonceType; Nb:NonceType; Var msg:Message; Var num : indexType);
   Var msg1, msg2: Message;
@@ -132,6 +250,18 @@ procedure lookAddPat5(Na:NonceType; Nb:NonceType; Var msg:Message; Var num : ind
    num:=index;
    msg:=msgs[index];
  end;
+---pat5: Na.Nb 
+procedure isPat5(msg:Message; Var flag:boolean);
+  var flag1 : boolean;
+  begin
+    flag1 := false;
+    if (msg.msgType = concat) then 
+      if (msgs[msg.concatPart1].msgType=nonce & msgs[msg.concatPart2].msgType=nonce) then 
+        flag1 := true;
+      endif;
+    endif;
+    flag := flag1;
+  end;
 ---pat6: pk(A) 
 procedure lookAddPat6(A:AgentType; Var msg:Message; Var num : indexType);
  Var index : indexType;
@@ -154,6 +284,18 @@ procedure lookAddPat6(A:AgentType; Var msg:Message; Var num : indexType);
    num:=index;
    msg:=msgs[index];
   end;
+---pat6: pk(A) 
+procedure isPat6(msg:Message; Var flag:boolean);
+  var flag1 : boolean;
+  begin
+    flag1 := false;
+    if (msg.msgType = key) then
+      if (msg.k.encTyp = PK) then
+        flag1 := true;
+      endif;
+    endif;
+    flag := flag1;
+  end;
 ---pat7: Nb 
 procedure lookAddPat7(Nb:NonceType; Var msg:Message; Var num : indexType);
  Var index : indexType;
@@ -174,6 +316,16 @@ procedure lookAddPat7(Nb:NonceType; Var msg:Message; Var num : indexType);
    endif;
    num:=index;
    msg:=msgs[index];
+  end;
+---pat7: Nb 
+procedure isPat7(msg:Message; Var flag:boolean);
+  var flag1 : boolean;
+  begin
+    flag1 := false;
+    if (msg.msgType = nonce) then
+      flag1 := true;
+    endif;
+    flag := flag1;
   end;
 ---pat8: aenc{ < Nb > }pk(B) 
 procedure lookAddPat8(Nb:NonceType; B:AgentType; Var msg:Message; Var num : indexType);
@@ -200,6 +352,22 @@ procedure lookAddPat8(Nb:NonceType; B:AgentType; Var msg:Message; Var num : inde
    num:=index;
    msg:=msgs[index];
  end;
+---pat8: aenc{ < Nb > }pk(B) 
+procedure isPat8(msg:Message; Var flag:boolean);
+  var flag1,flagPart1,flagPart2 : boolean;
+  begin
+    flag1 := false;
+    flagPart1 := false;
+    flagPart2 := false;
+    if (msg.msgType = aenc) then
+      isPat7(msgs[msg.aencMsg],flagPart1);
+      isPat6(msgs[msg.aencKey],flagPart2);
+      if (flagPart1 & flagPart2) then 
+        flag1 := true;
+      endif;
+    endif;
+    flag := flag1;
+  end;
 rule " roleA1 "
 roleA[i].st = A1 & ch[1].empty = true 
 ==>
@@ -554,5 +722,27 @@ startstate
   B[1].B = Bob;
   B[1].Nb = B1Nb;
   B[1].st = B1;
+end;
+invariant "sec1"
+  forall: i:msgLen do
+    (msgs[i].msgType=nonce & msgs[i].noncePart = Nb)
+     ->
+      Spy_known[i] = false
+end;
+invariant "sec2"
+  forall: i:msgLen do
+    (msgs[i].msgType=nonce & msgs[i].noncePart = Na)
+     ->
+      Spy_known[i] = false
+end;
+invariant "auth1"
+  forall i:eventNums do 
+    forall j:eventNums do 
+      (systemEvent[i].eveType = receive & 
+       systemEvent[i].msg.noncePart = Na) 
+      ->
+      systemEvent[i].eveType = send & 
+      systemEvent[i].receiver = systemEvent[j].receiver) 
+      systemEvent[i].msg.nonceType = systemEvent[j].msg.nonceType) 
 end;
 

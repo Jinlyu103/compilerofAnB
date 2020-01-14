@@ -813,7 +813,7 @@ let genSynthCode m i patList =
                   in
                   let m1Atoms = getAtoms m1 in                                            
                   printf "  Var msg1, msg2: Message;\n      index,i1,i2:indexType;\n  begin\n";
-                  printf "    index:=0;\n";
+                  printf "   index:=0;\n";
                   printf "   lookAddPat%d(%s,msg1,i1);\n" i1 (atom2Str m1Atoms);
                   printf "   lookAddPat%d(%s,msg2,i2);\n" i2 keyAg;               
                   printf "   for i : msgLen do\n";
@@ -924,6 +924,71 @@ let genSynthCode m i patList =
   |_ -> ()
 ;;
 
+let genIsPatCode m i patList =
+  let atoms = getAtoms m in
+  printf "---pat%d: %a \nprocedure isPat%d(msg:Message; Var flag:boolean);\n" i output_msg m i;
+  match m with 
+  |`Aenc(m1,k1) ->begin
+                  let i1= getPatNum m1 patList in
+                  let i2= getPatNum k1 patList in
+                  printf "  var flag1,flagPart1,flagPart2 : boolean;\n  begin\n";
+                  printf "    flag1 := false;\n";
+                  printf "    flagPart1 := false;\n";
+                  printf "    flagPart2 := false;\n";
+                  printf "    if (msg.msgType = aenc) then\n";
+                  printf "      isPat%d(msgs[msg.aencMsg],flagPart1);\n" i1;
+                  printf "      isPat%d(msgs[msg.aencKey],flagPart2);\n" i2;
+                  printf "      if (flagPart1 & flagPart2) then \n" ;
+                  printf "        flag1 := true;\n";
+                  printf "      endif;\n";
+                  printf "    endif;\n";
+                  printf "    flag := flag1;\n  end;\n";
+                  end;
+  |`Concat msgs ->begin
+                  printf "  var flag1 : boolean;\n  begin\n";
+                  printf "    flag1 := false;\n";
+                  printf "    if (msg.msgType = concat) then \n";
+                  let type2str = match List.nth atoms 1 with
+                              |Some (`Var n) -> "nonce"
+                              |Some (`Str r) -> "agent"
+                              |_ -> ""
+                  in
+                  printf "      if (msgs[msg.concatPart1].msgType=nonce & msgs[msg.concatPart2].msgType=%s) then \n" type2str;
+                  printf "        flag1 := true;\n";
+                  printf "      endif;\n";
+                  printf "    endif;\n";
+                  printf "    flag := flag1;\n";
+                  printf "  end;\n";
+                  end;
+  |`Str s ->begin
+            printf "  var flag1 : boolean;\n  begin\n";
+            printf "    flag1 := false;\n";
+            printf "    if (msg.msgType = agent) then\n";
+            printf "      flag1 := true;\n";
+            printf "    endif;\n";
+            printf "    flag := flag1;\n  end;\n";
+            end;
+  |`Pk role ->begin
+              printf "  var flag1 : boolean;\n  begin\n";
+              printf "    flag1 := false;\n";
+              printf "    if (msg.msgType = key) then\n";
+              printf "      if (msg.k.encTyp = PK) then\n";
+              printf "        flag1 := true;\n";
+              printf "      endif;\n";
+              printf "    endif;\n";
+              printf "    flag := flag1;\n  end;\n";
+              end;
+  |`Var n ->begin
+            printf "  var flag1 : boolean;\n  begin\n";
+            printf "    flag1 := false;\n";
+            printf "    if (msg.msgType = nonce) then\n";
+            printf "      flag1 := true;\n";
+            printf "    endif;\n";
+            printf "    flag := flag1;\n  end;\n";
+            end;
+  |_ -> ()
+;;
+
 (* print procedures and functions. *)
 let print_procedures outc actions knws =
   match actions with
@@ -931,7 +996,8 @@ let print_procedures outc actions knws =
   |`Actlist arr -> let patlist = getPatList actions in    (* get all patterns from actions *)
                   let non_dup = del_duplicate patlist in (* delete duplicate *)
                   let non_equivalent = getEqvlMsgPattern non_dup in (* delete equivalent class *) 
-                  List.iteri ~f:(fun i pat -> genSynthCode pat (i+1) non_equivalent) non_equivalent
+                  List.iteri ~f:(fun i pat -> genSynthCode pat (i+1) non_equivalent;
+                                              genIsPatCode pat (i+1) non_equivalent) non_equivalent
   |`Act (seq,r1,r2,n,m) -> let patlist = getPatList actions in    (* get all patterns from actions *)
                           let non_dup = del_duplicate patlist in (* delete duplicate *)
                           let non_equivalent = getEqvlMsgPattern non_dup in (* delete equivalent class *) 
@@ -974,31 +1040,6 @@ let trActionsToMurphi outc actions knws =
                    print_murphiRule outc actions knws; (* print rules for roleA and roleB *)
                    (*print_murphiRule_ofIntruder outc actions knws; *)(* print rules for intruder *)
 		               print_murphiRules_EncsDecs outc actions knws;(* encryption and decryption rules, enconcat and deconcat rules *)
-;;
-
-let print_startstate1 r num m =
-  match m with
-  |`Concat msgs -> let len = List.length msgs in
-                   if len = 3 then
-                   begin
-                      List.iteri ~f:(fun i m -> 
-                                match m with
-                                |`Var n -> printf "  %s[%d].Na = %s;\n" r num n
-                                |`Str role -> if i = 0 then printf "  %s[%d].A = %s;\n" r num role
-                                              else  printf "  %s[%d].B = %s;\n" r num role 
-                                |_ -> printf "null\n") msgs;
-                      printf "  %s[%d].st = A1;\n" r num;  
-                   end                             
-                    else
-                    begin
-                      List.iteri ~f:(fun i m -> 
-                      match m with
-                      |`Var n -> printf "  %s[%d].Nb = %s;\n" r num n
-                      |`Str role -> printf "  %s[%d].B = %s;\n" r num role 
-                      |_ -> printf "null\n" ) msgs;
-                      printf "  %s[%d].st = B1;\n" r num; 
-                    end                  
-  | _ -> printf "null\n"
 ;;
 
 let print_startstate r num m knws =
@@ -1070,8 +1111,8 @@ let printMurphiConsAndType outc k =
   printf "  msgLen:0..totalFact;\n";
   printf "  chanNums:1..chanNum;\n";
   printf "  eventNums:0..eventNum;\n";
-  printf "  AgentType : enum{Alice,Bob,intruderType};\n";
-  printf "  NonceType : enum{Na,Nb};\n";
+  printf "  AgentType : enum{Alice,Bob,intruderType};\n"; (* the roles should be derived by init knws*)
+  printf "  NonceType : enum{Na,Nb};\n";  (* the nonces should be derived by init knws *)
   printf "  EncryptType : enum{PK,SK,Symk};\n";
   printf "  KeyType: record \n";
   printf "    encType: EncryptType; \n";  
@@ -1094,15 +1135,30 @@ let printMurphiConsAndType outc k =
   printf "    msg : Message;\n";
   printf "    sender : AgentType;\n";
   printf "    receiver : AgentType;\n";
-  printf "    empty : boolean;\n  end;\n";
+  printf "    empty : boolean;\n  end;\n\n";
 
   printMurphiRecords outc k;(*print records of roleA and roleB by knws*)
 
   printf "  msgSet: record\n";
   printf "    content : Array[msgLen] of indexType;\n";
-  printf "    length : msgLen;\n  end;\n";
+  printf "    length : msgLen;\n  end;\n\n";
 
   (*print murphi vars *)
+  printf "var\n";
+  printf "  ch : Array[chanNums] of Channel;\n";
+  printf "  roleA : Array[roleANums] of RoleA;\n";
+  printf "  roleB : Array[roleBNums] of RoleB;\n";
+  printf "  msgs : Array[indexType] of Message;\n";
+  printf "  msg_end: indexType;\n\n";
+  printf "  pat1Set: msgSet;\n";
+  printf "  pat2Set: msgSet;\n";
+  printf "  pat3Set: msgSet;\n";
+  printf "  pat4Set: msgSet;\n";
+  printf "  pat5Set: msgSet;\n";
+  printf "  pat6Set: msgSet;\n";
+  printf "  pat7Set: msgSet;\n";
+  printf "  pat8Set: msgSet;\n\n";
+  printf "  Spy_known: Array[indexType] of boolean;\n\n";
 ;;
 
 let output_murphiCode outc pocol =
