@@ -448,6 +448,7 @@ procedure isPat8(msg:Message;Var flag:boolean);
 procedure cons1(Na:NonceType; A:AgentType; B: AgentType; Var msg:Message; Var num:indexType);
   begin
     clear msg;
+    clear num;
     lookAddPat5(Na, A, B, msg, num);
   end;
 
@@ -461,6 +462,7 @@ procedure cons2(Na:NonceType; Nb:NonceType; A:AgentType; Var msg:Message; Var nu
 procedure cons3(Nb:NonceType; B:AgentType; Var msg:Message; Var num: indexType);
   begin
     clear msg;
+    clear num;
     lookAddPat8(Nb,B,msg,num);
   end;
 
@@ -469,8 +471,7 @@ procedure destruct1(msg:Message; Var Na:NonceType; Var A: AgentType; Var B: Agen
   var k1:KeyType;
       msg1,msgNum1,msgNum2:Message;
   begin
-    ---clear msg1;
-    ---clear k1;
+    clear msg1;
     k1:=msgs[msg.aencKey].k;
     B:=k1.ag;
     msg1:=msgs[msg.aencMsg];

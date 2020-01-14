@@ -45,11 +45,15 @@ type
    A : AgentType;
    B : AgentType;
    Na : NonceType;
+   loc_Na : NonceType;
+   loc_Nb : NonceType;
    st : AStatus;
   end;
   RoleB : record
    B : AgentType;
    Nb : NonceType;
+   loc_Na : NonceType;
+   loc_Nb : NonceType;
    st : BStatus;
   end;
   msgSet: record
@@ -368,6 +372,157 @@ procedure isPat8(msg:Message; Var flag:boolean);
     endif;
     flag := flag1;
   end;
+procedure cons1(Na:NonceType; A:AgentType; B:AgentType; Var msg:Message; Var num:indexType);
+  begin
+    clear msg;
+    clear num;
+    lookAddPat1(Na, A, B,msg,num);
+  end;
+procedure destruct1(msg:Message; Var Na:NonceType; Var A:AgentType; Var B:AgentType);
+  var k1:KeyType;
+      msg1,msgNum1,msgNum2:Message;
+  begin
+    clear msg1;
+    k1 := msgs[msg.aencKey].k;
+    B := k1.ag;
+    msg1:=msgs[msg.aencMsg];
+    msgNum1:=msgs[msg1.concatPart1];
+    msgNum2:=msgs[msg1.concatPart2];
+    Na:=msgNum1.noncePart;
+    A:=msgNum2.ag;
+  end;
+procedure cons2(Na:NonceType; Nb:NonceType; A:AgentType; Var msg:Message; Var num:indexType);
+  begin
+    clear msg;
+    clear num;
+    lookAddPat4(Na, Nb, A,msg,num);
+  end;
+procedure destruct2(msg:Message; Var Na:NonceType; Var Nb:NonceType; Var A:AgentType);
+  var k1:KeyType;
+      msg1,msgNum1,msgNum2:Message;
+  begin
+    clear msg1;
+    k1 := msgs[msg.aencKey].k;
+    A := k1.ag;
+    msg1:=msgs[msg.aencMsg];
+    msgNum1:=msgs[msg1.concatPart1];
+    msgNum2:=msgs[msg1.concatPart2];
+    Na:=msgNum1.noncePart;
+    Nb:=msgNum2.noncePart;
+  end;
+procedure cons3(Nb:NonceType; B:AgentType; Var msg:Message; Var num:indexType);
+  begin
+    clear msg;
+    clear num;
+    lookAddPat8(Nb, B,msg,num);
+  end;
+procedure destruct3(msg:Message; Var Nb:NonceType; Var B:AgentType);
+  var k1:KeyType;
+      msg1,msgNum1,msgNum2:Message;
+  begin
+    clear msg1;
+    k1 := msgs[msg.aencKey].k;
+    B := k1.ag;
+    msg1:=msgs[msg.aencMsg];
+    Nb:=msg1.noncePart;
+  end;
+procedure get_msgNo(msg:Message; Var num:indexType);
+  var index:indexType;
+  begin
+    index:=0;
+    for i: msgLen do
+      if (msgs[i].msgType = msg.msgType) then
+        if ( (msg.msgType=agent & msgs[i].ag=msg.ag)
+          | (msg.msgType=nonce & msgs[i].noncePart=msg.noncePart)
+          | (msg.msgType=key & (msgs[i].k.encTyp=msg.k.encTyp & msgs[i].k.ag=msg.k.ag))
+          | (msg.msgType=aenc & (msgs[i].aencMsg=msg.aencMsg & msgs[i].aencKey=msg.aencKey))
+          | (msg.msgType=senc & (msgs[i].sencMsg=msg.sencMsg & msgs[i].sencKey=msg.sencKey))
+          ) then 
+          index:=i;
+        endif;
+      endif;
+    endfor;
+    num := index;
+  end;
+function inverseKey(msgK:Message):Message;
+  var key_inv:Message;
+  begin
+    key_inv.msgType := null;
+    if (msgK.msgType=key) then
+      key_inv.msgType := msgK.msgType;
+      key_inv.k.ag := msgK.k.ag;
+      if (msgK.k.encTyp=PK) then
+        key_inv.k.encTyp := SK;
+      elsif (msgK.k.encTyp=SK) then
+        key_inv.k.encTyp := PK;
+      endif;
+    endif;
+    return key_inv;
+  end;
+function lookUp(msg: Message): indexType;
+  var index : indexType;
+  begin
+    index:=0;
+    for i: indexType do
+      if(msgs[i].msgType=msg.msgType) then
+        if(msgs[i].msgType=agent & msgs[i].ag=msg.ag) then
+          index := i;
+        elsif(msgs[i].msgType=nonce & msgs[i].noncePart=msg.noncePart) then
+          index := i;
+        elsif(msgs[i].msgType=key & (msgs[i].k.encTyp=msg.k.encTyp & msgs[i].k.ag=msg.k.ag)) then
+          index := i;
+        elsif(msgs[i].msgType = aenc & (msgs[i].aencKey=msg.aencKey & msgs[i].aencMsg=msg.aencMsg)) then
+          index := i;
+        elsif(msgs[i].msgType = senc & (msgs[i].sencKey=msg.sencKey & msgs[i].sencMsg=msg.sencMsg)) then
+          index := i;
+        elsif(msgs[i].msgType = concat & (msgs[i].concatPart1=msg.concatPart1 & msgs[i].concatPart2=msg.concatPart2)) then
+          index := i;
+        endif;
+      endif;
+    endfor;
+    return index;
+  end;
+function construct1by26(msgNo2,msgNo6:indexType):indexType;
+  var index : indexType;
+      locNa:NonceType;
+      locA:NonceType;
+      k_ag : AgentType;
+      msg : Message;
+  begin
+   index := 0;
+   ----locNa/locNb=...
+   lookAddPat1(locNa,locNb,k_ag,msg,index);
+   return index;
+  end;
+function construct2by73(msgNo7,msgNo3:indexType):indexType;
+  var index : indexType;
+      msg : Message;
+function construct4by56(msgNo5,msgNo6:indexType):indexType;
+  var index : indexType;
+      locNa:NonceType;
+      locNb:NonceType;
+      k_ag : AgentType;
+      msg : Message;
+  begin
+   index := 0;
+   ----locNa/locNb=...
+   lookAddPat4(locNa,locNb,k_ag,msg,index);
+   return index;
+  end;
+function construct5by77(msgNo7,msgNo7:indexType):indexType;
+  var index : indexType;
+      msg : Message;
+function construct8by76(msgNo7,msgNo6:indexType):indexType;
+  var index : indexType;
+      locNb:NonceType;
+      k_ag : AgentType;
+      msg : Message;
+  begin
+   index := 0;
+   ----locNa/locNb=...
+   lookAddPat8(locNa,locNb,k_ag,msg,index);
+   return index;
+  end;
 rule " roleA1 "
 roleA[i].st = A1 & ch[1].empty = true 
 ==>
@@ -392,7 +547,7 @@ var msg:Message;
 begin
    clear msg;
    msg := ch[2].msg;
-   destruct2(msg,roleAloc_Na,roleAloc_Nb,roleAloc_A);
+   destruct2(msg,roleA[i].loc_Na,roleA[i].loc_Nb,roleA[i].loc_A);
    if(roleAloc_Na=roleA[i].Na&roleAloc_A=roleA[i].A)then
      ch[2].empty:=true;
      roleA[i].st := A3;
@@ -422,7 +577,7 @@ var msg:Message;
 begin
    clear msg;
    msg := ch[1].msg;
-   destruct1(msg,roleBloc_Na,roleBloc_A,roleBloc_B);
+   destruct1(msg,roleB[i].loc_Na,roleB[i].loc_A,roleB[i].loc_B);
    if(roleBloc_B=roleB[i].B)then
      ch[1].empty:=true;
      roleB[i].st := B2;
@@ -452,7 +607,7 @@ var msg:Message;
 begin
    clear msg;
    msg := ch[3].msg;
-   destruct3(msg,roleBloc_Nb,roleBloc_B);
+   destruct3(msg,roleB[i].loc_Nb,roleB[i].loc_B);
    if(roleBloc_Nb=roleB[i].Nb&roleBloc_B=roleB[i].B)then
      ch[3].empty:=true;
      roleB[i].st := B1;
