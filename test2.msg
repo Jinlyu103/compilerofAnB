@@ -9,8 +9,8 @@ Actions:{
 [seq3] A->B (n3) : aenc{nonce(Nb)}pk(B)
 }
 Environment:{
-[agent1] A [1] : <Alice.Intruder.nonce(A1Na)>;
-[agent2] B [1] : <Bob.nonce(B1Nb)>
+[agent1] A [1] : <Alice.intruderType.nonce(Na)>;
+[agent2] B [1] : <Bob.nonce(Nb)>
 }
 Goals:{
 [sec1] nonce(Nb);

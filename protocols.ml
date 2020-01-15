@@ -338,7 +338,7 @@ and existInMsgs msgs atom =
 ;;
 
 let rec genSendAct rolename i atoms length msgofRolename =
-  printf "var msg:Message;\n    msgNo:IndexType;\nbegin\n";
+  printf "var msg:Message;\n    msgNo:indexType;\nbegin\n";
   printf "   clear msg;\n   cons%d(%s,msg,msgNo);\n" i (sendAtoms2Str rolename i atoms msgofRolename);
   printf "   ch[%d].empty := false;\n" i;
   printf "   ch[%d].msg := msg;\n" i;
@@ -351,7 +351,7 @@ let rec genSendAct rolename i atoms length msgofRolename =
 
 and sendAtoms2Str rolename i atoms msgofRolename =
   let s = "role" ^ rolename ^"[i]." in
-  let loc = "role"^rolename^"loc_" in
+  let loc = "role"^rolename^"[i].loc_" in
   String.concat ~sep:"," (List.map ~f:(fun a ->                         
                         match a with
                         |`Var n -> if (existInit msgofRolename a)  then s ^ n else loc ^ n  (*if i = 1 then s ^ n else loc ^ n *)
@@ -361,7 +361,7 @@ and sendAtoms2Str rolename i atoms msgofRolename =
 ;;
 
 let rec genRecvAct rolename i atoms length msgofRolename =
-  printf "var msg:Message;\n    msgNo:IndexType;\nbegin\n";
+  printf "var msg:Message;\n    msgNo:indexType;\nbegin\n";
   printf "   clear msg;\n   msg := ch[%d].msg;\n   destruct%d(msg,%s);\n" i i (recvAtoms2Str atoms rolename); (* (recvAtoms2Str atoms) *)
   printf "   if(%s)then\n" (atoms2Str atoms rolename msgofRolename);
   printf "     ch[%d].empty:=true;\n" i;
@@ -379,7 +379,7 @@ and recvAtoms2Str atoms rolename =
   |_ -> "null") atoms)
 
 and atoms2Str atoms rolename msgofRolename = 
-  let loc = "role"^rolename^"loc_" in  
+  let loc = "role"^rolename^"[i].loc_" in  
   let strlist = (List.map ~f:(fun  a ->
   match a with
   |`Var n -> if (existInit msgofRolename a) then loc ^ n ^ "=role" ^ rolename ^ "[i]." ^ n else "true" (* if j <> 1 then loc ^ n ^ "=role" ^ rolename^ "[i]." ^ n else " true " *)
@@ -424,10 +424,11 @@ let print_murphiRule outc actions knws =  (*printf "murphi code"*)
                                             |Some msg -> msg
                             in
                             let lenActs = List.length acts in
+                            printf "ruleset i:role%sNums do\n" r;
                             List.iteri ~f:(fun j act -> match act with
                                                         | None -> output_string outc "null"
-                                                        | Some a -> trans a (genMsg a) (j+1) r lenActs msgofRole) 
-                                          acts ) rolelist;
+                                                        | Some a -> trans a (genMsg a) (j+1) r lenActs msgofRole) acts;
+                            printf "endruleset;\n\n"  ) rolelist;
 ;;
 (* generation code to encode each msg pattern *)
 (* Extracting msg patterns from actions and its sub-patterns *)
@@ -587,7 +588,7 @@ and printEncRule (m,k) i i1 i2 =
   printf "          endif;\n";
   printf "        endif;\n";
   printf "      end;\n";
-  printf "    end;\n";
+  (*printf "    end;\n";*)
 ;;
 
 (* deconcat rules for concat(Na,A) and concat (Na,Nb) *)
@@ -653,10 +654,11 @@ and printEnconcatRule msgs i i1 i2 =
   if i1 = i2 then
 	printf "      i != j & \n"
   else printf "";
-  printf "      !Spy_known[construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j])]\n      ==>\n" i i1 i2 i1 i2;
+  let (j1,j2) = if i1=i2 then (i1+1,i2+2) else (i1,i2) in
+  printf "      !Spy_known[construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j])]\n      ==>\n" i j1 j2 i1 i2;
   printf "      var concatMsgNo:indexType;\n";
   printf "      begin\n";
-  printf "        concatMsgNo := construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j]);\n" i i1 i2 i1 i2;
+  printf "        concatMsgNo := construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j]);\n" i j1 j2 i1 i2;
   printf "        Spy_known[concatMsgNo]:=true;\n";
   printf "        if (!exist(pat%dSet,concatMsgNo)) then\n" i;
   printf "          pat%dSet.length:=pat%dSet.length+1;\n" i i;
@@ -731,15 +733,15 @@ and print_getRules i j =
   printf "      endif;\n" ;
   printf "    endif;\n" ;
   printf "    ch[%d].empty := true;\n" i;
-  printf "    intruder.st := gotmsg%d;\n" i;
+  (*printf "    intruder.st := gotmsg%d;\n" i;*)
   printf "  end;\n"
 
 and print_emitRules i j=
   printf "\n---rule of intruder to emit msg%d.\n" i;
   printf "ruleset i: msgLen do\n";
   if i mod 2 = 1 then
-    printf "  ruleset j: bobNums do\n"
-  else printf "  ruleset j: aliceNums do\n";
+    printf "  ruleset j: roleBNums do\n"
+  else printf "  ruleset j: roleANums do\n";
   printf "    rule \"intruderEmitMsg%d\"\n" i;
   printf "      ch[%d].empty=true & i <= pat%dSet.length & Spy_known[pat%dSet.content[i]]\n      ==>\n" i j j;
   printf "      begin\n";
@@ -748,11 +750,11 @@ and print_emitRules i j=
   printf "          ch[%d].msg:=msgs[pat%dSet.content[i]];\n" i j;
   printf "          ch[%d].sender:=intruderType;\n" i;
   if i mod 2 = 1 then
-    printf "          ch[%d].receiver:=bobs[j].B;\n" i
-  else printf "          ch[%d].receiver:=alices[j].A;\n" i;
+    printf "          ch[%d].receiver:=roleB[j].B;\n" i  (* roleB[j] should be derived from initial knws roleB *)
+  else printf "          ch[%d].receiver:=roleA[j].A;\n" i;
   printf "          ch[%d].empty:=false;\n" i;
   printf "          emit[pat%dSet.content[i]] := true;\n" j;
-  printf "          intruder.st:=emitted%d;\n" i;
+  (*printf "          intruder.st:=emitted%d;\n" i;*)
   if i mod 2 = 1 then
     printf "          put \"ch[%d]: I->B\\n\";\n" i
   else printf "          put \"ch[%d]: I->A\\n\";\n" i;
@@ -760,8 +762,8 @@ and print_emitRules i j=
   printf "          put \"\\n\";\n";
   printf "        endif;\n";
   printf "      end;\n";
-  printf "  endruleset\n";
-  printf "endruleset\n";
+  printf "  endruleset;\n";
+  printf "endruleset;\n";
 ;;
 
 (* get msgs from actions: msgs
@@ -896,7 +898,7 @@ let genSynthCode m i patList =
                printf "   index:=0;\n";
                printf "   for i: msgLen do\n";
                printf "     if (msgs[i].msgType = key) then\n";
-               printf "       if (msgs[i].k.encTyp = PK & msgs[i].k.ag = %s) then\n" role;
+               printf "       if (msgs[i].k.encType = PK & msgs[i].k.ag = %s) then\n" role;
                printf "         index:=i;\n";
                printf "       endif;\n";
                printf "     endif;\n";
@@ -905,7 +907,7 @@ let genSynthCode m i patList =
                printf "     msg_end := msg_end + 1 ;\n";
                printf "     index := msg_end;\n";
                printf "     msgs[index].msgType := key;\n";
-               printf "     msgs[index].k.encTyp:=PK; \n";
+               printf "     msgs[index].k.encType:=PK; \n";
                printf "     msgs[index].k.ag:=%s; \n" role;
                printf "   endif;\n";
                printf "   num:=index;\n";
@@ -980,7 +982,7 @@ let genIsPatCode m i patList =
               printf "  var flag1 : boolean;\n  begin\n";
               printf "    flag1 := false;\n";
               printf "    if (msg.msgType = key) then\n";
-              printf "      if (msg.k.encTyp = PK) then\n";
+              printf "      if (msg.k.encType = PK) then\n";
               printf "        flag1 := true;\n";
               printf "      endif;\n";
               printf "    endif;\n";
@@ -1051,7 +1053,7 @@ let genGet_msgNoCode () =
   printf "      if (msgs[i].msgType = msg.msgType) then\n";
   printf "        if ( (msg.msgType=agent & msgs[i].ag=msg.ag)
           | (msg.msgType=nonce & msgs[i].noncePart=msg.noncePart)
-          | (msg.msgType=key & (msgs[i].k.encTyp=msg.k.encTyp & msgs[i].k.ag=msg.k.ag))
+          | (msg.msgType=key & (msgs[i].k.encType=msg.k.encType & msgs[i].k.ag=msg.k.ag))
           | (msg.msgType=aenc & (msgs[i].aencMsg=msg.aencMsg & msgs[i].aencKey=msg.aencKey))
           | (msg.msgType=senc & (msgs[i].sencMsg=msg.sencMsg & msgs[i].sencKey=msg.sencKey))
           ) then \n";
@@ -1063,6 +1065,50 @@ let genGet_msgNoCode () =
   printf "  end;\n";
 ;;
 
+let genPrintMsgCode () =
+  printf "procedure printMsg(msg:Message);\n";
+  printf "  begin\n";
+  printf "    if msg.msgType=null then\n";
+  printf "      put \"null\\n\";\n ";
+  printf "    elsif msg.msgType=agent then\n";
+  printf "      put msg.ag;\n ";
+  printf "    elsif msg.msgType=nonce then\n";
+  printf "      put msg.noncePart;\n ";
+  printf "    elsif msg.msgType=key then\n";
+  printf "      if msg.k.encType=PK then\n";
+  printf "        put \"PK(\";\n ";
+  printf "        put msg.k.ag;\n ";
+  printf "        put \")\";\n ";
+  printf "      elsif msg.k.encType=SK then\n";
+  printf "        put \"SK(\";\n ";
+  printf "        put msg.k.ag;\n ";
+  printf "        put \")\";\n ";
+  printf "      elsif msg.k.encType=Symk then\n";
+  printf "        put \"SymK(\";\n ";
+  printf "        put msg.k.ag;\n ";
+  printf "        put \")\";\n ";
+  printf "      endif;\n";
+  printf "    elsif msg.msgType=aenc then\n";
+  printf "      put \"aenc{\";\n";
+  printf "      printMsg(msgs[msg.aencMsg]);\n";
+  printf "      put \",\";\n";
+  printf "      printMsg(msgs[msg.aencKey]);\n";
+  printf "      put \"}\\n\";\n";
+  printf "    elsif msg.msgType=senc then\n";
+  printf "      put \"senc{\";\n";
+  printf "      printMsg(msgs[msg.sencMsg]);\n";
+  printf "      put \",\";\n";
+  printf "      printMsg(msgs[msg.sencKey]);\n";
+  printf "      put \"}\\n\";\n";
+  printf "    elsif msg.msgType=concat then\n";
+  printf "      put \"concat{\";\n";
+  printf "      printMsg(msgs[msg.concatPart1]);\n";
+  printf "      put \",\";\n";
+  printf "      printMsg(msgs[msg.concatPart2]);\n";
+  printf "      put\"}\\n\";\n";
+  printf "    endif;\n";
+  printf "  end;\n";
+;;
 let genInverseKeyCode ()=
   printf "function inverseKey(msgK:Message):Message;\n";
   printf "  var key_inv:Message;\n  begin\n";
@@ -1071,10 +1117,10 @@ let genInverseKeyCode ()=
   printf "      key_inv.msgType := msgK.msgType;\n";
   printf "      key_inv.k.ag := msgK.k.ag;\n";
   (*printf "      key_inv.k.encTyp:= msgK.k.encTyp;\n";*)
-  printf "      if (msgK.k.encTyp=PK) then\n";
-  printf "        key_inv.k.encTyp := SK;\n";
-  printf "      elsif (msgK.k.encTyp=SK) then\n";
-  printf "        key_inv.k.encTyp := PK;\n";
+  printf "      if (msgK.k.encType=PK) then\n";
+  printf "        key_inv.k.encType := SK;\n";
+  printf "      elsif (msgK.k.encType=SK) then\n";
+  printf "        key_inv.k.encType := PK;\n";
   printf "      endif;\n";
   printf "    endif;\n";
   printf "    return key_inv;\n  end;\n";
@@ -1090,7 +1136,7 @@ let genLookUpCode () =
   printf "          index := i;\n";
   printf "        elsif(msgs[i].msgType=nonce & msgs[i].noncePart=msg.noncePart) then\n";
   printf "          index := i;\n";
-  printf "        elsif(msgs[i].msgType=key & (msgs[i].k.encTyp=msg.k.encTyp & msgs[i].k.ag=msg.k.ag)) then\n";
+  printf "        elsif(msgs[i].msgType=key & (msgs[i].k.encType=msg.k.encType & msgs[i].k.ag=msg.k.ag)) then\n";
   printf "          index := i;\n";
   printf "        elsif(msgs[i].msgType = aenc & (msgs[i].aencKey=msg.aencKey & msgs[i].aencMsg=msg.aencMsg)) then\n";
   printf "          index := i;\n";
@@ -1110,14 +1156,15 @@ let rec constructMsgByPats m patList =
   |`Aenc(m1,k1) -> let i1 = getPatNum m1 patList in
                    let i2 = getPatNum k1 patList in
                    let atoms = getAtoms m1 in
-                   printf "function construct%dby%d%d(msgNo%d,msgNo%d:indexType):indexType;\n" i i1 i2 i1 i2;
+                   printf "function construct%dBy%d%d(msgNo%d,msgNo%d:indexType):indexType;\n" i i1 i2 i1 i2;
                    printf "  var index : indexType;\n";
                    printf "      %s;\n" (atoms2Str1 atoms);
                    printf "      k_ag : AgentType;\n";
                    printf "      msg : Message;\n  begin\n";
                    printf "   index := 0;\n";
-                   printf "   ----locNa/locNb=...\n" ;
-                   printf "   lookAddPat%d(locNa,locNb,k_ag,msg,index);\n" i;
+                   printf "   %s;\n" (atoms2Statm atoms m1 patList);
+                   printf "   k_ag := msgs[msgNo%d].k.ag;\n" i2;
+                   printf "   lookAddPat%d(%s,k_ag,msg,index);\n" i (atoms2Str2 atoms);
                    printf "   return index;\n" ;
                    printf "  end;\n";
 
@@ -1129,16 +1176,69 @@ let rec constructMsgByPats m patList =
                            |Some x -> getPatNum x patList
                            |None -> 0
                    in
-                   printf "function construct%dby%d%d(msgNo%d,msgNo%d:indexType):indexType;\n" i i1 i2 i1 i2;
+                   let atoms = getAtoms m in
+                   let (i1,i2) = if i1 <> i2 then (i1,i2) else (i1+1,i2+2) in
+                   printf "function construct%dBy%d%d(msgNo%d,msgNo%d:indexType):indexType;\n" i i1 i2 i1 i2;
                    printf "  var index : indexType;\n";
-                   printf "      msg : Message;\n";
+                   printf "      %s;\n" (atoms2Str1 atoms);
+                   printf "      msg : Message;\n  begin\n";
+                   printf "     index := 0;\n" ;
+                   printf "     %s;\n" (atoms2Statm1 atoms patList);
+                   printf "     lookAddPat%d(%s,msg,index);\n" i (atoms2Str2 atoms);
+                   printf "   return index;\n" ;
+                   printf "  end;\n";
   |_ -> ()
 
 and atoms2Str1 atoms=
   String.concat ~sep:";\n      " (List.map ~f:(fun atom -> match atom with
                 |`Var n -> "loc"^n^":NonceType"
-                |`Str r -> "loc"^r^":NonceType"
+                |`Str r -> "loc"^r^":AgentType"
                 |_ -> "") atoms)
+
+and atoms2Str2 atoms=
+    String.concat ~sep:"," (List.map ~f:(fun atom -> match atom with
+    |`Var n -> "loc"^n
+    |`Str r -> "loc"^r
+    |_ -> "") atoms)               
+and atoms2Statm atoms m patList=
+  let j = getPatNum m patList in
+  String.concat ~sep:";\n   " (List.mapi ~f:(fun i atom -> match atom with
+              |`Var n -> "loc"^n^":= msgs[msgs[msgNo"^ string_of_int j^"].concatPart"^(string_of_int (i+1))^"].noncePart"
+              |`Str r -> "loc"^r^":= msgs[msgs[msgNo"^ string_of_int j^"].concatPart"^(string_of_int (i+1))^"].ag"
+              |_ -> "") atoms)
+
+and atoms2Statm1 atoms patList =
+  let nums = List.map ~f:(fun atom -> getPatNum atom patList) atoms in
+  let n = match List.nth nums 0 with
+         |Some x -> x
+         |None -> 0
+  in
+  let isEqual = match List.reduce ~f:(&&) (List.map ~f:(fun num -> num = n) nums) with 
+                | Some x -> x
+                | None -> false
+  in
+  let nums1 = if isEqual then List.mapi ~f:(fun i n -> n+i+1) nums else nums
+  in
+  let strList = List.map2_exn ~f:(fun atom i -> match atom with
+                                  |`Var n -> (*let i = getPatNum atom patList in*)
+                                            "loc"^n^":= msgs[msgNo"^(string_of_int i)^"].noncePart"
+                                  |`Str r ->(*let i = getPatNum atom patList in*)
+                                            "loc"^r^":= msgs[msgNo"^(string_of_int i)^"].ag"
+                                  |_ -> "" ) atoms nums1
+  in
+  String.concat ~sep:";\n     " strList
+;;
+let genExistCode () =
+  printf "function exist(PatnSet:msgSet; msgNo:indexType):boolean;\n";
+  printf "  var flag:boolean;\n  begin\n";
+  printf "    flag := false;\n";
+  printf "    for i:indexType do\n";
+  printf "      if (PatnSet.content[i] = msgNo) then \n";
+  printf "         flag := true;\n";
+  printf "      endif; \n";
+  printf "    endfor;";
+  printf "    return flag;\n";
+  printf "  end;\n";
 ;;
 (* print procedures and functions. *)
 let print_procedures outc actions knws =
@@ -1155,10 +1255,12 @@ let print_procedures outc actions knws =
                                             genDestruct m (i+1)) msgs;
                   (* print get_msgNo: procedure get_msgNo(msg:Message; Var num : indexType); *)
                   genGet_msgNoCode ();
+                  genPrintMsgCode ();
                   (* print functions: inverseKey/lookUp/constructsAbyBC*)
                   genInverseKeyCode ();
                   genLookUpCode ();
                   List.iter ~f:(fun pat -> constructMsgByPats pat non_equivalent) non_equivalent;
+                  genExistCode ();
   |`Act (seq,r1,r2,n,m) ->begin
                           let patlist = getPatList actions in    (* get all patterns from actions *)
                           let non_dup = del_duplicate patlist in (* delete duplicate *)
@@ -1183,6 +1285,8 @@ let printRecords outc r m =
                   |_ -> printf "null\n") msgs;
                   printf "   loc_Na : NonceType;\n";
                   printf "   loc_Nb : NonceType;\n";
+                  printf "   loc_A : AgentType;\n";
+                  printf "   loc_B : AgentType;\n";
                   printf "   st : %sStatus;\n" r;
                   end
   |_ -> printf "null\n"
@@ -1207,7 +1311,7 @@ let trActionsToMurphi outc actions knws =
   |`Act (seq,r1,r2,n,m) -> print_murphiRule outc actions knws
   |`Actlist arr -> print_procedures outc actions knws; (* print prcedures and functions. *)                   
                    print_murphiRule outc actions knws; (* print rules for roleA and roleB *)
-                   (*print_murphiRule_ofIntruder outc actions knws; *)(* print rules for intruder *)
+                   print_murphiRule_ofIntruder outc actions knws; (* print rules for intruder *)
 		               print_murphiRules_EncsDecs outc actions knws;(* encryption and decryption rules, enconcat and deconcat rules *)
 ;;
 
@@ -1217,12 +1321,12 @@ let print_startstate r num m knws =
                             match (m,m1) with
                             |(`Concat msgs,`Concat msgs1) -> let strs = (List.map2_exn ~f:(fun m' m1' -> 
                                                                 match (m',m1') with
-                                                                |(`Var n,`Var n1) -> r^"["^(string_of_int num)^"]."^n1^" = "^n^";\n"
-                                                                |(`Str role,`Str role1) -> r^"["^(string_of_int num)^"]."^ role1^" = "^role^";\n" 
+                                                                |(`Var n,`Var n1) -> "role"^r^"["^(string_of_int num)^"]."^n1^" := "^n^";\n"
+                                                                |(`Str role,`Str role1) ->"role"^r^"["^(string_of_int num)^"]."^ role1^" := "^role^";\n" 
                                                                 |_ -> "error: mismatching!\n") msgs msgs1) 
                                                               in
                                                               List.iter ~f:(fun s -> printf "  %s" s) strs;
-                                                              printf "  %s[%d].st = %s1;\n" r num r
+                                                              printf "  role%s[%d].st := %s1;\n" r num r
                             |_ -> printf "null\n"
                           else printf "" ) msgOfKnws
 ;;
@@ -1246,21 +1350,21 @@ let rec printGoal2Murphi outc g =
 
 and printSecGoal (seq,m) =
   printf "invariant \"%s\"\n" seq;
-  printf "  forall: i:msgLen do\n";
+  printf "  forall i:msgLen do\n";
   printf "    (msgs[i].msgType=nonce & msgs[i].noncePart = %a)\n" output_msg m;
   printf "     ->\n";
   printf "      Spy_known[i] = false\nend;\n"
 
 and printAgreeGoal (seq,r1,r2,m) =
-  printf "invariant \"%s\"\n" seq;
+  printf "/*invariant \"%s\"\n" seq;
   printf "  forall i:eventNums do \n";
   printf "    forall j:eventNums do \n";
-  printf "      (systemEvent[i].eveType = receive & \n";
+  printf "      (systemEvent[i].eveType = false & \n"; (* false means receive *)
   printf "       systemEvent[i].msg.noncePart = %a) \n" output_msg m;
   printf "      ->\n";
-  printf "      systemEvent[i].eveType = send & \n";
-  printf "      systemEvent[i].receiver = systemEvent[j].receiver) \n";
-  printf "      systemEvent[i].msg.nonceType = systemEvent[j].msg.nonceType) \nend;\n";
+  printf "      (systemEvent[i].eveType = true & \n";  (* true means send *)
+  printf "      systemEvent[i].receiver = systemEvent[j].receiver & \n";
+  printf "      systemEvent[i].msg.noncePart = systemEvent[j].msg.noncePart) \nend;\n*/";
 ;;
 
 let printMurphiConsAndType outc k =
@@ -1308,15 +1412,25 @@ let printMurphiConsAndType outc k =
 
   printMurphiRecords outc k;(*print records of roleA and roleB by knws*)
 
+  printf "  RoleIntruder: record\n";
+  printf "    B : AgentType;\n";
+  printf "  end;\n\n";
   printf "  msgSet: record\n";
   printf "    content : Array[msgLen] of indexType;\n";
   printf "    length : msgLen;\n  end;\n\n";
+
+  printf "  Event: record\n";
+  printf "    eveType : boolean;\n";
+  printf "    sender  : AgentType;\n";
+  printf "    receiver: AgentType;\n";
+  printf "    msg	: Message;\n  end;\n\n";
 
   (*print murphi vars *)
   printf "var\n";
   printf "  ch : Array[chanNums] of Channel;\n";
   printf "  roleA : Array[roleANums] of RoleA;\n";
   printf "  roleB : Array[roleBNums] of RoleB;\n";
+  printf "  intruder    : RoleIntruder;\n";
   printf "  msgs : Array[indexType] of Message;\n";
   printf "  msg_end: indexType;\n\n";
   printf "  pat1Set: msgSet;\n";
@@ -1327,7 +1441,9 @@ let printMurphiConsAndType outc k =
   printf "  pat6Set: msgSet;\n";
   printf "  pat7Set: msgSet;\n";
   printf "  pat8Set: msgSet;\n\n";
-  printf "  Spy_known: Array[indexType] of boolean;\n\n";
+  printf "  Spy_known: Array[indexType] of boolean;\n";
+  printf "  systemEvent   : array[eventNums] of Event;\n";
+  printf "  emit: Array[indexType] of boolean;\n\n";
 ;;
 
 let output_murphiCode outc pocol =
