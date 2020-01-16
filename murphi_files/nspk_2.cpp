@@ -1,5 +1,5 @@
 /******************************
-  Program "nspk_2.m" compiled by "Caching Murphi Release 5.4.9.1"
+  Program "murphi_files/nspk_2.m" compiled by "Caching Murphi Release 5.4.9.1"
 
   Murphi Last Compiled date: "Aug  7 2019"
  ******************************/
@@ -9,7 +9,7 @@
  ********************/
 #define MURPHI_VERSION "Caching Murphi Release 5.4.9.1"
 #define MURPHI_DATE "Aug  7 2019"
-#define PROTOCOL_NAME "nspk_2"
+#define PROTOCOL_NAME "murphi_files/nspk_2"
 #define BITS_IN_WORLD 4008
 #define ALIGN
 
@@ -3093,6 +3093,7 @@ else
 void mu_cons1(const mu_1_NonceType& mu_Na, const mu_1_AgentType& mu_A, const mu_1_AgentType& mu_B, mu_1_Message& mu_msg, mu_1_indexType& mu_num)
 {
 mu_msg.clear();
+mu_num.clear();
 mu_lookAddPat5 ( mu_Na, mu_A, mu_B, mu_msg, mu_num );
 };
 /*** end procedure declaration ***/
@@ -3108,6 +3109,7 @@ mu_lookAddPat7 ( mu_Na, mu_Nb, mu_A, mu_msg, mu_num );
 void mu_cons3(const mu_1_NonceType& mu_Nb, const mu_1_AgentType& mu_B, mu_1_Message& mu_msg, mu_1_indexType& mu_num)
 {
 mu_msg.clear();
+mu_num.clear();
 mu_lookAddPat8 ( mu_Nb, mu_B, mu_msg, mu_num );
 };
 /*** end procedure declaration ***/
@@ -3126,6 +3128,7 @@ mu_1_Message mu_msgNum1("msgNum1",104);
 /*** Variable declaration ***/
 mu_1_Message mu_msgNum2("msgNum2",192);
 
+mu_msg1.clear();
 mu_k1 = mu_msgs[mu_msg.mu_aencKey].mu_k;
 mu_B = mu_k1.mu_ag;
 mu_msg1 = mu_msgs[mu_msg.mu_aencMsg];
