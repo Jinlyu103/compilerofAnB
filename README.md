@@ -3,25 +3,17 @@ NS协议compiler，可以编译协议的动作，并输出Alice和Bob的串自�
 # how?
  终端输入：  
  $ corebuild -use-menhir test.native   
- $ ./test.native  test1.msg  
+ $ ./test.native  test2.msg > result.m   
+ Then a new file with name result.m will be generated.   
+# Murphi model checker:
+ terminal:  
+ $ /your murphi-path/src/mu result.m   
+Then a C++ file will be generated with name result.cpp.  
+ $ g++ result.cpp -I /your murphi-path/include   
+Then an executing file with name a.out will be generated.  
+ $ ./a.out
+Finally you will see the verification results on the terminal.  
    
-  10-29  
- 修改了actions2.ml文件，新增了消息编译部分。  
- 如何运行：  
- 终端输入： corebuild actions2.byte ，然后输入：./actions2.byte  
- 然后修改了原来的action类型，涉及到actions.ml，parser.mly和lexer.mll文件，可以编译test1.msg里的actions。  
- 使用命令：  
-  $ corebuild -use-menhir test.native   
-  $ ./test.native  test1.msg   
-  来运行  
-  10-30  
-  actions2.ml中实现了trans (act,m,i,rolename)
-  
-  11-2:
-  更新了branch里的protocols.ml文件：   
-  执行命令依然是：  
-  $ corebuild -use-menhir test.native   
-  $ ./test.native  test1.msg  
   关于protocols.ml：  
   加入了对knowledge的解析。另外输出action也作了修改：  
 1、rolelist从knowledge中获取  
