@@ -9,12 +9,11 @@ Actions:{
 [seq3] A->B (n3) : aenc{nonce(Nb)}pk(B)
 }
 Environment:{
-[agent1] A [1] : <Alice.Bob.nonce(Na)>;
+[agent1] A [1] : <Alice.Intruder.nonce(Na)>;
 [agent2] B [1] : <Bob.nonce(Nb)>
 }
 Goals:{
 [sec1] nonce(Nb);
-[sec2] nonce(Na);
 [auth1] B non-injectively agrees with A on nonce(Na)
 }
 end
