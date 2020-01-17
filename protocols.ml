@@ -153,6 +153,28 @@ and print_msglist outc msgs =
 	if i < ((List.length msgs)-1) then output_string outc "." else output_string outc "" ;) msgs;
 ;;
 
+let rec output_msg1 msg =
+  match msg with
+  |`Null -> sprintf "null"
+  |`Var n -> sprintf "%s" n
+  |`Str r -> sprintf "%s" r
+  |`Concat msgs -> sprint_msglist msgs
+  |`Hash m -> sprintf "hash(%s) " (output_msg1 m)
+  |`Aenc (m1,k1) -> sprintf "aenc{< %s >}%s" (output_msg1 m1) (output_msg1 k1)
+  |`Senc (m1,k1) -> sprintf "senc{< %s >}%s" (output_msg1 m1) (output_msg1 k1)
+  |`Pk rolename -> sprintf "pk(%s)" rolename
+  |`Sk rolename -> sprintf "sk(%s)" rolename
+  |`K (r1,r2) -> sprintf "k(%s,%s)" r1 r2
+
+and sprint_msglist msgs =
+  String.concat (List.mapi ~f:(fun i m ->
+                let str = if i < ((List.length msgs)-1) then 
+                            sprintf "."
+                          else sprintf "" 
+                in 
+                (output_msg1 m)^str) msgs)
+;;
+
 (* print actions *)
 let rec output_action outc actions knws = 
   let rolelist = getRolesFromKnws knws [] in
@@ -1431,37 +1453,40 @@ let print_startstate r num m knws =
 let rec printMuriphiStart outc env k =
   match env with
   |`Null -> output_string outc "null"
-  (*|`Env_rlist rlist -> printf "print the definition of agents:\n %a\n" output_msg rlist
-        |`Env_nlist nlist -> printf "print the definition of nonces:\n %a\n" output_msg nlist*)
   |`Env_agent (r,num,m) -> print_startstate r num m k;(* print startstates *)
   |`Envlist envs -> List.iter ~f:(fun e -> printMuriphiStart outc e k) envs
   |_ -> output_string outc "null"
 ;;
 
-let rec printGoal2Murphi outc g =
+let rec printGoal2Murphi g =
   match g with
-  |`Null -> output_string outc "null\n"
+  |`Null -> sprintf "null\n"
   |`Secretgoal (seq,m) -> printSecGoal (seq,m)
   |`Agreegoal (seq,r1,r2,m) -> printAgreeGoal (seq,r1,r2,m)
-  |`Goallist gols -> List.iter ~f:(fun g -> printGoal2Murphi outc g) gols
+  |`Goallist gols -> String.concat (List.map ~f:(fun g -> printGoal2Murphi g) gols)
 
 and printSecGoal (seq,m) =
-  printf "invariant \"%s\"\n" seq;
-  printf "  forall i:msgLen do\n";
-  printf "    (msgs[i].msgType=nonce & msgs[i].noncePart = %a)\n" output_msg m;
-  printf "     ->\n";
-  printf "      Spy_known[i] = false\nend;\n"
+  sprintf "
+invariant \"%s\"
+  forall i:msgLen do
+    (msgs[i].msgType=nonce & msgs[i].noncePart = %s)
+    ->
+    Spy_known[i] = false
+end;\n" seq (output_msg1 m)
 
-and printAgreeGoal (seq,r1,r2,m) =
-  printf "/*invariant \"%s\"\n" seq;
-  printf "  forall i:eventNums do \n";
-  printf "    forall j:eventNums do \n";
-  printf "      (systemEvent[i].eveType = receive & \n"; (* false means receive *)
-  printf "       systemEvent[i].msg.noncePart = %a) \n" output_msg m;
-  printf "      ->\n";
-  printf "      (systemEvent[i].eveType = send & \n";  (* true means send *)
-  printf "      systemEvent[i].receiver = systemEvent[j].receiver & \n";
-  printf "      systemEvent[i].msg.noncePart = systemEvent[j].msg.noncePart) \nend;\n*/";
+and printAgreeGoal (seq,r1,r2,m) = 
+  sprintf "
+/*invariant \"%s\"
+  forall i:eventNums do
+    forall j:eventNums do
+      (systemEvent[i].eveType = receive &
+      systemEvent[i].msg.noncePart = %s)
+      -> 
+      (systemEvent[i].eveType = send &
+      systemEvent[i].receiver = systemEvent[j].receiver &
+      systemEvent[i].msg.noncePart = systemEvent[j].msg.noncePart)
+end;
+*/" seq (output_msg1 m)
 ;;
 
 (**return string*)
@@ -1627,7 +1652,7 @@ let output_murphiCode outc pocol =
                         output_string outc "startstate\n";
                         printMuriphiStart outc env k;
                         output_string outc "end;\n";
-                        printGoal2Murphi outc g
+                        printf "%s" (printGoal2Murphi g)
                    (* let ms = getMsgOfRoles k [] in
                     List.iter ~f:(fun m -> output_msg outc m; printf "\n"; ) ms*)
 ;;
