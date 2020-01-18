@@ -260,6 +260,8 @@ let rec isSamePat m1 m2 =
   | (`Senc(m1',k1'),`Senc(m2',k2')) -> if (isSamePat k1' k2') && (isSamePat m1' m2') then true else false
   | (`Pk r1,`Pk r2) -> true
   | (`Sk r1,`Sk r2) -> true
+  | (`Pk r1,`Sk r2) -> true  (* sk(r1),pk(r1) are the same pat, they are stored into the same patSet*)
+  | (`Sk r1,`Pk r2) -> true
   | (`K(r11,r12),`K(r21,r22)) -> true
   | (`Var n1,`Var n2) -> true
   | (`Concat msgs1,`Concat msgs2) -> isSameList msgs1 msgs2
@@ -371,7 +373,12 @@ let rec genSendAct rolename i atoms length msgofRolename =
   sprintf "   ch[%d].sender := role%s[i].%s;\n" i rolename rolename ^
   sprintf "   ch[%d].receiver := role%s[i].%s;\n" i rolename (getPkAg atoms msgofRolename) ^
   sprintf "   role%s[i].st := %s%d;\n" rolename rolename ((i mod length)+1) ^
-  sprintf "   put \"%d. \";\n   put ch[%d].sender;\n  put \"   \";\n   put ch[%d].receiver;\n   put \"   msg: \";\n   printMsg(ch[%d].msg);\n   put \"\\n\";\n" i i i i ^
+  sprintf "   put \"%d. \";\n   put ch[%d].sender;\n   put \"   \";\n   put ch[%d].receiver;\n   put \"   msg: \";\n   printMsg(ch[%d].msg);\n   put \"\\n\";\n" i i i i ^
+  sprintf "   eve_end := eve_end +1 ;\n" ^
+  sprintf "   systemEvent[eve_end].eveType := send; ;\n" ^
+  sprintf "   systemEvent[eve_end].sender := ch[%d].sender ;\n" i ^
+  sprintf "   systemEvent[eve_end].receiver := ch[%d].receiver ;\n" i ^
+  sprintf "   systemEvent[eve_end].msg := ch[%d].msg ;\n" i ^
   sprintf "end;\n"
   (* (i+1) should be (i+1) % length of the strand list *)
 
@@ -403,6 +410,11 @@ and getPkAg atoms msgofRolename =
 let rec genRecvAct rolename i atoms length msgofRolename =
   sprintf "var msg:Message;\n    msgNo:indexType;\nbegin\n" ^
   sprintf "   clear msg;\n   msg := ch[%d].msg;\n   destruct%d(msg,%s);\n" i i (recvAtoms2Str atoms rolename) ^ (* (recvAtoms2Str atoms) *)
+  sprintf "   eve_end:= eve_end + 1 ;\n" ^
+  sprintf "   systemEvent[eve_end].eveType := receive;\n" ^
+  sprintf "   systemEvent[eve_end].sender := ch[%d].sender;\n" i ^
+  sprintf "   systemEvent[eve_end].receiver := ch[%d].receiver;\n" i ^
+  sprintf "   systemEvent[eve_end].msg := ch[%d].msg;\n" i ^
   sprintf "   if(%s)then\n" (atoms2Str atoms rolename msgofRolename) ^
   sprintf "     ch[%d].empty:=true;\n" i ^
   sprintf "     role%s[i].st := %s%d;\n" rolename rolename ((i mod length)+1) ^
@@ -1402,22 +1414,22 @@ let print_startstate r num m knws =
   msg_end:=msg_end+1;
   msgs[msg_end].msgType := key;
   msgs[msg_end].k.ag:=Intruder;
-  msgs[msg_end].k.encType:=SK;  ---- SK(intruserType) for intruder to decrypt msg form Alice 
+  msgs[msg_end].k.encType:=SK;  
 
-  pat1Set.length := pat1Set.length + 1; ---A,B
+  pat1Set.length := pat1Set.length + 1; 
   pat1Set.content[pat1Set.length] :=msg_end;
   Spy_known[msg_end] := true;
 
-  msg_end := msg_end+1;  ---pk(B)
+  msg_end := msg_end+1;  
   msgs[msg_end].msgType := key;
   msgs[msg_end].k.ag:=Bob;
   msgs[msg_end].k.encType:=PK;
 
-  pat1Set.length := pat1Set.length + 1; ---A,B
+  pat1Set.length := pat1Set.length + 1; 
   pat1Set.content[pat1Set.length] :=msg_end;
   Spy_known[msg_end] := true;
 
-  eve_end := 0;  ---?2
+  eve_end := 0;  
   for i:eventNums do
      systemEvent[i].eveType := empty;
   endfor;"
