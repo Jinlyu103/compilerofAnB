@@ -412,7 +412,7 @@ let rec genRecvAct rolename i atoms length msgofRolename =
   sprintf "   clear msg;\n   msg := ch[%d].msg;\n   destruct%d(msg,%s);\n" i i (recvAtoms2Str atoms rolename) ^ (* (recvAtoms2Str atoms) *)
   sprintf "   eve_end:= eve_end + 1 ;\n" ^
   sprintf "   systemEvent[eve_end].eveType := receive;\n" ^
-  sprintf "   systemEvent[eve_end].sender := ch[%d].sender;\n" i ^
+  sprintf "   systemEvent[eve_end].sender := roleB[i].loc_A;\n" ^  (* the sender of the receive event is not get from ch[%d]*)
   sprintf "   systemEvent[eve_end].receiver := ch[%d].receiver;\n" i ^
   sprintf "   systemEvent[eve_end].msg := ch[%d].msg;\n" i ^
   sprintf "   if(%s)then\n" (atoms2Str atoms rolename msgofRolename) ^
@@ -521,6 +521,13 @@ let rec existSamePat eqvlPats pat =
   | hd::tl -> if isSamePat hd pat then true else existSamePat tl pat
 ;;
 
+let isSubPat y x =
+  let ysubs = getSubMsg y in
+    let boollist = List.map ~f:(fun ysub -> if isSamePat ysub x then true else false) ysubs in
+    match List.reduce ~f:(||) boollist with
+    |Some b -> b
+    |None -> false
+;;
 let rec getEqvlMsgPattern patlist =
   let non_eqvlPat = ref [] in 
   let len = List.length patlist in
@@ -536,13 +543,6 @@ and insert x patlist =
     | [] -> x::patlist
     | [y] -> if isSubPat y x then x::patlist else patlist@[x] (* if x is a subpat of y,then x before y,else x after y*)
     | hd :: tl -> if isSubPat hd x then x::patlist else hd::(insert x tl)
-
-and isSubPat y x =
-    let ysubs = getSubMsg y in
-    let boollist = List.map ~f:(fun ysub -> if isSamePat ysub x then true else false) ysubs in
-    match List.reduce ~f:(||) boollist with
-    |Some b -> b
-    |None -> false
 ;;
 
 let rec getPatList actions =
@@ -1449,7 +1449,7 @@ let rec printGoal2Murphi g =
   match g with
   |`Null -> sprintf "null\n"
   |`Secretgoal (seq,m) -> printSecGoal (seq,m)
-  |`Agreegoal (seq,r1,r2,m) -> printAgreeGoal (seq,r1,r2,m)
+  |`Agreegoal (seq,r1,r2,m) -> printAgreeGoal (seq,r1,r2,m) 
   |`Goallist gols -> String.concat (List.map ~f:(fun g -> printGoal2Murphi g) gols)
 
 and printSecGoal (seq,m) =
@@ -1465,12 +1465,14 @@ and printAgreeGoal (seq,r1,r2,m) =
   sprintf "
 invariant \"%s\"   
   forall i:eventNums do
-    forall j:eventNums do
-      systemEvent[i].eveType = receive 
+      (systemEvent[i].eveType = receive )
       -> 
+      (exists j:eventNums do
       (systemEvent[j].eveType = send &
       systemEvent[j].receiver = systemEvent[i].receiver &
-      systemEvent[j].msg.msgType = systemEvent[i].msg.msgType &
+      systemEvent[j].sender = systemEvent[i].sender &
+      systemEvent[j].msg.msgType = systemEvent[i].msg.msgType &      
+      ---systemEvent[j].msg.ag =systemEvent[i].sender &
       systemEvent[j].msg.ag = systemEvent[i].msg.ag &
       systemEvent[j].msg.k.encType = systemEvent[i].msg.k.encType &
       systemEvent[j].msg.k.ag = systemEvent[i].msg.k.ag &
@@ -1480,8 +1482,8 @@ invariant \"%s\"
       systemEvent[j].msg.sencMsg = systemEvent[i].msg.sencMsg &
       systemEvent[j].msg.sencKey = systemEvent[i].msg.sencKey &
       systemEvent[j].msg.concatPart1 = systemEvent[i].msg.concatPart1 &
-      systemEvent[j].msg.concatPart2 = systemEvent[i].msg.concatPart2)
-   endforall
+      systemEvent[j].msg.concatPart2 = systemEvent[i].msg.concatPart2
+     )endexists)
 endforall" seq 
 ;;
 
@@ -1659,12 +1661,6 @@ let genCode outc value =
   |`Null -> create_file "result.m" "null"
   |`Protocol (n,p) -> create_file "result.m" (output_murphiCode p)
 ;;
-
-
-
-
-
-
 
 
 
