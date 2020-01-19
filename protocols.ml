@@ -1360,7 +1360,7 @@ let trActionsToMurphi actions knws =
 
 let print_startstate r num m knws =
   let msgOfKnws = getMsgOfRoles knws in
-  let str1 = String.concat (List.map ~f:(fun m1 -> if isSamePat m m1 then
+  String.concat (List.map ~f:(fun m1 -> if isSamePat m m1 then
                                                      match (m,m1) with
                                                      |(`Concat msgs,`Concat msgs1) -> let strs = (List.map2_exn ~f:(fun m' m1' -> 
                                                                                         match (m',m1') with
@@ -1372,8 +1372,18 @@ let print_startstate r num m knws =
                                                                                       sprintf "  role%s[%d].st := %s1;\n" r num r
                                                      |_ -> sprintf "null\n"
                                                   else sprintf "" ) msgOfKnws)
-  in
-  let str2 = sprintf "  intruder.B := Bob;
+;;
+(*startstate of roleA and role B*)
+let rec printMuriphiStart env k =
+  match env with
+  |`Null -> sprintf "null"
+  |`Env_agent (r,num,m) -> print_startstate r num m k;(* print startstates *)
+  |`Envlist envs -> String.concat (List.map ~f:(fun e -> printMuriphiStart e k) envs)
+  |_ -> sprintf "null"
+;;
+
+let printImpofStart actions knws =
+  let str1 = sprintf "  intruder.B := Bob;
   for i:chanNums do
     ch[i].empty := true;
   endfor;
@@ -1387,26 +1397,17 @@ let print_startstate r num m knws =
   endfor;
 
   msg_end := 0;
-  for i:msgLen do
-    pat1Set.content[i] := 0;
-    pat2Set.content[i] := 0;
-    pat3Set.content[i] := 0;
-    pat4Set.content[i] := 0;
-    pat5Set.content[i] := 0;
-    pat6Set.content[i] := 0;
-    pat7Set.content[i] := 0;
-    pat8Set.content[i] := 0; 
-  endfor;
-
-  pat1Set.length:= 0;
-  pat2Set.length:= 0;
-  pat3Set.length:= 0;
-  pat4Set.length:= 0;
-  pat5Set.length:= 0;
-  pat6Set.length:= 0;
-  pat7Set.length:= 0;
-  pat8Set.length:= 0;
-
+  for i:msgLen do\n"
+  in
+  let patlist = getPatList actions in    (* get all patterns from actions *)
+  let non_dup = del_duplicate patlist in (* delete duplicate *)
+  let non_equivalent = getEqvlMsgPattern non_dup in
+  let str2 = String.concat (List.mapi ~f:(fun i p -> sprintf "    pat%dSet.content[i] := 0;\n" (getPatNum p non_equivalent) ) non_equivalent)
+  in
+  let str3 = String.concat (List.mapi ~f:(fun i p -> sprintf "  pat%dSet.length := 0;\n" (getPatNum p non_equivalent) ) non_equivalent)
+  in
+  let kNum = getPatNum (`Pk "A") non_equivalent in
+  let str4 = sprintf "
   for i:indexType do 
     Spy_known[i] := false;
   endfor;
@@ -1414,35 +1415,34 @@ let print_startstate r num m knws =
   msg_end:=msg_end+1;
   msgs[msg_end].msgType := key;
   msgs[msg_end].k.ag:=Intruder;
-  msgs[msg_end].k.encType:=SK;  
-
-  pat1Set.length := pat1Set.length + 1; 
-  pat1Set.content[pat1Set.length] :=msg_end;
+  msgs[msg_end].k.encType:=SK;
+  pat%dSet.length := pat%dSet.length + 1; 
+  pat%dSet.content[pat%dSet.length] :=msg_end;
   Spy_known[msg_end] := true;
-
+  " kNum kNum kNum kNum
+  in
+  let str4 = sprintf "
   msg_end := msg_end+1;  
   msgs[msg_end].msgType := key;
   msgs[msg_end].k.ag:=Bob;
   msgs[msg_end].k.encType:=PK;
 
-  pat1Set.length := pat1Set.length + 1; 
-  pat1Set.content[pat1Set.length] :=msg_end;
+  pat%dSet.length := pat%dSet.length + 1; 
+  pat%dSet.content[pat%dSet.length] :=msg_end;
   Spy_known[msg_end] := true;
-
+  " kNum kNum kNum kNum
+  in
+  str1 ^ str2 ^ 
+  "  endfor;
+  for i:indexType do 
+    Spy_known[i] := false;
+  endfor;\n" ^
+  str3 ^ str4 ^
+  "
   eve_end := 0;  
   for i:eventNums do
      systemEvent[i].eveType := empty;
-  endfor;"
-  in
-  str1 ^ str2
-;;
-(*startstate of roleA and role B*)
-let rec printMuriphiStart env k =
-  match env with
-  |`Null -> sprintf "null"
-  |`Env_agent (r,num,m) -> print_startstate r num m k;(* print startstates *)
-  |`Envlist envs -> String.concat (List.map ~f:(fun e -> printMuriphiStart e k) envs)
-  |_ -> sprintf "null"
+  endfor;\n"
 ;;
 
 let rec printGoal2Murphi g =
@@ -1463,17 +1463,26 @@ end;\n" seq (output_msg m)
 
 and printAgreeGoal (seq,r1,r2,m) = 
   sprintf "
-/*invariant \"%s\"
+invariant \"%s\"   
   forall i:eventNums do
     forall j:eventNums do
-      (systemEvent[i].eveType = receive &
-      systemEvent[i].msg.noncePart = %s)
+      systemEvent[i].eveType = receive 
       -> 
-      (systemEvent[i].eveType = send &
-      systemEvent[i].receiver = systemEvent[j].receiver &
-      systemEvent[i].msg.noncePart = systemEvent[j].msg.noncePart)
-end;
-*/" seq (output_msg m)
+      (systemEvent[j].eveType = send &
+      systemEvent[j].receiver = systemEvent[i].receiver &
+      systemEvent[j].msg.msgType = systemEvent[i].msg.msgType &
+      systemEvent[j].msg.ag = systemEvent[i].msg.ag &
+      systemEvent[j].msg.k.encType = systemEvent[i].msg.k.encType &
+      systemEvent[j].msg.k.ag = systemEvent[i].msg.k.ag &
+      systemEvent[j].msg.noncePart = systemEvent[i].msg.noncePart &
+      systemEvent[j].msg.aencMsg = systemEvent[i].msg.aencMsg &
+      systemEvent[j].msg.aencKey = systemEvent[i].msg.aencKey &
+      systemEvent[j].msg.sencMsg = systemEvent[i].msg.sencMsg &
+      systemEvent[j].msg.sencKey = systemEvent[i].msg.sencKey &
+      systemEvent[j].msg.concatPart1 = systemEvent[i].msg.concatPart1 &
+      systemEvent[j].msg.concatPart2 = systemEvent[i].msg.concatPart2)
+   endforall
+endforall" seq 
 ;;
 
 (**return string*)
@@ -1634,7 +1643,7 @@ let output_murphiCode pocol =
   |`Pocol (k,a,env,g) -> (printMurphiConsAndType k) ^ (*print murphi const/type*)
                          (trActionsToMurphi a k) ^
                          "startstate\n" ^
-                         (printMuriphiStart env k) ^ 
+                         (printMuriphiStart env k) ^ (printImpofStart a k) ^
                          "end;\n" ^
                          (printGoal2Murphi g)
 ;;
