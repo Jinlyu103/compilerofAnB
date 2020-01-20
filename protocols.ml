@@ -520,7 +520,7 @@ let del_duplicate org_list =
 ;;
 
 (* To get equivalent msg pattern from patlist. *)
-let rec existSamePat eqvlPats pat =
+let rec existSamePat eqvlPats pat = 
   match eqvlPats with
   | [] -> false
   | hd::tl -> if isSamePat hd pat then true else existSamePat tl pat
