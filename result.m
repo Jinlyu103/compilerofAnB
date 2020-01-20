@@ -632,6 +632,25 @@ function exist(PatnSet:msgSet; msgNo:indexType):boolean;
     endfor;
     return flag;
   end;
+function msgContains(msg1: Message; Na: NonceType):boolean;  ---if msg1 contains msg2 then return true else return false
+  var flag : boolean;
+  begin
+    flag := false;
+    if (msg1.msgType = nonce) then
+      if (msg1.noncePart = Na) then
+        flag := true;
+      endif;
+    elsif (msg1.msgType = aenc) then
+      flag := msgContains(msgs[msg1.aencMsg],Na);
+    elsif (msg1.msgType = senc) then
+      flag := msgContains(msgs[msg1.sencMsg],Na);
+    elsif (msg1.msgType = concat) then
+      if (msgContains(msgs[msg1.concatPart1],Na) | msgContains(msgs[msg1.concatPart2],Na)) then
+        flag := true;
+      endif;
+    endif;
+    return flag;
+  end;
 ruleset i:roleANums do
 rule " roleA1 "
 roleA[i].st = A1 & ch[1].empty = true 
@@ -670,7 +689,7 @@ begin
    destruct2(msg,roleA[i].loc_Na,roleA[i].loc_Nb,roleA[i].loc_A);
    eve_end:= eve_end + 1 ;
    systemEvent[eve_end].eveType := receive;
-   systemEvent[eve_end].sender := roleB[i].loc_A;
+   systemEvent[eve_end].sender := roleA[i].B;
    systemEvent[eve_end].receiver := ch[2].receiver;
    systemEvent[eve_end].msg := ch[2].msg;
    if(roleA[i].loc_Na=roleA[i].Na&roleA[i].loc_A=roleA[i].A)then
@@ -1235,7 +1254,10 @@ end;
 
 invariant "auth1"   
   forall i:eventNums do
-      (systemEvent[i].eveType = receive )
+      (systemEvent[i].eveType = receive & 
+       systemEvent[i].receiver = Bob & 
+       systemEvent[i].sender = Alice &
+       msgContains(systemEvent[i].msg,Na) )
       -> 
       (exists j:eventNums do
       (systemEvent[j].eveType = send &

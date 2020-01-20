@@ -14,6 +14,6 @@ Environment:{
 }
 Goals:{
 [sec1] nonce(Nb);
-[auth1] B non-injectively agrees with A on nonce(Na)
+[auth1] Bob non-injectively agrees with Alice on nonce(Na)
 }
 end

@@ -412,7 +412,7 @@ let rec genRecvAct rolename i atoms length msgofRolename =
   sprintf "   clear msg;\n   msg := ch[%d].msg;\n   destruct%d(msg,%s);\n" i i (recvAtoms2Str atoms rolename) ^ (* (recvAtoms2Str atoms) *)
   sprintf "   eve_end:= eve_end + 1 ;\n" ^
   sprintf "   systemEvent[eve_end].eveType := receive;\n" ^
-  sprintf "   systemEvent[eve_end].sender := roleB[i].loc_A;\n" ^  (* the sender of the receive event is not get from ch[%d]*)
+  sprintf "   systemEvent[eve_end].sender := role%s[i].%s;\n" rolename (getSubField rolename) ^  (* the sender of the receive event is not get from ch[%d]: roleA.B or roleB.loc_A*)
   sprintf "   systemEvent[eve_end].receiver := ch[%d].receiver;\n" i ^
   sprintf "   systemEvent[eve_end].msg := ch[%d].msg;\n" i ^
   sprintf "   if(%s)then\n" (atoms2Str atoms rolename msgofRolename) ^
@@ -440,6 +440,11 @@ and atoms2Str atoms rolename msgofRolename =
   |_ -> "null" ) atoms)
   in
   String.concat ~sep:"&" (remove strlist "true")
+
+and getSubField r =
+  if r = "A" then 
+    sprintf "B"
+  else  sprintf "loc_A"
 ;;
 
 let trans act m i rolename length msgOfrolename =
@@ -1276,6 +1281,28 @@ let genExistCode () =
     return flag;
   end;\n";
 ;;
+
+let genMsgContains () =
+  sprintf "function msgContains(msg1: Message; Na: NonceType):boolean;  ---if msg1 contains msg2 then return true else return false
+  var flag : boolean;
+  begin
+    flag := false;
+    if (msg1.msgType = nonce) then
+      if (msg1.noncePart = Na) then
+        flag := true;
+      endif;
+    elsif (msg1.msgType = aenc) then
+      flag := msgContains(msgs[msg1.aencMsg],Na);
+    elsif (msg1.msgType = senc) then
+      flag := msgContains(msgs[msg1.sencMsg],Na);
+    elsif (msg1.msgType = concat) then
+      if (msgContains(msgs[msg1.concatPart1],Na) | msgContains(msgs[msg1.concatPart2],Na)) then
+        flag := true;
+      endif;
+    endif;
+    return flag;
+  end;\n"
+;;
 (* print procedures and functions. *)
 let print_procedures actions knws =
   match actions with
@@ -1293,7 +1320,7 @@ let print_procedures actions knws =
                   let str3 = genGet_msgNoCode () ^ genPrintMsgCode () in
                   (* print functions: inverseKey/lookUp/constructsAbyBC*)
                   let str4 = genInverseKeyCode ()^ genLookUpCode () ^ String.concat (List.map ~f:(fun pat -> constructMsgByPats pat non_equivalent) non_equivalent) in
-                  str1 ^ str2 ^ str3 ^ str4 ^ genExistCode ();
+                  str1 ^ str2 ^ str3 ^ str4 ^ genExistCode () ^genMsgContains ();
   |`Act (seq,r1,r2,n,m) ->begin
                           let patlist = getPatList actions in    (* get all patterns from actions *)
                           let non_dup = del_duplicate patlist in (* delete duplicate *)
@@ -1307,7 +1334,7 @@ let print_procedures actions knws =
                           let str3 = genGet_msgNoCode () ^ genPrintMsgCode () in
                           (* print functions: inverseKey/lookUp/constructsAbyBC*)
                           let str4 = genInverseKeyCode ()^ genLookUpCode () ^ String.concat (List.map ~f:(fun pat -> constructMsgByPats pat non_equivalent) non_equivalent) in
-                          str1 ^ str2 ^ str3 ^ str4 ^ genExistCode ();
+                          str1 ^ str2 ^ str3 ^ str4 ^ genExistCode () ^ genMsgContains ();
                           end;
   
 ;;
@@ -1465,7 +1492,10 @@ and printAgreeGoal (seq,r1,r2,m) =
   sprintf "
 invariant \"%s\"   
   forall i:eventNums do
-      (systemEvent[i].eveType = receive )
+      (systemEvent[i].eveType = receive & 
+       systemEvent[i].receiver = %s & 
+       systemEvent[i].sender = %s &
+       msgContains(systemEvent[i].msg,%s) )
       -> 
       (exists j:eventNums do
       (systemEvent[j].eveType = send &
@@ -1484,7 +1514,7 @@ invariant \"%s\"
       systemEvent[j].msg.concatPart1 = systemEvent[i].msg.concatPart1 &
       systemEvent[j].msg.concatPart2 = systemEvent[i].msg.concatPart2
      )endexists)
-endforall" seq 
+endforall" seq r1 r2 (output_msg m)
 ;;
 
 (**return string*)
