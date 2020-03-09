@@ -26,3 +26,5 @@ Goals:{
 [auth1] Host non-injectively agrees with CA on nonce(r)
 }
 end
+
+注：这是接入认证协议的A&B描述形式，actions中省掉了网关发送网关宣告报文这一动作，直接从终端开始发送接入认证报文。编译器解析器还要稍作修改才能读取报文类型msgType、序号seq，认证结果result，权限right等token

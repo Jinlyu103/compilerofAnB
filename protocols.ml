@@ -1365,7 +1365,7 @@ let printRecords r m =
 let rec printMurphiRecords knw =
   match knw with
   |`Null -> sprintf "null"
-  | `Knowledge (r,m) -> let str1 = sprintf "  Role%s : record" r in
+  | `Knowledge (r,m) -> let str1 = sprintf "  Role%s : record\n" r in
                         let str2 = sprintf "  end;\n" in
                         str1 ^ printRecords r m ^ str2
   | `Knowledge_list knws ->String.concat (List.map ~f:(fun k -> printMurphiRecords k) knws)
@@ -1520,16 +1520,19 @@ endforall" seq r1 r2 (output_msg m)
 (**return string*)
 let printMurphiConsAndType k =
   (* print const *)
-  sprintf "const
-  roleANum:1;
-  roleBNum:1;
+  let rlist = getRolesFromKnws k [] in
+  sprintf "const\n" ^
+  String.concat ~sep:"\n" (List.map ~f:(fun r -> sprintf "  role%sNum:1;" r) rlist) ^
+  "
   totalFact:20;
   chanNum:3;
-  eventNum:30;
-type
-  indexType:0..totalFact;
-  roleANums:1..roleANum;
-  roleBNums:1..roleBNum;
+  eventNum:30;\n" ^
+
+  (* print type*)
+  sprintf "type
+  indexType:0..totalFact;\n"^
+  String.concat ~sep:"\n" (List.map ~f:(fun r -> sprintf "  role%sNums:1..role%sNum;" r r) rlist) ^
+  "
   msgLen:0..totalFact;
   chanNums:1..chanNum;
   eventNums:0..eventNum;
@@ -1563,8 +1566,7 @@ type
     sender : AgentType;
     receiver : AgentType;
     empty : boolean;
-  end;
-  " ^ printMurphiRecords k ^ 
+  end;\n" ^ printMurphiRecords k ^ 
   "
   RoleIntruder: record
     B : AgentType;

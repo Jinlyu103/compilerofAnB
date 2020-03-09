@@ -42,7 +42,8 @@ type
     receiver : AgentType;
     empty : boolean;
   end;
-    RoleA : record   A : AgentType;
+  RoleA : record
+   A : AgentType;
    B : AgentType;
    Na : NonceType;
    loc_Na : NonceType;
@@ -51,7 +52,8 @@ type
    loc_B : AgentType;
    st : AStatus;
   end;
-  RoleB : record   B : AgentType;
+  RoleB : record
+   B : AgentType;
    Nb : NonceType;
    loc_Na : NonceType;
    loc_Nb : NonceType;
