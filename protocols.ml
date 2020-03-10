@@ -917,7 +917,7 @@ let genSynthCode m i patList =
    endif;
    num:=index;
    msg:=msgs[index];
-   end;\n" s s
+  end;\n" s s
   |`Pk role -> str1 ^ sprintf "
   Var index : indexType;\n begin
     index:=0;
@@ -938,8 +938,7 @@ let genSynthCode m i patList =
     num:=index;
     msg:=msgs[index];
   end;\n" role role
-  |`Var n ->str1 ^ sprintf "
-    Var index : indexType;\n  begin
+  |`Var n ->str1 ^ sprintf "  Var index : indexType;\n  begin
       index:=0;
       for i: msgLen do
         if(msgs[i].msgType=nonce) then
@@ -956,7 +955,7 @@ let genSynthCode m i patList =
       endif;
       num:=index;
       msg:=msgs[index];
-    end;\n" n n;
+  end;\n" n n;
   |_ -> ""
 ;;
 
@@ -1409,6 +1408,7 @@ let rec printMuriphiStart env k =
   |_ -> sprintf "null"
 ;;
 
+(* pritn startstate of arrays *)
 let printImpofStart actions knws =
   let str1 = sprintf "  intruder.B := Bob;
   for i:chanNums do
@@ -1604,8 +1604,7 @@ var
   Spy_known: Array[indexType] of boolean;
   systemEvent   : array[eventNums] of Event;
   eve_end       : eventNums;
-  emit: Array[indexType] of boolean;
-  "  
+  emit: Array[indexType] of boolean;\n\n"  
  (* printf "  AgentType : enum{Alice,Bob,Intruder};\n"; (* the roles should be derived by init knws*)
   printf "  NonceType : enum{Na,Nb};\n";  (* the nonces should be derived by init knws *)
   printf "  EncryptType : enum{PK,SK,Symk};\n";
@@ -1675,11 +1674,11 @@ let output_murphiCode pocol =
   match pocol with
   |`Null -> sprintf "null\n"
   |`Pocol (k,a,env,g) -> (printMurphiConsAndType k) ^ (*print murphi const/type*)
-                         (trActionsToMurphi a k) ^
-                         "startstate\n" ^
+                         (trActionsToMurphi a k) ^ (* print murphi rules *)
+                         "startstate\n" ^ (* print startstate *)
                          (printMuriphiStart env k) ^ (printImpofStart a k) ^
                          "end;\n" ^
-                         (printGoal2Murphi g)
+                         (printGoal2Murphi g) (* print murphi goals *)
 ;;
 
 let create_file filename str =
