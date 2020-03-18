@@ -29,7 +29,8 @@ type message = [
 ];;
 
 type action = [
-  | `Act of label * roleName * roleName * identifier * message
+  | `Act1 of label * roleName * roleName * identifier * message (* `Act1(seq, r1, r2, n, m) *)
+  | `Act2 of label * roleName * roleName * message (* No new nonce generated. `Act2(seq, r1, r2,  m) *)
   | `Actlist of action list
   | `Null
 ];;
@@ -74,7 +75,13 @@ type sign =
 type act = sign * message ;;
 
 (* part 2 functions definition *)
-let compileAct (seq,r1,r2,n,m) roleName =
+let compileAct1 (seq,r1,r2,n,m) roleName =
+  if roleName = r1 then Some (Plus,m)
+  else if roleName = r2 then Some (Minus,m)
+  else None
+;;
+
+let compileAct2 (seq,r1,r2,m) roleName =
   if roleName = r1 then Some (Plus,m)
   else if roleName = r2 then Some (Minus,m)
   else None
@@ -116,6 +123,16 @@ let rec getRolesFromKnws knws rl =
   | `Knowledge_list ks -> getroles ks rl
 and getroles ks rl =
   List.concat (List.map ~f:(fun k -> getRolesFromKnws k rl ) ks)
+;;
+
+let rec getRolesFromEnv env rl = 
+  match env with
+  |`Null -> rl
+  |`Env_agent (r, num, m) -> if listwithout rl r then r :: rl else rl
+  |`Envlist envs -> getRoles envs rl
+
+and getRoles envs rl =
+  List.concat (List.map ~f:(fun e -> getRolesFromEnv e rl ) envs)
 ;;
 
 (* get role's msg from knowledges : [msgofA;msgofB] *)
@@ -284,7 +301,8 @@ let rec getActsList actions rolelist =
   match actions with
   | `Null -> []
   | `Actlist arr ->  getActs arr rolelist
-  | `Act (seq,r1,r2,n,m) -> [List.map ~f:(fun rolename -> compileAct (seq,r1,r2,n,m) rolename) rolelist]
+  | `Act1 (seq,r1,r2,n,m) -> [List.map ~f:(fun rolename -> compileAct1 (seq,r1,r2,n,m) rolename) rolelist]
+  | `Act2 (seq,r1,r2,m) -> [List.map ~f:(fun rolename -> compileAct2 (seq,r1,r2,m) rolename) rolelist]
 
 and getActs arr rolelist =
   let roleStrlist = List.map ~f:(fun a -> getRoleStr a rolelist) arr in 
@@ -297,8 +315,10 @@ and getRoleStr a rolelist =
   match a with
   | `Null -> []  (* The input action here is absolutly the only act, not actlist nor `Null. So these patterns return [] is ok. *)
   | `Actlist arr -> []
-  | `Act (seq,r1,r2,n,m) -> List.map ~f:(fun rolename ->
-			    compileAct ((seq,r1,r2,n,m)) rolename) rolelist
+  | `Act1 (seq,r1,r2,n,m) -> List.map ~f:(fun rolename ->
+          compileAct1 ((seq,r1,r2,n,m)) rolename) rolelist
+  | `Act2 (seq,r1,r2,m) -> List.map ~f:(fun rolename ->
+			    compileAct2 ((seq,r1,r2,m)) rolename) rolelist
 ;; 
 (* Transforming the i-th action into murphy rule *)
 let rec getAtoms msg =
@@ -553,7 +573,8 @@ and insert x patlist =
 let rec getPatList actions =
   match actions with
   | `Null -> []
-  | `Act (seq,r1,r2,n,m) -> (getSubMsg m) @ [m]
+  | `Act1 (seq,r1,r2,n,m) -> (getSubMsg m) @ [m]
+  | `Act2 (seq,r1,r2,m) -> (getSubMsg m) @ [m] 
   | `Actlist arr -> List.concat (List.map ~f:getPatList arr)
 ;;
 
@@ -728,7 +749,7 @@ let print_murphiRules_EncsDecs actions knws =
                     let non_dup = del_duplicate patlist in (* delete duplicate *)
                     let non_equivalent = getEqvlMsgPattern non_dup in (* delete equivalent class *) 
                     String.concat (List.mapi ~f:(fun i pat -> print_murphiRule_byPats pat (i+1) non_equivalent ) non_equivalent)
-  | `Act (seq,r1,r2,n,m) -> let patlist = getPatList actions in    (* get all patterns from actions *)
+  | _ -> let patlist = getPatList actions in    (* get all patterns from actions *)
 		    	                  let non_dup = del_duplicate patlist in (* delete duplicate *)
                             let non_equivalent = getEqvlMsgPattern non_dup in (* delete equivalent class *) 
                             String.concat (List.mapi ~f:(fun i pat -> print_murphiRule_byPats pat (i+1) non_equivalent ) non_equivalent)
@@ -741,7 +762,8 @@ let print_murphiRules_EncsDecs actions knws =
 let rec getMsgs actions =
   match actions with
   | `Null -> []
-  | `Act (seq,r1,r2,n,m) -> [m] 
+  | `Act1 (seq,r1,r2,n,m) -> [m] 
+  | `Act2 (seq,r1,r2,m) -> [m]
   | `Actlist arr -> List.concat (List.map ~f:getMsgs arr)
 ;;
 
@@ -811,7 +833,12 @@ let print_murphiRule_ofIntruder actions knws =
                    let non_dup = del_duplicate patlist in (* delete duplicate *)
                    let non_equivalent = getEqvlMsgPattern non_dup in
                    String.concat (List.mapi ~f:(fun i m -> print_murphiRule_byMsgs m (i+1) non_equivalent) msgs)
-  |`Act (seq,r1,r2,n,m) -> let msgs = getMsgs actions in    (* get all msgs from actions *)
+  |`Act1 (seq,r1,r2,n,m) -> let msgs = getMsgs actions in    (* get all msgs from actions *)
+                           let patlist = getPatList actions in    (* get all patterns from actions *)
+                           let non_dup = del_duplicate patlist in (* delete duplicate *)
+                           let non_equivalent = getEqvlMsgPattern non_dup in
+                           String.concat (List.mapi ~f:(fun i m -> print_murphiRule_byMsgs m (i+1) non_equivalent) msgs)
+  |`Act2 (seq,r1,r2,m) -> let msgs = getMsgs actions in    (* get all msgs from actions *)
                            let patlist = getPatList actions in    (* get all patterns from actions *)
                            let non_dup = del_duplicate patlist in (* delete duplicate *)
                            let non_equivalent = getEqvlMsgPattern non_dup in
@@ -1320,7 +1347,7 @@ let print_procedures actions knws =
                   (* print functions: inverseKey/lookUp/constructsAbyBC*)
                   let str4 = genInverseKeyCode ()^ genLookUpCode () ^ String.concat (List.map ~f:(fun pat -> constructMsgByPats pat non_equivalent) non_equivalent) in
                   str1 ^ str2 ^ str3 ^ str4 ^ genExistCode () ^genMsgContains ();
-  |`Act (seq,r1,r2,n,m) ->begin
+  |_ ->begin
                           let patlist = getPatList actions in    (* get all patterns from actions *)
                           let non_dup = del_duplicate patlist in (* delete duplicate *)
                           let non_equivalent = getEqvlMsgPattern non_dup in (* delete equivalent class *) 
@@ -1377,7 +1404,8 @@ let rec printMurphiRecords knw =
 let trActionsToMurphi actions knws =
   match actions with
   |`Null -> sprintf "null"
-  |`Act (seq,r1,r2,n,m) -> print_murphiRule actions knws
+  |`Act1 (seq,r1,r2,n,m) -> print_murphiRule actions knws
+  |`Act2 (seq,r1,r2,m) -> print_murphiRule actions knws
   |`Actlist arr -> print_procedures actions knws^ (* print prcedures and functions. *)                   
                    print_murphiRule actions knws^ (* print rules for roleA and roleB *)
                    print_murphiRule_ofIntruder actions knws^ (* print rules for intruder *)
@@ -1517,10 +1545,10 @@ invariant \"%s\"
 endforall" seq r1 r2 (output_msg m)
 ;;
 
-(**return string*)
-let printMurphiConsAndType k =
+let printMurphiConsAndType k env=
   (* print const *)
   let rlist = getRolesFromKnws k [] in
+  let rolesOfEnv = getRolesFromEnv env [] in
   sprintf "const\n" ^
   String.concat ~sep:"\n" (List.map ~f:(fun r -> sprintf "  role%sNum:1;" r) rlist) ^
   "
@@ -1535,10 +1563,11 @@ let printMurphiConsAndType k =
   "
   msgLen:0..totalFact;
   chanNums:1..chanNum;
-  eventNums:0..eventNum;
+  eventNums:0..eventNum;\n"^
 
-  AgentType : enum{Alice,Bob,Intruder};
-  NonceType : enum{Na,Nb};
+  "
+  AgentType : enum{Alice, Bob,Intruder}; ---Alice and Bob should be derived from environment
+  NonceType : enum{Na,Nb};  ---Na,Nb should be nonceType instance derived from environment
   EncryptType : enum{PK,SK,Symk};
   KeyType: record 
     encType: EncryptType; 
@@ -1673,7 +1702,7 @@ var
 let output_murphiCode pocol =
   match pocol with
   |`Null -> sprintf "null\n"
-  |`Pocol (k,a,env,g) -> (printMurphiConsAndType k) ^ (*print murphi const/type*)
+  |`Pocol (k,a,env,g) -> (printMurphiConsAndType k env) ^ (*print murphi const/type*)
                          (trActionsToMurphi a k) ^ (* print murphi rules *)
                          "startstate\n" ^ (* print startstate *)
                          (printMuriphiStart env k) ^ (printImpofStart a k) ^

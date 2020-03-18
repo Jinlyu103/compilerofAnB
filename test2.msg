@@ -4,9 +4,9 @@ Knowledges:{
     B : <B.nonce(Nb)>
 }
 Actions:{
-[seq1] A->B (n1) : aenc{<nonce(Na).A>}pk(B);
-[seq2] B->A (n2) : aenc{<nonce(Na).nonce(Nb)>}pk(A);
-[seq3] A->B (n3) : aenc{nonce(Nb)}pk(B)
+[seq1] A->B (nonce(Na)) : aenc{<nonce(Na).A>}pk(B);
+[seq2] B->A (nonce(Nb)) : aenc{<nonce(Na).nonce(Nb)>}pk(A);
+[seq3] A->B () : aenc{nonce(Nb)}pk(B)
 }
 Environment:{
 [agent1] A [1] : <Alice.Intruder.nonce(Na)>;
