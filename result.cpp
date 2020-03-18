@@ -216,7 +216,7 @@ class mu_1_AgentType: public mu__byte
   };
 };
 
-const char *mu_1_AgentType::values[] = {"Alice","Bob","Intruder",NULL };
+const char *mu_1_AgentType::values[] = {"Bob","Intruder","Alice",NULL };
 
 /*** end of enum declaration ***/
 mu_1_AgentType mu_1_AgentType_undefined_var;
@@ -259,7 +259,7 @@ class mu_1_NonceType: public mu__byte
   };
 };
 
-const char *mu_1_NonceType::values[] = {"Na","Nb",NULL };
+const char *mu_1_NonceType::values[] = {"Nb","Na",NULL };
 
 /*** end of enum declaration ***/
 mu_1_NonceType mu_1_NonceType_undefined_var;
@@ -2724,11 +2724,11 @@ const int mu_roleBNum = 1;
 const int mu_totalFact = 20;
 const int mu_chanNum = 3;
 const int mu_eventNum = 30;
-const int mu_Alice = 1;
-const int mu_Bob = 2;
-const int mu_Intruder = 3;
-const int mu_Na = 4;
-const int mu_Nb = 5;
+const int mu_Bob = 1;
+const int mu_Intruder = 2;
+const int mu_Alice = 3;
+const int mu_Nb = 4;
+const int mu_Na = 5;
 const int mu_PK = 6;
 const int mu_SK = 7;
 const int mu_Symk = 8;

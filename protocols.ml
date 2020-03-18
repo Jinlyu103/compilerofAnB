@@ -115,6 +115,19 @@ let rec transpose xlist =
     (x :: List.map ~f:head xss) :: transpose (xs :: List.map ~f:tail xss)
 ;;
 
+let del_duplicate org_list =
+  match org_list with
+  | [] -> []
+  | l -> let len = List.length l in
+         let non_duplicate = ref [] in
+         for i = 0 to len do
+           match List.nth l i with
+           | None -> ()
+           | Some x -> if listwithout !non_duplicate x then non_duplicate := x::!non_duplicate
+         done;
+         !non_duplicate
+;;
+
 (* get roles from knowledge list *)
 let rec getRolesFromKnws knws rl =
   match knws with
@@ -125,14 +138,52 @@ and getroles ks rl =
   List.concat (List.map ~f:(fun k -> getRolesFromKnws k rl ) ks)
 ;;
 
-let rec getRolesFromEnv env rl = 
+let rec getEnvRoles env rl = 
   match env with
   |`Null -> rl
-  |`Env_agent (r, num, m) -> if listwithout rl r then r :: rl else rl
-  |`Envlist envs -> getRoles envs rl
+  |`Env_agent (r, num, m) -> getRolesInstance m rl (*if listwithout rl r then r :: rl else rl*)
+  |`Envlist envs -> getRole envs rl
 
-and getRoles envs rl =
-  List.concat (List.map ~f:(fun e -> getRolesFromEnv e rl ) envs)
+and getRole envs rl =
+  List.concat (List.map ~f:(fun e -> getEnvRoles e rl ) envs)
+
+and getRolesInstance m rl =
+  match m with
+  | `Str r -> if listwithout rl r then r :: rl else rl
+  | `Concat msgs -> getRolesInstances msgs rl
+  | _ -> rl
+
+and getRolesInstances msgs rl =
+  List.concat (List.map ~f:(fun m -> getRolesInstance m rl) msgs)
+;;
+
+let getRolesFromEnv env rl =
+  let rlist = getEnvRoles env rl in
+  del_duplicate rlist
+;;
+
+let rec getEnvNonces env nl = 
+  match env with
+  |`Null -> nl
+  |`Env_agent (r, num, m) -> getNonceInstance m nl 
+  |`Envlist envs -> getNonce envs nl
+
+and getNonce envs nl =
+  List.concat (List.map ~f:(fun e -> getEnvNonces e nl) envs)
+
+and getNonceInstance m nl =
+  match m with
+  | `Var n -> if listwithout nl n then n :: nl else nl
+  | `Concat msgs -> getNonceInstances msgs nl
+  | _ -> nl
+
+and getNonceInstances msgs nl =
+  List.concat (List.map ~f:(fun m -> getNonceInstance m nl) msgs)
+;;
+
+let getNonceFromEnv env nl =
+  let nlist = getEnvNonces env nl in
+  del_duplicate nlist
 ;;
 
 (* get role's msg from knowledges : [msgofA;msgofB] *)
@@ -193,83 +244,7 @@ and sprint_msglist msgs =
                 (output_msg m)^str) msgs)
 ;;
 
-(* print actions *)
-(*
-let rec output_action outc actions knws = 
-  let rolelist = getRolesFromKnws knws [] in
-  match actions with
-  | `Null -> output_string outc "null"
-  | `Actlist arr ->  print_actionlist outc arr knws
-  | `Act (seq,r1,r2,n,m) -> let roleStr = List.map ~f:(fun rolename ->
-			    compileAct ((seq,r1,r2,n,m)) rolename) rolelist in
-			List.iteri ~f:(fun i s -> match List.nth rolelist i with
-			    | None -> ()
-			    | Some r -> printf "role%s:" r
-			;
-			    match s with
-			    | Some(Plus,m) -> printf "+\n"
-			    | Some(Minus,m) -> printf "-\n"
-			    | None -> output_string outc "null"
-			) roleStr
 
-and print_actionlist outc arr knws =
-  output_string outc "Actions:{\n";
-  let rolelist = getRolesFromKnws knws [] in
-  let roleStrlist = List.map ~f:(fun a -> getRoleStr outc a knws) arr in (* get role strand from each action *)
-  let transRlStrList = transpose roleStrlist in   (* Transpose the List from each action strand *)
-  let strOfEachRoleNoEmpty = List.map ~f:(fun str -> remove str None) transRlStrList in (* remove Empty act *)
-  List.iteri ~f:(fun i roleStr ->   		  (* output the strand of each role *)
-		match List.nth rolelist i with
-		| None -> ()
-		| Some r -> printf "role%s:\n" r
-		;
-		List.iter ~f:(fun s -> match s with
-			    | Some(Plus,m) -> printf "(+,%a)\n" output_msg m
-			    | Some(Minus,m) -> printf "(-,%a)\n" output_msg m
-			    | None -> output_string outc "Empty" ) roleStr) strOfEachRoleNoEmpty;
-  output_string outc "}"
-
-and getRoleStr outc a knws = 
-  let rolelist = getRolesFromKnws knws [] in
-  match a with
-  | `Null -> []  (* The input action here is absolutly the only act, not actlist nor `Null. So these patterns return [] is ok. *)
-  | `Actlist arr -> []
-  | `Act (seq,r1,r2,n,m) -> List.map ~f:(fun rolename ->
-			    compileAct ((seq,r1,r2,n,m)) rolename) rolelist
-;;
-*)
-(* print knowledges *)
-(*
-let rec output_knowledge outc knw =
-  match knw with 
-  | `Null       -> output_string outc "null"
-  | `Knowledge_list arr  -> print_knowledgelist outc arr
-  | `Knowledge (r,m) -> printf "r%s:" r;output_msg outc m
-
-and print_knowledgelist outc arr = 
-  output_string outc "Knowledges{\n";
-  List.iteri ~f:(fun i v ->
-  if i > 0 then
-    output_string outc "\n";
-  output_knowledge outc v) arr;
-  output_string outc "\n}"
-;;
-*)
-(* print protocols *)
-(*let output_pocolcontext outc pocol = 
-  match pocol with
-  | `Null       -> output_string outc "null"
-  | `Pocol (k,a)-> printf "%a \n" output_knowledge k; (output_action outc a k)
-;;
-*)
-(* part 3 output_protocol *)
-(*
-let output_pocol outc value = 
-  match value with
-  | `Null       -> output_string outc "null"
-  | `Protocol (n,p)  -> printf "Protocol %s:\n%a\nEND" n output_pocolcontext p
-;;
-*)
 (* To determine whether two msgs are equivalent? *)
 let rec isSamePat m1 m2 =
   match (m1,m2) with
@@ -524,19 +499,6 @@ let rec getSubMsg msg =
   |`Pk role -> [`Pk role]
   |`Sk role -> [`Sk role]
   |`K (r1,r2) -> [`K (r1,r2)]
-;;
-
-let del_duplicate org_list =
-  match org_list with
-  | [] -> []
-  | l -> let len = List.length l in
-         let non_duplicate = ref [] in
-         for i = 0 to len do
-           match List.nth l i with
-           | None -> ()
-           | Some x -> if listwithout !non_duplicate x then non_duplicate := x::!non_duplicate
-         done;
-         !non_duplicate
 ;;
 
 (* To get equivalent msg pattern from patlist. *)
@@ -1347,21 +1309,21 @@ let print_procedures actions knws =
                   (* print functions: inverseKey/lookUp/constructsAbyBC*)
                   let str4 = genInverseKeyCode ()^ genLookUpCode () ^ String.concat (List.map ~f:(fun pat -> constructMsgByPats pat non_equivalent) non_equivalent) in
                   str1 ^ str2 ^ str3 ^ str4 ^ genExistCode () ^genMsgContains ();
-  |_ ->begin
-                          let patlist = getPatList actions in    (* get all patterns from actions *)
-                          let non_dup = del_duplicate patlist in (* delete duplicate *)
-                          let non_equivalent = getEqvlMsgPattern non_dup in (* delete equivalent class *) 
-                          let str1 = String.concat (List.mapi ~f:(fun i pat -> (genSynthCode pat (i+1) non_equivalent) ^ genIsPatCode pat (i+1) non_equivalent) non_equivalent)
-                          in
-                          let msgs = getMsgs actions in
-                          let str2 = String.concat (List.mapi ~f:(fun i m -> genCons m (i+1) non_equivalent ^ genDestruct m (i+1)) msgs)
-                          in
-                          (* print get_msgNo: procedure get_msgNo(msg:Message; Var num : indexType); *)
-                          let str3 = genGet_msgNoCode () ^ genPrintMsgCode () in
-                          (* print functions: inverseKey/lookUp/constructsAbyBC*)
-                          let str4 = genInverseKeyCode ()^ genLookUpCode () ^ String.concat (List.map ~f:(fun pat -> constructMsgByPats pat non_equivalent) non_equivalent) in
-                          str1 ^ str2 ^ str3 ^ str4 ^ genExistCode () ^ genMsgContains ();
-                          end;
+  | _ ->  begin
+          let patlist = getPatList actions in    (* get all patterns from actions *)
+          let non_dup = del_duplicate patlist in (* delete duplicate *)
+          let non_equivalent = getEqvlMsgPattern non_dup in (* delete equivalent class *) 
+          let str1 = String.concat (List.mapi ~f:(fun i pat -> (genSynthCode pat (i+1) non_equivalent) ^ genIsPatCode pat (i+1) non_equivalent) non_equivalent)
+          in
+          let msgs = getMsgs actions in
+          let str2 = String.concat (List.mapi ~f:(fun i m -> genCons m (i+1) non_equivalent ^ genDestruct m (i+1)) msgs)
+          in
+          (* print get_msgNo: procedure get_msgNo(msg:Message; Var num : indexType); *)
+          let str3 = genGet_msgNoCode () ^ genPrintMsgCode () in
+          (* print functions: inverseKey/lookUp/constructsAbyBC*)
+          let str4 = genInverseKeyCode ()^ genLookUpCode () ^ String.concat (List.map ~f:(fun pat -> constructMsgByPats pat non_equivalent) non_equivalent) in
+          str1 ^ str2 ^ str3 ^ str4 ^ genExistCode () ^ genMsgContains ();
+          end;
   
 ;;
 
@@ -1545,10 +1507,19 @@ invariant \"%s\"
 endforall" seq r1 r2 (output_msg m)
 ;;
 
+let agents2Str rlist =
+  String.concat ~sep:", " rlist
+;;
+
+let nonce2Str nlist =
+  String.concat ~sep:", " nlist
+;;
+
 let printMurphiConsAndType k env=
   (* print const *)
   let rlist = getRolesFromKnws k [] in
   let rolesOfEnv = getRolesFromEnv env [] in
+  let nonceOfEnv = getNonceFromEnv env [] in
   sprintf "const\n" ^
   String.concat ~sep:"\n" (List.map ~f:(fun r -> sprintf "  role%sNum:1;" r) rlist) ^
   "
@@ -1565,16 +1536,18 @@ let printMurphiConsAndType k env=
   chanNums:1..chanNum;
   eventNums:0..eventNum;\n"^
 
+  sprintf "
+  AgentType : enum{%s}; ---Alice and Bob should be derived from environment
+  NonceType : enum{%s};  ---Na,Nb should be nonceType instance derived from environment\n" (agents2Str rolesOfEnv) (nonce2Str nonceOfEnv)
+  ^
   "
-  AgentType : enum{Alice, Bob,Intruder}; ---Alice and Bob should be derived from environment
-  NonceType : enum{Na,Nb};  ---Na,Nb should be nonceType instance derived from environment
   EncryptType : enum{PK,SK,Symk};
   KeyType: record 
     encType: EncryptType; 
     ag: AgentType; 
   end;
 
-  AStatus : enum {A1,A2,A3};
+  AStatus : enum {A1,A2,A3}; ---the roles status should be derived from actions and the principals
   BStatus : enum {B1,B2,B3};
   MsgType : enum {null,agent,nonce,key,aenc,senc,concat,hash};
   EveType : enum {empty,send,receive};

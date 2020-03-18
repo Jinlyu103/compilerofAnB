@@ -12,8 +12,9 @@ type
   chanNums:1..chanNum;
   eventNums:0..eventNum;
 
-  AgentType : enum{Alice, Bob,Intruder}; ---Alice and Bob should be derived from environment
-  NonceType : enum{Na,Nb};  ---Na,Nb should be nonceType instance derived from environment
+  AgentType : enum{Bob, Intruder, Alice}; ---Alice and Bob should be derived from environment
+  NonceType : enum{Nb, Na};  ---Na,Nb should be nonceType instance derived from environment
+
   EncryptType : enum{PK,SK,Symk};
   KeyType: record 
     encType: EncryptType; 
