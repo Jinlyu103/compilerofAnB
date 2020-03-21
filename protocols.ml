@@ -1515,11 +1515,28 @@ let nonce2Str nlist =
   String.concat ~sep:", " nlist
 ;;
 
-let printMurphiConsAndType k env=
+let agentSStatus rlist lensOfrlist =
+  String.concat ~sep:";\n  " (List.mapi ~f:(fun i r -> 
+                            let len = match List.nth lensOfrlist i with
+                                      |None -> 0
+                                      |Some l -> l
+                            in
+                            let statuslist = ref [] in
+                            for j = 1 to len do
+                              let statu = sprintf "%s%d" r j in
+                              statuslist := !statuslist @ [statu]
+                            done;
+                            let status = String.concat ~sep:"," !statuslist in
+                            sprintf "%sStatus: enum{%s}" r status ) rlist)
+;;
+
+let printMurphiConsAndType actions k env=
   (* print const *)
   let rlist = getRolesFromKnws k [] in
   let rolesOfEnv = getRolesFromEnv env [] in
   let nonceOfEnv = getNonceFromEnv env [] in
+  let actsOfAllRls = getActsList actions rlist in (* Get act list of each role in rlist *)
+  let lensOfactStr = List.map ~f: List.length actsOfAllRls in
   sprintf "const\n" ^
   String.concat ~sep:"\n" (List.map ~f:(fun r -> sprintf "  role%sNum:1;" r) rlist) ^
   "
@@ -1537,18 +1554,18 @@ let printMurphiConsAndType k env=
   eventNums:0..eventNum;\n"^
 
   sprintf "
-  AgentType : enum{%s}; ---Alice and Bob should be derived from environment
-  NonceType : enum{%s};  ---Na,Nb should be nonceType instance derived from environment\n" (agents2Str rolesOfEnv) (nonce2Str nonceOfEnv)
+  AgentType : enum{%s}; 
+  NonceType : enum{%s};  \n" (agents2Str rolesOfEnv) (nonce2Str nonceOfEnv)
   ^
-  "
+  sprintf "
   EncryptType : enum{PK,SK,Symk};
   KeyType: record 
     encType: EncryptType; 
     ag: AgentType; 
-  end;
-
-  AStatus : enum {A1,A2,A3}; ---the roles status should be derived from actions and the principals
-  BStatus : enum {B1,B2,B3};
+  end;\n\n  %s;\n" (agentSStatus rlist lensOfactStr)
+  (*AStatus : enum {A1,A2,A3}; ---the roles status should be derived from actions and the principals
+  BStatus : enum {B1,B2,B3};*)
+  ^"
   MsgType : enum {null,agent,nonce,key,aenc,senc,concat,hash};
   EveType : enum {empty,send,receive};
   Message: record
@@ -1675,7 +1692,7 @@ var
 let output_murphiCode pocol =
   match pocol with
   |`Null -> sprintf "null\n"
-  |`Pocol (k,a,env,g) -> (printMurphiConsAndType k env) ^ (*print murphi const/type*)
+  |`Pocol (k,a,env,g) -> (printMurphiConsAndType a k env) ^ (*print murphi const/type*)
                          (trActionsToMurphi a k) ^ (* print murphi rules *)
                          "startstate\n" ^ (* print startstate *)
                          (printMuriphiStart env k) ^ (printImpofStart a k) ^
