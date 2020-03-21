@@ -1633,13 +1633,15 @@ let printMurphiConsAndType actions k env=
 
 var
   ch : Array[chanNums] of Channel;
-  roleA : Array[roleANums] of RoleA;
+
+  roleA : Array[roleANums] of RoleA;  ---variables of type Agents should be derivred by agents in knwss
   roleB : Array[roleBNums] of RoleB;
+
   intruder    : RoleIntruder;
   msgs : Array[indexType] of Message;
   msg_end: indexType;
 
-  pat1Set: msgSet;
+  pat1Set: msgSet;  ---patnSet should be derived from pats we got from actions
   pat2Set: msgSet;
   pat3Set: msgSet;
   pat4Set: msgSet;
