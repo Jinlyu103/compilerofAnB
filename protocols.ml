@@ -1329,12 +1329,32 @@ let print_procedures actions knws =
 
 (*-----------------------------------------------*)
 (* records of roleA and roleB; return string*)
+let rec getNonces msgs =
+  match msgs with
+  | [] -> []
+  | hd :: tl -> (getNoncesOfMsg hd) @ (getNonces tl)
+
+and getNoncesOfMsg m =
+  match m with
+  |`Var n -> [n]
+  |`Concat msgs -> List.concat (List.map ~f:getNoncesOfMsg msgs)
+  |_ -> []
+;;
+
+let nType2Str nlist = 
+  String.concat ~sep:";\n   " (List.map ~f:(fun n -> sprintf "loc_%s : NonceType" n) nlist)
+;;
+
+let agType2Str rlist =
+  String.concat ~sep: ";\n   " (List.map ~f:(fun r -> sprintf "loc_%s : AgentType" r) rlist)
+;;
+
 let printRecords r m =
   match m with
   |`Concat msgs -> begin
                    let str1 =String.concat (List.mapi ~f:(fun i m1 -> match m1 with
                                           |`Str r -> sprintf "   %s : AgentType;\n" r
-                                          |`Var n -> sprintf "   %s : NonceType;\n" n;                               
+                                          |`Var n -> sprintf "   %s : NonceType;\n" n                               
                                           |_ -> sprintf "null\n") msgs)
                    in
                   (*List.iteri ~f:(fun i m1 -> 
@@ -1343,20 +1363,24 @@ let printRecords r m =
                       |`Var n -> printf "   %s : NonceType;\n" n;                               
                       |_ -> printf "null\n") msgs;
                   *)
-                  let str2 = sprintf "   loc_Na : NonceType;\n   loc_Nb : NonceType;\n   loc_A : AgentType;\n   loc_B : AgentType;\n   st : %sStatus;\n" r
-                  in
-                  str1 ^ str2
+                  (* let str2 = sprintf "   %s;\n   %s;\n   st: %sStatus;\n" (nonceType) (agentType) r
+                  in *)
+                  (* let str2 = sprintf "   loc_Na : NonceType;\n   loc_Nb : NonceType;\n   loc_A : AgentType;\n   loc_B : AgentType;\n   st : %sStatus;\n" r
+                  in *)
+                  str1 (*^ str2*)
                   end
   |_ -> sprintf "null\n"
 ;;
 (*return string*)
-let rec printMurphiRecords knw =
+let rec printMurphiRecords knw nlist aglist =
   match knw with
   |`Null -> sprintf "null"
   | `Knowledge (r,m) -> let str1 = sprintf "  Role%s : record\n" r in
-                        let str2 = sprintf "  end;\n" in
-                        str1 ^ printRecords r m ^ str2
-  | `Knowledge_list knws ->String.concat (List.map ~f:(fun k -> printMurphiRecords k) knws)
+                        let str2 = sprintf "   %s;\n   %s;\n   st: %sStatus;\n" (nType2Str nlist) (agType2Str aglist) r
+                        in
+                        let str3 = sprintf "  end;\n" in
+                        str1 ^ printRecords r m ^ str2 ^ str3
+  | `Knowledge_list knws ->String.concat (List.map ~f:(fun k -> printMurphiRecords k nlist aglist) knws)
 ;;
 
 (*procedures and functions 
@@ -1515,6 +1539,7 @@ let nonce2Str nlist =
   String.concat ~sep:", " nlist
 ;;
 
+(* print agents status might occur (in enum {} type )*)
 let agentSStatus rlist lensOfrlist =
   String.concat ~sep:";\n  " (List.mapi ~f:(fun i r -> 
                             let len = match List.nth lensOfrlist i with
@@ -1532,6 +1557,9 @@ let agentSStatus rlist lensOfrlist =
 
 let printMurphiConsAndType actions k env=
   (* print const *)
+  let msgs = getMsgOfRoles k in
+  let nlist = getNonces msgs in
+
   let rlist = getRolesFromKnws k [] in
   let rolesOfEnv = getRolesFromEnv env [] in
   let nonceOfEnv = getNonceFromEnv env [] in
@@ -1585,7 +1613,7 @@ let printMurphiConsAndType actions k env=
     sender : AgentType;
     receiver : AgentType;
     empty : boolean;
-  end;\n" ^ printMurphiRecords k ^ 
+  end;\n" ^ printMurphiRecords k nlist rlist ^ (* print records of principals *)
   "
   RoleIntruder: record
     B : AgentType;
@@ -1624,69 +1652,7 @@ var
   systemEvent   : array[eventNums] of Event;
   eve_end       : eventNums;
   emit: Array[indexType] of boolean;\n\n"  
- (* printf "  AgentType : enum{Alice,Bob,Intruder};\n"; (* the roles should be derived by init knws*)
-  printf "  NonceType : enum{Na,Nb};\n";  (* the nonces should be derived by init knws *)
-  printf "  EncryptType : enum{PK,SK,Symk};\n";
-  printf "  KeyType: record \n";
-  printf "    encType: EncryptType; \n";  
-  printf "    ag: AgentType; \n  end;\n";  
-  printf "  AStatus : enum {A1,A2,A3};\n"; (* the status should be derived by A's strand *)
-  printf "  BStatus : enum {B1,B2,B3};\n"; (* the status should be derived by B's strand *)
-  printf "  MsgType : enum {null,agent,nonce,key,aenc,senc,concat,hash};\n"; (* message type *)
-  printf "  EveType : enum {empty,send,receive};\n"; (* event type *)
-  printf "  Message: record\n";
-  printf "    msgType : MsgType;\n";
-  printf "    ag : AgentType;\n";
-  printf "    noncePart : NonceType;\n";
-  printf "    k : KeyType;\n";
-  printf "    aencMsg : indexType;\n";
-  printf "    aencKey : indexType;\n";
-  printf "    sencMsg : indexType;\n";
-  printf "    sencKey : indexType;\n";
-  printf "    concatPart1 : indexType;\n";
-  printf "    concatPart2 : indexType;\n  end;\n";
-  printf "  Channel: record\n";
-  printf "    msg : Message;\n";
-  printf "    sender : AgentType;\n";
-  printf "    receiver : AgentType;\n";
-  printf "    empty : boolean;\n  end;\n\n";
-*)
- (* printMurphiRecords outc k;(*print records of roleA and roleB by knws*)
-
-  printf "  RoleIntruder: record\n";
-  printf "    B : AgentType;\n";
-  printf "  end;\n\n";
-  printf "  msgSet: record\n";
-  printf "    content : Array[msgLen] of indexType;\n";
-  printf "    length : msgLen;\n  end;\n\n";
-
-  printf "  Event: record\n";
-  printf "    eveType : EveType;\n";
-  printf "    sender  : AgentType;\n";
-  printf "    receiver: AgentType;\n";
-  printf "    msg	: Message;\n  end;\n\n";
-
-  (*print murphi vars *)
-  printf "var\n";
-  printf "  ch : Array[chanNums] of Channel;\n";
-  printf "  roleA : Array[roleANums] of RoleA;\n";
-  printf "  roleB : Array[roleBNums] of RoleB;\n";
-  printf "  intruder    : RoleIntruder;\n";
-  printf "  msgs : Array[indexType] of Message;\n";
-  printf "  msg_end: indexType;\n\n";
-  printf "  pat1Set: msgSet;\n";
-  printf "  pat2Set: msgSet;\n";
-  printf "  pat3Set: msgSet;\n";
-  printf "  pat4Set: msgSet;\n";
-  printf "  pat5Set: msgSet;\n";
-  printf "  pat6Set: msgSet;\n";
-  printf "  pat7Set: msgSet;\n";
-  printf "  pat8Set: msgSet;\n\n";
-  printf "  Spy_known: Array[indexType] of boolean;\n";
-  printf "  systemEvent   : array[eventNums] of Event;\n";
-  printf "  eve_end       : eventNums;\n";
-  printf "  emit: Array[indexType] of boolean;\n\n";
-  *)
+ 
 ;;
 
 let output_murphiCode pocol =

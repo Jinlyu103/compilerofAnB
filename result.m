@@ -14,8 +14,8 @@ type
   chanNums:1..chanNum;
   eventNums:0..eventNum;
 
-  AgentType : enum{ServerIP, GatewayIP, HostID}; ---Alice and Bob should be derived from environment
-  NonceType : enum{Na3, Na2, Na1};  ---Na,Nb should be nonceType instance derived from environment
+  AgentType : enum{ServerIP, GatewayIP, HostID}; 
+  NonceType : enum{Na3, Na2, Na1};  
 
   EncryptType : enum{PK,SK,Symk};
   KeyType: record 
@@ -51,23 +51,25 @@ type
    Host : AgentType;
    Gateway : AgentType;
    Na1 : NonceType;
-   loc_Na : NonceType;
-   loc_Nb : NonceType;
-   loc_A : AgentType;
-   loc_B : AgentType;
-   st : HostStatus;
+   loc_Na1 : NonceType;
+   loc_Na2 : NonceType;
+   loc_Na3 : NonceType;
+   loc_Host : AgentType;
+   loc_Gateway : AgentType;
+   loc_Server : AgentType;
+   st: HostStatus;
   end;
   RoleGateway : record
    Host : AgentType;
    Server : AgentType;
    Gateway : AgentType;
-
    loc_Na1 : NonceType;
    loc_Na2 : NonceType;
-
-   loc_A : AgentType;
-   loc_B : AgentType;
-   st : GatewayStatus;
+   loc_Na3 : NonceType;
+   loc_Host : AgentType;
+   loc_Gateway : AgentType;
+   loc_Server : AgentType;
+   st: GatewayStatus;
   end;
   RoleServer : record
    Host : AgentType;
@@ -75,11 +77,13 @@ type
    Server : AgentType;
    Na2 : NonceType;
    Na3 : NonceType;
-   loc_Na : NonceType;
-   loc_Nb : NonceType;
-   loc_A : AgentType;
-   loc_B : AgentType;
-   st : ServerStatus;
+   loc_Na1 : NonceType;
+   loc_Na2 : NonceType;
+   loc_Na3 : NonceType;
+   loc_Host : AgentType;
+   loc_Gateway : AgentType;
+   loc_Server : AgentType;
+   st: ServerStatus;
   end;
 
   RoleIntruder: record
@@ -100,8 +104,10 @@ type
 
 var
   ch : Array[chanNums] of Channel;
+
   roleA : Array[roleANums] of RoleA;
   roleB : Array[roleBNums] of RoleB;
+
   intruder    : RoleIntruder;
   msgs : Array[indexType] of Message;
   msg_end: indexType;
