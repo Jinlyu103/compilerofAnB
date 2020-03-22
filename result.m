@@ -104,15 +104,15 @@ type
 
 var
   ch : Array[chanNums] of Channel;
-
-  roleA : Array[roleANums] of RoleA;
-  roleB : Array[roleBNums] of RoleB;
+  roleHost : Array[roleHostNums] of RoleHost;
+  roleGateway : Array[roleGatewayNums] of RoleGateway;
+  roleServer : Array[roleServerNums] of RoleServer
 
   intruder    : RoleIntruder;
   msgs : Array[indexType] of Message;
   msg_end: indexType;
 
-  pat1Set: msgSet;
+  pat1Set: msgSet;  ---patnSet should be derived from pats we got from actions
   pat2Set: msgSet;
   pat3Set: msgSet;
   pat4Set: msgSet;

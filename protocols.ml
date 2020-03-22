@@ -1555,6 +1555,13 @@ let agentSStatus rlist lensOfrlist =
                             sprintf "%sStatus: enum{%s}" r status ) rlist)
 ;;
 
+(*roleA : Array[roleANums] of RoleA;  ---variables of type Agents should be derivred by agents in knwss
+  roleB : Array[roleBNums] of RoleB;*)
+let rlistToVars rlist =
+  String.concat ~sep:";\n  " (List.map ~f:(fun r -> 
+                sprintf "role%s : Array[role%sNums] of Role%s" r r r) rlist)
+;;
+
 let printMurphiConsAndType actions k env=
   (* print const *)
   let msgs = getMsgOfRoles k in
@@ -1632,11 +1639,9 @@ let printMurphiConsAndType actions k env=
   end;
 
 var
-  ch : Array[chanNums] of Channel;
-
-  roleA : Array[roleANums] of RoleA;  ---variables of type Agents should be derivred by agents in knwss
-  roleB : Array[roleBNums] of RoleB;
-
+  ch : Array[chanNums] of Channel;\n"^
+  sprintf "  %s\n" (rlistToVars rlist )^
+  "
   intruder    : RoleIntruder;
   msgs : Array[indexType] of Message;
   msg_end: indexType;
