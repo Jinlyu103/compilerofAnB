@@ -106,21 +106,20 @@ var
   ch : Array[chanNums] of Channel;
   roleHost : Array[roleHostNums] of RoleHost;
   roleGateway : Array[roleGatewayNums] of RoleGateway;
-  roleServer : Array[roleServerNums] of RoleServer
+  roleServer : Array[roleServerNums] of RoleServer;
 
   intruder    : RoleIntruder;
   msgs : Array[indexType] of Message;
   msg_end: indexType;
-
-  pat1Set: msgSet;  ---patnSet should be derived from pats we got from actions
+  
+  pat1Set: msgSet;
   pat2Set: msgSet;
   pat3Set: msgSet;
   pat4Set: msgSet;
   pat5Set: msgSet;
   pat6Set: msgSet;
-  pat7Set: msgSet;
-  pat8Set: msgSet;
 
+  
   Spy_known: Array[indexType] of boolean;
   systemEvent   : array[eventNums] of Event;
   eve_end       : eventNums;
@@ -193,11 +192,11 @@ procedure isPat2(msg:Message; Var flag:boolean);
   end;
 ---pat3: Server.Na3 
 procedure lookAddPat3(Server:AgentType; Na3:NonceType; Var msg:Message; Var num : indexType);
-  Var msg1, msg2: Message;
-      index,i1,i2:indexType;
+  Var msg1, msg2 : Message;
+      index,i1,i2 : indexType;
   begin
    index:=0;
-   lookAddPat0(null,msg1,i1);
+   lookAddPat2(Server,msg1,i1);
    lookAddPat1(Na3,msg2,i2);
    for i : msgLen do
      if (msgs[i].msgType = concat) then
@@ -210,8 +209,8 @@ procedure lookAddPat3(Server:AgentType; Na3:NonceType; Var msg:Message; Var num 
      msg_end := msg_end + 1 ;
      index := msg_end;
      msgs[index].msgType := concat;
-     msgs[index].concatPart1:=i1; 
-     msgs[index].concatPart2:=i2; 
+     msgs[index].concatPart1 := i1;
+     msgs[index].concatPart2 := i2; 
    endif;
    num:=index;
    msg:=msgs[index];
@@ -274,15 +273,16 @@ procedure isPat5(msg:Message; Var flag:boolean);
   end;
 ---pat6: Server.Na3.aenc{< Server.Na3 >}sk(Server) 
 procedure lookAddPat6(Server:AgentType; Na3:NonceType; Server:AgentType; Na3:NonceType; ; Var msg:Message; Var num : indexType);
-  Var msg1, msg2: Message;
-      index,i1,i2:indexType;
+  Var msg1, msg2, msg3 : Message;
+      index,i1,i2,i3 : indexType;
   begin
    index:=0;
-   lookAddPat0(null,msg1,i1);
+   lookAddPat2(Server,msg1,i1);
    lookAddPat1(Na3,msg2,i2);
+   lookAddPat5(Server,Na3,Server,msg3,i3);
    for i : msgLen do
      if (msgs[i].msgType = concat) then
-       if (msgs[i].concatPart1 = i1 & msgs[i].concatPart2 = i2) then
+       if (msgs[i].concatPart1 = i1 & msgs[i].concatPart2 = i2 & msgs[i].concatPart3 = i3) then
           index:=i;
        endif;
      endif;
@@ -291,8 +291,9 @@ procedure lookAddPat6(Server:AgentType; Na3:NonceType; Server:AgentType; Na3:Non
      msg_end := msg_end + 1 ;
      index := msg_end;
      msgs[index].msgType := concat;
-     msgs[index].concatPart1:=i1; 
-     msgs[index].concatPart2:=i2; 
+     msgs[index].concatPart1 := i1;
+     msgs[index].concatPart2 := i2;
+     msgs[index].concatPart3 := i3; 
    endif;
    num:=index;
    msg:=msgs[index];
