@@ -547,18 +547,12 @@ let rec list_max xs =
   | x :: remainder -> max x (list_max remainder) (* multiple element list: recursive case *)
 ;;
 
-let rec getMaxLenMsg actions = 
-  match actions with
-  | `Null -> 0 
-  | `Act1 (seq,r1,r2,n,m) -> getMsgLen m
-  | `Act2 (seq,r1,r2,m) -> getMsgLen m 
-  | `Actlist arr -> list_max (List.map ~f:getMaxLenMsg arr)
-
-and getMsgLen m =
-  match m with
-  |`Null -> 0
-  |`Concat msgs -> List.length msgs
-  |_ -> 1
+let getMaxLenMsg actions = 
+  let pats = getPatList actions in
+  list_max (List.map ~f:(fun p -> match p with
+                                |`Null -> 0
+                                |`Concat msgs -> List.length msgs
+                                |_ -> 1 ) pats)
 ;;
 
 (* 2019-12-17 *)
