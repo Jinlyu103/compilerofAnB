@@ -123,7 +123,7 @@ let del_duplicate org_list =
          for i = 0 to len do
            match List.nth l i with
            | None -> ()
-           | Some x -> if listwithout !non_duplicate x then non_duplicate := x::!non_duplicate
+           | Some x -> if listwithout !non_duplicate x then non_duplicate := !non_duplicate @ [x]
          done;
          !non_duplicate
 ;;
@@ -540,6 +540,27 @@ let rec getPatList actions =
   | `Actlist arr -> List.concat (List.map ~f:getPatList arr)
 ;;
 
+let rec list_max xs =
+  match xs with
+  | [] ->  failwith "list_max called on empty list" (* empty list: fail *)
+  | [x] -> x (* single element list: return the element *)
+  | x :: remainder -> max x (list_max remainder) (* multiple element list: recursive case *)
+;;
+
+let rec getMaxLenMsg actions = 
+  match actions with
+  | `Null -> 0 
+  | `Act1 (seq,r1,r2,n,m) -> getMsgLen m
+  | `Act2 (seq,r1,r2,m) -> getMsgLen m 
+  | `Actlist arr -> list_max (List.map ~f:getMaxLenMsg arr)
+
+and getMsgLen m =
+  match m with
+  |`Null -> 0
+  |`Concat msgs -> List.length msgs
+  |_ -> 1
+;;
+
 (* 2019-12-17 *)
 (* 2019-12-18 *)
 (* encrypt and decrypt / enconcat and deconcat *)
@@ -813,6 +834,7 @@ let atoms2Parms atoms =
   |`Var n -> n ^ ":NonceType"
   |`Str s -> s ^ ":AgentType"
   |`Pk role -> role ^ ":AgentType"
+  |`Sk role -> role ^ ":AgentType"
   |_ -> "" ) atoms )
 ;;
 
@@ -821,6 +843,7 @@ let atoms2Parms1 atoms =
   |`Var n ->"Var "^ n ^ ":NonceType"
   |`Str s ->"Var "^ s ^ ":AgentType"
   |`Pk role ->"Var "^ role ^ ":AgentType"
+  |`Sk role ->"Var "^ role ^ ":AgentType"
   |_ -> "" ) atoms )
 ;;
 
@@ -832,10 +855,32 @@ let atom2Str atoms =
   |_ -> "" ) atoms )
 ;;
 
+(* let removeTags atoms =
+  let l = ref [] in
+  List.iter ~f:(fun a -> match a with
+                        |`Var n -> if listwithout !l n then l := !l@[n]
+                        |`Str r -> if listwithout !l r then l := !l@[r]
+                        |`Pk r -> if listwithout !l r then l := !l@[r]
+                        |`Sk r -> if listwithout !l r then l := !l@[r]
+                        |_ -> ()) atoms;
+  !l
+;; *)
+let delDup atoms = 
+  let atoms1 = ref [] in
+  List.iter ~f:(fun a -> match a with
+                        |`Var n -> atoms1 := !atoms1 @ [`Var n]
+                        |`Str r -> atoms1 := !atoms1 @ [`Str r] 
+                        |`Pk r -> atoms1 := !atoms1 @ [`Str r] 
+                        |`Sk r -> atoms1 := !atoms1 @ [`Str r] 
+                        |_ -> () ) atoms;
+  del_duplicate !atoms1
+;;
+
 let genSynthCode m i patList =
   let atoms = getAtoms m in
+  let noDupAtoms = delDup atoms in
   let str1 = sprintf "---pat%d: %s \nprocedure lookAddPat%d" i (output_msg m) i ^ 
-             sprintf "(%s; Var msg:Message; Var num : indexType);\n" (atoms2Parms atoms)
+             sprintf "(%s; Var msg:Message; Var num : indexType);\n" (atoms2Parms noDupAtoms)
   in
   match m with
   |`Aenc(m1,k1) -> begin
@@ -843,6 +888,7 @@ let genSynthCode m i patList =
                   let i2= getPatNum k1 patList in
                   let keyAg=match k1 with
                             |`Pk role -> role
+                            |`Sk role -> role
                             |_ -> "null"
                   in
                   let m1Atoms = getAtoms m1 in  
@@ -884,12 +930,13 @@ let genSynthCode m i patList =
                                                          in
                                                          (str, getPatNum (`K (r1, r2)) patList)
                                   |Some (`Aenc (m1,k1)) -> let atoms = getAtoms (`Aenc(m1,k1)) in
+                                                           let noDupAtoms = delDup atoms in
                                                            let str = String.concat ~sep:"," (List.map ~f:(fun a -> match a with
                                                                                         |`Var n -> n
                                                                                         |`Str r -> r
                                                                                         |`Pk r -> r
                                                                                         |`Sk r -> r
-                                                                                        |`K(r1,r2) -> r1^","^r2) atoms)
+                                                                                        |`K(r1,r2) -> r1^","^r2) noDupAtoms)
                                                             in
                                                            (str, getPatNum (`Aenc (m1,k1)) patList)
                                   |Some (`Senc (m1,k1)) -> let atoms = getAtoms (`Aenc(m1,k1)) in
@@ -947,8 +994,7 @@ let genSynthCode m i patList =
    num:=index;
    msg:=msgs[index];
   end;\n" s s
-  |`Pk role -> str1 ^ sprintf "
-  Var index : indexType;\n begin
+  |`Pk role -> str1 ^ sprintf "  Var index : indexType;\n  begin
     index:=0;
     for i: msgLen do
       if (msgs[i].msgType = key) then
@@ -962,6 +1008,25 @@ let genSynthCode m i patList =
       index := msg_end;
       msgs[index].msgType := key;
       msgs[index].k.encType:=PK; 
+      msgs[index].k.ag:=%s;
+    endif;
+    num:=index;
+    msg:=msgs[index];
+  end;\n" role role
+  |`Sk role -> str1 ^ sprintf "  Var index : indexType;\n  begin
+    index:=0;
+    for i: msgLen do
+      if (msgs[i].msgType = key) then
+        if (msgs[i].k.encType = SK & msgs[i].k.ag = %s) then
+          index:=i;
+        endif;
+      endif;
+    endfor;
+    if(index=0) then
+      msg_end := msg_end + 1 ;
+      index := msg_end;
+      msgs[index].msgType := key;
+      msgs[index].k.encType:=SK; 
       msgs[index].k.ag:=%s;
     endif;
     num:=index;
@@ -1037,11 +1102,20 @@ let genIsPatCode m i patList =
     flag := flag1;\n  end;\n"
   end;
   |`Pk role ->begin
-              str1 ^ sprintf "
-  var flag1 : boolean;\n  begin
+              str1 ^ sprintf "  var flag1 : boolean;\n  begin
     flag1 := false;
     if (msg.msgType = key) then
       if (msg.k.encType = PK) then
+        flag1 := true;
+      endif;
+    endif;
+    flag := flag1;\n  end;\n"
+  end;
+  |`Sk role ->begin
+    str1 ^ sprintf "  var flag1 : boolean;\n  begin
+    flag1 := false;
+    if (msg.msgType = key) then
+      if (msg.k.encType = SK) then
         flag1 := true;
       endif;
     endif;
@@ -1621,6 +1695,12 @@ let printMurphiConsAndType actions k env=
   let non_dup = del_duplicate patlist in (* delete duplicate *)
   let pats = getEqvlMsgPattern non_dup in
 
+  let maxMsgLen = getMaxLenMsg actions in
+  let concatParts = ref ""  in
+  for i = 1 to maxMsgLen do
+    concatParts := sprintf "%s\n    concatPart%d : indexType;" !concatParts i
+  done;
+
   sprintf "const\n" ^
   String.concat ~sep:"\n" (List.map ~f:(fun r -> sprintf "  role%sNum:1;" r) rlist) ^
   "
@@ -1660,9 +1740,7 @@ let printMurphiConsAndType actions k env=
     aencMsg : indexType;
     aencKey : indexType;
     sencMsg : indexType;
-    sencKey : indexType;
-    concatPart1 : indexType;
-    concatPart2 : indexType;
+    sencKey : indexType;"^ !concatParts ^ "
   end;
   Channel: record
     msg : Message;
