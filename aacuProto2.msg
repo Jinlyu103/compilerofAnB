@@ -9,7 +9,7 @@ Actions:{
 [seq2] Gateway -> Server  () : <Host.nonce(Na1).aenc{<Host.nonce(Na1)>}sk(Host)>;
 
 [seq3] Server -> Gateway  (nonce(Na2)) : <Server.nonce(Na2).aenc{<Server.nonce(Na2)>}sk(Server)>;
-[seq4] Gateway-> Host ():      <Server.nonce(Na2).aenc{<Host.nonce(Na2)>}sk(Server)>;
+[seq4] Gateway-> Host ():      <Server.nonce(Na2).aenc{<Server.nonce(Na2)>}sk(Server)>;
 
 [seq5] Host -> Gateway  (): <Host.nonce(Na2).aenc{<Host.nonce(Na2)>}sk(Host)>;
 [seq6] Gateway -> Server(): <Host.nonce(Na2).aenc{<Host.nonce(Na2)>}sk(Host)>;
