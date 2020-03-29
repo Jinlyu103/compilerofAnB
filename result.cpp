@@ -3887,7 +3887,7 @@ return mu_index;
 };
 /*** end function declaration ***/
 
-mu_1_indexType mu_construct6By12(const mu_1_indexType& mu_msgNo1,const mu_1_indexType& mu_msgNo2)
+mu_1_indexType mu_construct6By11(const mu_1_indexType& mu_msgNo1,const mu_1_indexType& mu_msgNo2)
 {
 /*** Variable declaration ***/
 mu_1_indexType mu_index("index",0);
@@ -3903,10 +3903,10 @@ mu_1_Message mu_msg("msg",24);
 
 mu_index = 0;
 mu_locNa = mu_msgs[mu_msgNo1].mu_noncePart;
-mu_locNb = mu_msgs[mu_msgNo2].mu_noncePart;
+mu_locNb = mu_msgs[mu_msgNo1].mu_noncePart;
 mu_lookAddPat6 ( mu_locNa, mu_locNb, mu_msg, mu_index );
 return mu_index;
-	Error.Error("The end of function construct6By12 reached without returning values.");
+	Error.Error("The end of function construct6By11 reached without returning values.");
 };
 /*** end function declaration ***/
 
@@ -4720,7 +4720,7 @@ bool mu__boolexpr70;
 }
   if (!(mu__boolexpr67)) mu__boolexpr66 = FALSE ;
   else {
-  mu__boolexpr66 = (!(mu_Spy_known[mu_construct6By12( mu_pat1Set.mu_content[mu_i0], mu_pat1Set.mu_content[mu_i1] )])) ; 
+  mu__boolexpr66 = (!(mu_Spy_known[mu_construct6By11( mu_pat1Set.mu_content[mu_i0], mu_pat1Set.mu_content[mu_i1] )])) ; 
 }
     return mu__boolexpr66;
   }
@@ -4760,7 +4760,7 @@ bool mu__boolexpr75;
 }
   if (!(mu__boolexpr72)) mu__boolexpr71 = FALSE ;
   else {
-  mu__boolexpr71 = (!(mu_Spy_known[mu_construct6By12( mu_pat1Set.mu_content[mu_i0], mu_pat1Set.mu_content[mu_i1] )])) ; 
+  mu__boolexpr71 = (!(mu_Spy_known[mu_construct6By11( mu_pat1Set.mu_content[mu_i0], mu_pat1Set.mu_content[mu_i1] )])) ; 
 }
 	      if (mu__boolexpr71) {
 		if ( ( TRUE  ) )
@@ -4792,7 +4792,7 @@ bool mu__boolexpr75;
 /*** Variable declaration ***/
 mu_1_indexType mu_concatMsgNo("concatMsgNo",0);
 
-mu_concatMsgNo = mu_construct6By12( mu_pat1Set.mu_content[mu_i0], mu_pat1Set.mu_content[mu_i1] );
+mu_concatMsgNo = mu_construct6By11( mu_pat1Set.mu_content[mu_i0], mu_pat1Set.mu_content[mu_i1] );
 mu_Spy_known[mu_concatMsgNo] = mu_true;
 if ( !(mu_exist( mu_pat6Set, mu_concatMsgNo )) )
 {

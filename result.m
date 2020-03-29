@@ -587,7 +587,7 @@ function construct5By34(msgNo3,msgNo4:indexType):indexType;
    lookAddPat5(locNa,locA,k_ag,msg,index);
    return index;
   end;
-function construct6By12(msgNo1,msgNo2:indexType):indexType;
+function construct6By11(msgNo1,msgNo2:indexType):indexType;
   var index : indexType;
       locNa:NonceType;
       locNb:NonceType;
@@ -595,7 +595,7 @@ function construct6By12(msgNo1,msgNo2:indexType):indexType;
   begin
      index := 0;
      locNa:= msgs[msgNo1].noncePart;
-     locNb:= msgs[msgNo2].noncePart;
+     locNb:= msgs[msgNo1].noncePart;
      lookAddPat6(locNa,locNb,msg,index);
    return index;
   end;
