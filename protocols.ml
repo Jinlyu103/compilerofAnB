@@ -1316,7 +1316,7 @@ let rec consMsgBySubs m patList =
                     let i2 = getPatNum k1 patList in
                     let subMsgNo = String.concat (List.map ~f:(fun i -> sprintf "%d" i) [i1; i2])
                     in
-                    let msgNoStr = String.concat ~sep:"," (List.mapi ~f:(fun i j -> sprintf "msgNo%d" (i+1)) [i1; i2])
+                    let msgNoStr = String.concat ~sep:"," (List.mapi ~f:(fun i j -> sprintf "msgNo%d" j) [i1; i2])
                     in
                     sprintf "function construct%dBy%s(%s:indexType):indexType;\n" i subMsgNo msgNoStr ^
                     sprintf "  var index : indexType;\n"^
@@ -1324,9 +1324,9 @@ let rec consMsgBySubs m patList =
                     sprintf "      k_ag : AgentType;\n"^
                     sprintf "      msg : Message;\n  begin\n"^
                     sprintf "   index := 0;\n"^
-                    sprintf "   %s;\n" (atoms2Statm atoms m1 patList)^
-                    sprintf "   k_ag := msgs[msgNo%d].k.ag;\n" i2^
-                    sprintf "   lookAddPat%d(%s,k_ag,msg,index);\n" i (atoms2Str2 noDupAtoms)^
+                    sprintf "   %s;\n" (atoms2Statm atoms m patList)^
+                    (* sprintf "   k_ag := msgs[msgNo%d].k.ag;\n" i2^ *)
+                    sprintf "   lookAddPat%d(%s,msg,index);\n" i (atoms2Str2 noDupAtoms)^
                     sprintf "   return index;\n" ^
                     sprintf "  end;\n"
   |`Senc(m1, k1) -> sprintf " ---Sorry, the compilation process of symmetric encryption is not written !\n\n"
@@ -1362,24 +1362,37 @@ and atoms2Str2 atoms=
                       |_ -> "") atoms) 
 
 and atoms2Statm atoms m patList=
-    let j = getPatNum m patList in
     match m with 
-    |`Concat msgs -> String.concat ~sep:";\n   " (List.mapi ~f:(fun i atom -> 
+    |`Concat msgs -> let j = getPatNum m patList in
+                     String.concat ~sep:";\n   " (List.mapi ~f:(fun i atom -> 
                       match atom with
                       |`Var n -> "loc"^n^":= msgs[msgs[msgNo"^ string_of_int j^"].concatPart"^(string_of_int (i+1))^"].noncePart"
                       |`Str r -> "loc"^r^":= msgs[msgs[msgNo"^ string_of_int j^"].concatPart"^(string_of_int (i+1))^"].ag"
                       |_ -> "") atoms)
-    |`Var n -> "loc"^n^":=msgs[msgNo"^string_of_int j^"].noncePart"
+    |`Var n -> let j = getPatNum m patList in
+              "loc"^n^":=msgs[msgNo"^string_of_int j^"].noncePart"
+    |`Pk r -> let j = getPatNum m patList in
+              "loc"^r^"Pk := msgs[msgNo"^ string_of_int j ^"].k.ag"
+    |`Aenc(m1,k1)-> atoms2Statm atoms m1 patList ^ ";\n" ^atoms2Statm atoms k1 patList
     |_ -> ""
 
 and atoms2Statm1 atoms msgs = (* occurred some problem *)
-    String.concat ~sep:";\n" (List.mapi ~f:(fun i m -> 
+    String.concat ~sep:";\n" (List.map ~f:(fun m -> let i = getNum m msgs in 
                               match m with
-                              |`Var n -> "     loc"^n^":= msgs[msgNo"^(string_of_int i)^"].noncePart"
-                              |`Str r -> "     loc"^r^":= msgs[msgNo"^(string_of_int i)^"].ag"
+                              |`Var n -> 
+                                        "     loc"^n^":= msgs[msgNo"^(string_of_int i)^"].noncePart"
+                              |`Str r -> 
+                                        "     loc"^r^":= msgs[msgNo"^(string_of_int i)^"].ag"
                               |`Pk r -> "     loc"^r^":= msgs[msgNo"^(string_of_int i)^"].k.ag"
                               |`Sk r -> "     loc"^r^":= msgs[msgNo"^(string_of_int i)^"].k.ag"
                               | _ -> "" ) atoms)
+
+and getNum m msgs = 
+  match msgs with 
+  | [] -> failwith "-1"
+  | hd :: tl -> let atoms = getAtoms hd in
+                if listwithout atoms m then (getNum m tl) + 1
+                else 1
 ;;
 let rec constructMsgByPats m patList =
   let i = getPatNum m patList in
@@ -1555,7 +1568,7 @@ let print_procedures actions =
                   (* print get_msgNo: procedure get_msgNo(msg:Message; Var num : indexType); *)
                   let str3 = genGet_msgNoCode () ^ genPrintMsgCode () in
                   (* print functions: inverseKey/lookUp/constructsAbyBC*)
-                  let str4 = genInverseKeyCode ()^ genLookUpCode () ^ String.concat (List.map ~f:(fun pat -> constructMsgByPats pat non_equivalent) non_equivalent) in
+                  let str4 = genInverseKeyCode ()^ genLookUpCode () ^ String.concat (List.map ~f:(fun pat -> consMsgBySubs pat non_equivalent) non_equivalent) in
                   str1 ^ str2 ^ str3 ^ str4 ^ genExistCode () ^genMsgContains ();
   | _ ->  begin
           let patlist = getPatList actions in    (* get all patterns from actions *)
@@ -1569,7 +1582,7 @@ let print_procedures actions =
           (* print get_msgNo: procedure get_msgNo(msg:Message; Var num : indexType); *)
           let str3 = genGet_msgNoCode () ^ genPrintMsgCode () in
           (* print functions: inverseKey/lookUp/constructsAbyBC*)
-          let str4 = genInverseKeyCode ()^ genLookUpCode () ^ String.concat (List.map ~f:(fun pat -> constructMsgByPats pat non_equivalent) non_equivalent) in
+          let str4 = genInverseKeyCode ()^ genLookUpCode () ^ String.concat (List.map ~f:(fun pat -> consMsgBySubs pat non_equivalent) non_equivalent) in
           str1 ^ str2 ^ str3 ^ str4 ^ genExistCode () ^ genMsgContains ();
           end;
   

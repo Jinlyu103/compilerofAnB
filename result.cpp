@@ -3872,16 +3872,19 @@ mu_1_NonceType mu_locNa("locNa",8);
 mu_1_AgentType mu_locA("locA",16);
 
 /*** Variable declaration ***/
-mu_1_AgentType mu_k_ag("k_ag",24);
+mu_1_AgentType mu_locBPk("locBPk",24);
 
 /*** Variable declaration ***/
-mu_1_Message mu_msg("msg",32);
+mu_1_AgentType mu_k_ag("k_ag",32);
+
+/*** Variable declaration ***/
+mu_1_Message mu_msg("msg",40);
 
 mu_index = 0;
 mu_locNa = mu_msgs[mu_msgs[mu_msgNo3].mu_concatPart1].mu_noncePart;
 mu_locA = mu_msgs[mu_msgs[mu_msgNo3].mu_concatPart2].mu_ag;
-mu_k_ag = mu_msgs[mu_msgNo4].mu_k.mu_ag;
-mu_lookAddPat5 ( mu_locNa, mu_locA, mu_k_ag, mu_msg, mu_index );
+mu_locBPk = mu_msgs[mu_msgNo4].mu_k.mu_ag;
+mu_lookAddPat5 ( mu_locNa, mu_locA, mu_locBPk, mu_msg, mu_index );
 return mu_index;
 	Error.Error("The end of function construct5By34 reached without returning values.");
 };
@@ -3903,7 +3906,7 @@ mu_1_Message mu_msg("msg",24);
 
 mu_index = 0;
 mu_locNa = mu_msgs[mu_msgNo1].mu_noncePart;
-mu_locNb = mu_msgs[mu_msgNo1].mu_noncePart;
+mu_locNb = mu_msgs[mu_msgNo2].mu_noncePart;
 mu_lookAddPat6 ( mu_locNa, mu_locNb, mu_msg, mu_index );
 return mu_index;
 	Error.Error("The end of function construct6By11 reached without returning values.");
@@ -3922,16 +3925,19 @@ mu_1_NonceType mu_locNa("locNa",8);
 mu_1_NonceType mu_locNb("locNb",16);
 
 /*** Variable declaration ***/
-mu_1_AgentType mu_k_ag("k_ag",24);
+mu_1_AgentType mu_locAPk("locAPk",24);
 
 /*** Variable declaration ***/
-mu_1_Message mu_msg("msg",32);
+mu_1_AgentType mu_k_ag("k_ag",32);
+
+/*** Variable declaration ***/
+mu_1_Message mu_msg("msg",40);
 
 mu_index = 0;
 mu_locNa = mu_msgs[mu_msgs[mu_msgNo6].mu_concatPart1].mu_noncePart;
 mu_locNb = mu_msgs[mu_msgs[mu_msgNo6].mu_concatPart2].mu_noncePart;
-mu_k_ag = mu_msgs[mu_msgNo4].mu_k.mu_ag;
-mu_lookAddPat7 ( mu_locNa, mu_locNb, mu_k_ag, mu_msg, mu_index );
+mu_locAPk = mu_msgs[mu_msgNo4].mu_k.mu_ag;
+mu_lookAddPat7 ( mu_locNa, mu_locNb, mu_locAPk, mu_msg, mu_index );
 return mu_index;
 	Error.Error("The end of function construct7By64 reached without returning values.");
 };
@@ -3946,15 +3952,18 @@ mu_1_indexType mu_index("index",0);
 mu_1_NonceType mu_locNb("locNb",8);
 
 /*** Variable declaration ***/
-mu_1_AgentType mu_k_ag("k_ag",16);
+mu_1_AgentType mu_locBPk("locBPk",16);
 
 /*** Variable declaration ***/
-mu_1_Message mu_msg("msg",24);
+mu_1_AgentType mu_k_ag("k_ag",24);
+
+/*** Variable declaration ***/
+mu_1_Message mu_msg("msg",32);
 
 mu_index = 0;
 mu_locNb = mu_msgs[mu_msgNo1].mu_noncePart;
-mu_k_ag = mu_msgs[mu_msgNo4].mu_k.mu_ag;
-mu_lookAddPat8 ( mu_locNb, mu_k_ag, mu_msg, mu_index );
+mu_locBPk = mu_msgs[mu_msgNo4].mu_k.mu_ag;
+mu_lookAddPat8 ( mu_locNb, mu_locBPk, mu_msg, mu_index );
 return mu_index;
 	Error.Error("The end of function construct8By14 reached without returning values.");
 };

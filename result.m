@@ -561,6 +561,10 @@ function lookUp(msg: Message): indexType;
     endfor;
     return index;
   end;
+---Sorry, the compilation process is not written!
+
+---Sorry, the compilation process is not written!
+
 function construct3By12(msgNo1,msgNo2:indexType):indexType;
   var index : indexType;
       locNa:NonceType;
@@ -573,18 +577,22 @@ function construct3By12(msgNo1,msgNo2:indexType):indexType;
      lookAddPat3(locNa,locA,msg,index);
    return index;
   end;
+---Sorry, the compilation process is not written!
+
 function construct5By34(msgNo3,msgNo4:indexType):indexType;
   var index : indexType;
       locNa:NonceType;
       locA:AgentType;
+      locBPk:AgentType;
       k_ag : AgentType;
       msg : Message;
   begin
    index := 0;
    locNa:= msgs[msgs[msgNo3].concatPart1].noncePart;
    locA:= msgs[msgs[msgNo3].concatPart2].ag;
-   k_ag := msgs[msgNo4].k.ag;
-   lookAddPat5(locNa,locA,k_ag,msg,index);
+   ;
+locBPk := msgs[msgNo4].k.ag;
+   lookAddPat5(locNa,locA,locBPk,msg,index);
    return index;
   end;
 function construct6By11(msgNo1,msgNo2:indexType):indexType;
@@ -595,7 +603,7 @@ function construct6By11(msgNo1,msgNo2:indexType):indexType;
   begin
      index := 0;
      locNa:= msgs[msgNo1].noncePart;
-     locNb:= msgs[msgNo1].noncePart;
+     locNb:= msgs[msgNo2].noncePart;
      lookAddPat6(locNa,locNb,msg,index);
    return index;
   end;
@@ -603,26 +611,29 @@ function construct7By64(msgNo6,msgNo4:indexType):indexType;
   var index : indexType;
       locNa:NonceType;
       locNb:NonceType;
+      locAPk:AgentType;
       k_ag : AgentType;
       msg : Message;
   begin
    index := 0;
    locNa:= msgs[msgs[msgNo6].concatPart1].noncePart;
    locNb:= msgs[msgs[msgNo6].concatPart2].noncePart;
-   k_ag := msgs[msgNo4].k.ag;
-   lookAddPat7(locNa,locNb,k_ag,msg,index);
+   ;
+locAPk := msgs[msgNo4].k.ag;
+   lookAddPat7(locNa,locNb,locAPk,msg,index);
    return index;
   end;
 function construct8By14(msgNo1,msgNo4:indexType):indexType;
   var index : indexType;
       locNb:NonceType;
+      locBPk:AgentType;
       k_ag : AgentType;
       msg : Message;
   begin
    index := 0;
    locNb:=msgs[msgNo1].noncePart;
-   k_ag := msgs[msgNo4].k.ag;
-   lookAddPat8(locNb,k_ag,msg,index);
+locBPk := msgs[msgNo4].k.ag;
+   lookAddPat8(locNb,locBPk,msg,index);
    return index;
   end;
 function exist(PatnSet:msgSet; msgNo:indexType):boolean;
