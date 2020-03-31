@@ -361,6 +361,7 @@ and existInMsgs msgs atom =
 ;;
 
 let rec genSendAct rolename i atoms length msgofRolename =
+  let atoms = del_duplicate atoms in
   sprintf "var msg:Message;\n    msgNo:indexType;\nbegin\n" ^
   sprintf "   clear msg;\n   cons%d(%s,msg,msgNo);\n" i (sendAtoms2Str rolename i atoms msgofRolename) ^
   sprintf "   ch[%d].empty := false;\n" i ^
@@ -385,6 +386,7 @@ and sendAtoms2Str rolename i atoms msgofRolename =
                         |`Var n -> if (existInit msgofRolename a)  then s ^ n else loc ^ n  (*if i = 1 then s ^ n else loc ^ n *)
                         |`Str r -> if (existInit msgofRolename a)  then s ^ r else loc ^ r
                         |`Pk r -> if (existInit msgofRolename (`Str r))  then s ^ r else loc ^ r
+                        |`Sk r -> if (existInit msgofRolename (`Str r))  then s ^ r else loc ^ r
                         |_ -> "null" ) atoms)
 and getPkAg atoms msgofRolename =
   let ag = ref "" in
