@@ -18,7 +18,7 @@ Actions:{
 [seq8] Gateway-> Host () :    <Server.nonce(Na3).aenc{<Server.nonce(Na3)>}sk(Server)>
 }
 Environment:{
-[agent1] Host [1] : <HostID.GatewayIP.nonce(Na1)>;
+[agent1] Host [1] : <HostID.Intruder.nonce(Na1)>;
 [agent2] Gateway [1] : <HostID.ServerIP.GatewayIP>;
 [agent3] Server [1] : <HostID.GatewayIP.ServerIP.nonce(Na2).nonce(Na3)>
 }

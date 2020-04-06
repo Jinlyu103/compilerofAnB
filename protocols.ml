@@ -367,7 +367,7 @@ let rec genSendAct rolename i atoms length msgofRolename =
   sprintf "   ch[%d].empty := false;\n" i ^
   sprintf "   ch[%d].msg := msg;\n" i ^
   sprintf "   ch[%d].sender := role%s[i].%s;\n" i rolename rolename ^
-  sprintf "   ch[%d].receiver := role%s[i].%s;\n" i rolename (getPkAg atoms msgofRolename) ^
+  sprintf "   ch[%d].receiver := Intruder;\n" i  (* role%s[i].%s: rolename (getPkAg atoms msgofRolename) *)^
   sprintf "   role%s[i].st := %s%d;\n" rolename rolename ((i mod length)+1) ^
   sprintf "   put \"%d. \";\n   put ch[%d].sender;\n   put \"   \";\n   put ch[%d].receiver;\n   put \"   msg: \";\n   printMsg(ch[%d].msg);\n   put \"\\n\";\n" i i i i ^
   sprintf "   eve_end := eve_end +1 ;\n" ^
@@ -409,7 +409,7 @@ let rec genRecvAct rolename i atoms length msgofRolename =
   sprintf "   clear msg;\n   msg := ch[%d].msg;\n   destruct%d(msg,%s);\n" i i (recvAtoms2Str atoms rolename) ^ (* (recvAtoms2Str atoms) *)
   sprintf "   eve_end:= eve_end + 1 ;\n" ^
   sprintf "   systemEvent[eve_end].eveType := receive;\n" ^
-  sprintf "   systemEvent[eve_end].sender := role%s[i].%s;\n" rolename (getSubField rolename) ^  (* the sender of the receive event is not get from ch[%d]: roleA.B or roleB.loc_A*)
+  sprintf "   systemEvent[eve_end].sender := role%s[i].%s;\n" rolename (getSubField rolename) ^  (* the sender of the receive event is not get from ch[%d]: roleA.B or roleB.loc_A/ roleHost.Host or roleServer.loc_host*)
   sprintf "   systemEvent[eve_end].receiver := ch[%d].receiver;\n" i ^
   sprintf "   systemEvent[eve_end].msg := ch[%d].msg;\n" i ^
   sprintf "   if(%s)then\n" (atoms2Str atoms rolename msgofRolename) ^
@@ -425,6 +425,7 @@ and recvAtoms2Str atoms rolename =
   |`Var n -> loc ^ n
   |`Str r -> loc ^ r
   |`Pk r -> loc ^ r
+  |`Sk r -> loc ^ r
   |_ -> "null") atoms)
 
 and atoms2Str atoms rolename msgofRolename = 
@@ -434,6 +435,7 @@ and atoms2Str atoms rolename msgofRolename =
   |`Var n -> if (existInit msgofRolename a) then loc ^ n ^ "=role" ^ rolename ^ "[i]." ^ n else "true" (* if j <> 1 then loc ^ n ^ "=role" ^ rolename^ "[i]." ^ n else " true " *)
   |`Str r -> if (existInit msgofRolename a) then loc ^ r ^ "=role" ^ rolename ^ "[i]." ^ r else "true"  (*loc ^ r ^ "=role" ^ rolename ^ "[i]." ^ r*)
   |`Pk r -> loc ^ r ^ "=role" ^ rolename ^ "[i]." ^ r
+  |`Sk r -> loc ^ r ^ "=role" ^ rolename ^ "[i]." ^ r
   |_ -> "null" ) atoms)
   in
   String.concat ~sep:"&" (remove strlist "true")
@@ -446,6 +448,7 @@ and getSubField r =
 
 let trans act m i rolename length msgOfrolename =
   let atoms = getAtoms m in
+  let atoms = del_duplicate atoms in
   match (sign act) with
   | Plus -> begin 
               genRuleName rolename i ^
@@ -879,8 +882,8 @@ let atoms2Parms1 atoms =
   String.concat ~sep:"; "  (List.map ~f:(fun a -> match a with
   |`Var n ->"Var "^ n ^ ":NonceType"
   |`Str s ->"Var "^ s ^ ":AgentType"
-  |`Pk role ->"Var "^ role ^ ":AgentType"
-  |`Sk role ->"Var "^ role ^ ":AgentType"
+  |`Pk role ->"Var "^ role ^ "Pk:AgentType"
+  |`Sk role ->"Var "^ role ^ "Sk:AgentType"
   |_ -> "" ) atoms )
 ;;
 
@@ -1162,30 +1165,22 @@ let genCons m i patList =
 
 let genDestruct m i =
   let atoms =getAtoms m in 
+  let atoms = del_duplicate atoms in
   let str1 = sprintf "procedure destruct%d(msg:Message; %s);\n" i (atoms2Parms1 atoms) in
   match m with
   |`Aenc(m1,k1) ->begin let keyAg=match k1 with
-                           |`Pk role -> role
+                           |`Pk role -> role^"Pk"
                            |_ -> "null"
                    in                  
                    match m1 with
-                  |`Concat msgs -> str1 ^ (sprintf "
-  var k1:KeyType;
-      msg1,msgNum1,msgNum2:Message;
-  begin
-    clear msg1;
-    k1 := msgs[msg.aencKey].k;
-    %s := k1.ag;
-    msg1:=msgs[msg.aencMsg];
-    msgNum1:=msgs[msg1.concatPart1];
-    msgNum2:=msgs[msg1.concatPart2];\n" keyAg) ^ (String.concat (List.mapi ~f:(fun i m'-> match m' with
+                  |`Concat msgs ->let str2 = sprintf "  var k1:KeyType;\n    msg1,msgNum1,msgNum2:Message;" ^
+                                             sprintf "  begin\n    clear msg1;\n   k1 := msgs[msg.aencKey].k;\n    %s := k1.ag;\n    msg1:=msgs[msg.aencMsg];\n     msgNum1:=msgs[msg1.concatPart1];\n    msgNum2:=msgs[msg1.concatPart2];\n" keyAg
+                                  in 
+                                  str1 ^ str2^ (String.concat (List.mapi ~f:(fun i m'-> match m' with
                                                                                         |`Var n -> sprintf "    %s:=msgNum%d.noncePart;\n" n (i+1)
                                                                                         |`Str r -> sprintf "    %s:=msgNum%d.ag;\n" r (i+1)
                                                                                         |_ -> sprintf "" )msgs)) ^ "  end;\n"
-                  |`Var n -> str1 ^ sprintf "
-  var k1:KeyType;
-      msg1,msgNum1,msgNum2:Message;
-  begin
+                  |`Var n -> str1 ^ sprintf "  var k1:KeyType;\n    msg1,msgNum1,msgNum2:Message;\n   begin\n
     clear msg1;
     k1 := msgs[msg.aencKey].k;
     %s := k1.ag;
@@ -1193,7 +1188,26 @@ let genDestruct m i =
     %s:=msg1.noncePart;
   end;\n" keyAg n
                   |_ -> ""     
-  end             
+  end   
+  |`Concat msgs -> let msgNums = String.concat ~sep:"," (List.mapi ~f:(fun i m -> sprintf "msgNum%d" (i+1)) msgs) in
+                   let stats = String.concat ~sep:";\n" (List.mapi ~f:(fun i m -> match m with
+                      |`Str r -> sprintf "    msgNum%d := msgs[msg.concatPart%d];\n" (i+1) (i+1) ^
+                                 sprintf "    %s := msgNum%d.ag" r (i+1)
+                      |`Var n -> sprintf "    msgNum%d := msgs[msg.concatPart%d];\n" (i+1) (i+1) ^
+                                 sprintf "    %s := msgNum%d.noncePart" n (i+1)
+                      |`Aenc(m1,k1) -> let keyAg = match k1 with 
+                                                   |`Pk r -> r ^ "Pk"
+                                                   |`Sk r -> r ^ "Sk"
+                                                   |_ -> "" 
+                                        in
+                                        sprintf "    msgNum%d := msgs[msg.concatPart%d];\n" (i+1) (i+1)^
+                                        sprintf "    k := msgs[msgNum%d.aencKey].k;\n" (i+1) ^
+                                        sprintf "    %s := k.ag" keyAg
+                      |_ -> "") msgs) in
+                  str1 ^ sprintf "  Var %s: Message;
+    k: KeyType;
+  begin\n%s;
+  end;\n" msgNums stats   (* 2020-04-04: not finished !! *)    
   |_ -> ""
 ;;
 

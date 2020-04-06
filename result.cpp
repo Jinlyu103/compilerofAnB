@@ -3445,7 +3445,7 @@ mu_lookAddPat5 ( mu_Na, mu_A, mu_BPk, mu_msg, mu_num );
 };
 /*** end procedure declaration ***/
 
-void mu_destruct1(mu_1_Message& mu_msg, mu_1_NonceType& mu_Na, mu_1_AgentType& mu_A, mu_1_AgentType& mu_B)
+void mu_destruct1(mu_1_Message& mu_msg, mu_1_NonceType& mu_Na, mu_1_AgentType& mu_A, mu_1_AgentType& mu_BPk)
 {
 /*** Variable declaration ***/
 mu_1_KeyType mu_k1("k1",0);
@@ -3461,7 +3461,7 @@ mu_1_Message mu_msgNum2("msgNum2",192);
 
 mu_msg1.clear();
 mu_k1 = mu_msgs[mu_msg.mu_aencKey].mu_k;
-mu_B = mu_k1.mu_ag;
+mu_BPk = mu_k1.mu_ag;
 mu_msg1 = mu_msgs[mu_msg.mu_aencMsg];
 mu_msgNum1 = mu_msgs[mu_msg1.mu_concatPart1];
 mu_msgNum2 = mu_msgs[mu_msg1.mu_concatPart2];
@@ -3478,7 +3478,7 @@ mu_lookAddPat7 ( mu_Na, mu_Nb, mu_APk, mu_msg, mu_num );
 };
 /*** end procedure declaration ***/
 
-void mu_destruct2(mu_1_Message& mu_msg, mu_1_NonceType& mu_Na, mu_1_NonceType& mu_Nb, mu_1_AgentType& mu_A)
+void mu_destruct2(mu_1_Message& mu_msg, mu_1_NonceType& mu_Na, mu_1_NonceType& mu_Nb, mu_1_AgentType& mu_APk)
 {
 /*** Variable declaration ***/
 mu_1_KeyType mu_k1("k1",0);
@@ -3494,7 +3494,7 @@ mu_1_Message mu_msgNum2("msgNum2",192);
 
 mu_msg1.clear();
 mu_k1 = mu_msgs[mu_msg.mu_aencKey].mu_k;
-mu_A = mu_k1.mu_ag;
+mu_APk = mu_k1.mu_ag;
 mu_msg1 = mu_msgs[mu_msg.mu_aencMsg];
 mu_msgNum1 = mu_msgs[mu_msg1.mu_concatPart1];
 mu_msgNum2 = mu_msgs[mu_msg1.mu_concatPart2];
@@ -3511,7 +3511,7 @@ mu_lookAddPat8 ( mu_Nb, mu_BPk, mu_msg, mu_num );
 };
 /*** end procedure declaration ***/
 
-void mu_destruct3(mu_1_Message& mu_msg, mu_1_NonceType& mu_Nb, mu_1_AgentType& mu_B)
+void mu_destruct3(mu_1_Message& mu_msg, mu_1_NonceType& mu_Nb, mu_1_AgentType& mu_BPk)
 {
 /*** Variable declaration ***/
 mu_1_KeyType mu_k1("k1",0);
@@ -3527,7 +3527,7 @@ mu_1_Message mu_msgNum2("msgNum2",192);
 
 mu_msg1.clear();
 mu_k1 = mu_msgs[mu_msg.mu_aencKey].mu_k;
-mu_B = mu_k1.mu_ag;
+mu_BPk = mu_k1.mu_ag;
 mu_msg1 = mu_msgs[mu_msg.mu_aencMsg];
 mu_Nb = mu_msg1.mu_noncePart;
 };
@@ -6164,7 +6164,7 @@ mu_cons2 ( mu_roleB[mu_i].mu_loc_Na, mu_roleB[mu_i].mu_Nb, mu_roleB[mu_i].mu_loc
 mu_ch[2].mu_empty = mu_false;
 mu_ch[2].mu_msg = mu_msg;
 mu_ch[2].mu_sender = mu_roleB[mu_i].mu_B;
-mu_ch[2].mu_receiver = mu_roleB[mu_i].mu_loc_A;
+mu_ch[2].mu_receiver = mu_Intruder;
 mu_roleB[mu_i].mu_st = mu_B3;
 cout << "2. ";
 mu_ch[2].mu_sender.print();
@@ -6352,7 +6352,7 @@ mu_cons3 ( mu_roleA[mu_i].mu_loc_Nb, mu_roleA[mu_i].mu_B, mu_msg, mu_msgNo );
 mu_ch[3].mu_empty = mu_false;
 mu_ch[3].mu_msg = mu_msg;
 mu_ch[3].mu_sender = mu_roleA[mu_i].mu_A;
-mu_ch[3].mu_receiver = mu_roleA[mu_i].mu_B;
+mu_ch[3].mu_receiver = mu_Intruder;
 mu_roleA[mu_i].mu_st = mu_A1;
 cout << "3. ";
 mu_ch[3].mu_sender.print();
@@ -6545,7 +6545,7 @@ mu_cons1 ( mu_roleA[mu_i].mu_Na, mu_roleA[mu_i].mu_A, mu_roleA[mu_i].mu_B, mu_ms
 mu_ch[1].mu_empty = mu_false;
 mu_ch[1].mu_msg = mu_msg;
 mu_ch[1].mu_sender = mu_roleA[mu_i].mu_A;
-mu_ch[1].mu_receiver = mu_roleA[mu_i].mu_B;
+mu_ch[1].mu_receiver = mu_Intruder;
 mu_roleA[mu_i].mu_st = mu_A2;
 cout << "1. ";
 mu_ch[1].mu_sender.print();
