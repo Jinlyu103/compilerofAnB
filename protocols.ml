@@ -1207,7 +1207,7 @@ let genDestruct m i =
                   str1 ^ sprintf "  Var %s: Message;
     k: KeyType;
   begin\n%s;
-  end;\n" msgNums stats   (* 2020-04-04: not finished !! *)    
+  end;\n" msgNums stats   (* 2020-04-06: finished !! *)    
   |_ -> ""
 ;;
 
