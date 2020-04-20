@@ -306,7 +306,7 @@ let genSendGuard rolename i =
 ;;
 
 let genRecvGuard rolename i =
-  sprintf "role%s[i].st = %s%d & ch[%d].empty = false & ch[%d].receiver = role%s[i].%s\n==>\n" rolename rolename i i i rolename rolename
+  sprintf "role%s[i].st = %s%d & ch[%d].empty = false ---& ch[%d].receiver = role%s[i].%s\n==>\n" rolename rolename i i i rolename rolename
 ;;
 
 let rec existInit msg atom =
@@ -340,6 +340,7 @@ and existInMsgs msgs atom =
 
 let rec genSendAct rolename i atoms length msgofRolename =
   let atoms = del_duplicate atoms in
+  let commitStr = if i = length then sprintf "   role%s[i].commit := true;\n" rolename else "" in
   sprintf "var msg:Message;\n    msgNo:indexType;\nbegin\n" ^
   sprintf "   clear msg;\n   cons%d(%s,msg,msgNo);\n" i (sendAtoms2Str rolename i atoms msgofRolename) ^
   sprintf "   ch[%d].empty := false;\n" i ^
@@ -348,11 +349,7 @@ let rec genSendAct rolename i atoms length msgofRolename =
   sprintf "   ch[%d].receiver := Intruder;\n" i  (* role%s[i].%s: rolename (getPkAg atoms msgofRolename) *)^
   sprintf "   role%s[i].st := %s%d;\n" rolename rolename ((i mod length)+1) ^
   sprintf "   put \"%d. \";\n   put ch[%d].sender;\n   put \"   \";\n   put ch[%d].receiver;\n   put \"   msg: \";\n   printMsg(ch[%d].msg);\n   put \"\\n\";\n" i i i i ^
-  sprintf "   eve_end := eve_end +1 ;\n" ^
-  sprintf "   systemEvent[eve_end].eveType := send; ;\n" ^
-  sprintf "   systemEvent[eve_end].sender := ch[%d].sender ;\n" i ^
-  sprintf "   systemEvent[eve_end].receiver := ch[%d].receiver ;\n" i ^
-  sprintf "   systemEvent[eve_end].msg := ch[%d].msg ;\n" i ^
+  commitStr ^
   sprintf "end;\n"
   (* (i+1) should be (i+1) % length of the strand list *)
 
@@ -383,17 +380,13 @@ and getPkAg atoms msgofRolename =
 ;;
 
 let rec genRecvAct rolename i m atoms length msgofRolename =
+  let commitStr = if i = length then sprintf "   role%s[i].commit := true;\n" rolename else "" in
   sprintf "var msg:Message;\n    msgNo:indexType;\nbegin\n" ^
   sprintf "   clear msg;\n   msg := ch[%d].msg;\n   destruct%d(msg,%s);\n" i i (recvAtoms2Str atoms rolename) ^ (* (recvAtoms2Str atoms) *)
-  sprintf "   eve_end:= eve_end + 1 ;\n" ^
-  sprintf "   systemEvent[eve_end].eveType := receive;\n" ^
-  sprintf "   systemEvent[eve_end].sender := role%s[i].%s;\n" rolename (getSender rolename m) ^  (* the sender of the receive event is not get from ch[%d]: roleA.B or roleB.loc_A/ roleHost.Host or roleServer.loc_host*)
-  sprintf "   systemEvent[eve_end].receiver := ch[%d].receiver;\n" i ^
-  sprintf "   systemEvent[eve_end].msg := ch[%d].msg;\n" i ^
   sprintf "   if(%s)then\n" (atoms2Str atoms rolename msgofRolename) ^
   sprintf "     ch[%d].empty:=true;\n" i ^
   sprintf "     role%s[i].st := %s%d;\n" rolename rolename ((i mod length)+1) ^
-  sprintf "   endif;\n" ^
+  sprintf "   endif;\n" ^ commitStr ^
   sprintf "end;\n"
 
 and recvAtoms2Str atoms rolename = 
@@ -1647,7 +1640,8 @@ let print_startstate r num m knws =
                                                                                         |_ -> "error: mismatching!\n") msgs msgs1) 
                                                                                       in
                                                                                       (String.concat (List.map ~f:(fun s -> sprintf "  %s" s) strs)) ^ 
-                                                                                      sprintf "  role%s[%d].st := %s1;\n" r num r
+                                                                                      sprintf "  role%s[%d].st := %s1;\n" r num r ^
+                                                                                      sprintf "  role%s[%d].commit := false;\n" r num
                                                      |_ -> sprintf "null\n"
                                                   else sprintf "" ) msgOfKnws)
 ;;
@@ -1718,10 +1712,10 @@ let printImpofStart actions knws =
   endfor;\n" ^
   str3 ^ str4 ^
   "
-  eve_end := 0;  
-  for i:eventNums do
-     systemEvent[i].eveType := empty;
-  endfor;\n"
+  ---eve_end := 0;  
+  ---for i:eventNums do
+  ---   systemEvent[i].eveType := empty;
+  ---endfor;\n"
 ;;
 
 let rec printGoal2Murphi g =
@@ -1910,8 +1904,8 @@ var
   " (printPatSetVars pats) ^
   "
   Spy_known: Array[indexType] of boolean;
-  systemEvent   : array[eventNums] of Event;
-  eve_end       : eventNums;
+  ---systemEvent   : array[eventNums] of Event;
+  ---eve_end       : eventNums;
   emit: Array[indexType] of boolean;\n\n"  
  
 ;;
