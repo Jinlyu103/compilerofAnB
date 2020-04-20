@@ -200,28 +200,6 @@ let rec remove ls e =
   | hd::tl -> if hd = e then remove tl e else hd::(remove tl e)
 ;;
 
-(* Print msgs *)
-(*)
-let rec output_msg outc msg =
-  match msg with 
-  | `Null -> output_string outc "null"
-  | `Var id -> printf "%s" id
- (* | `Nonce na    -> printf "%s" na*)
-  | `Str s -> printf "%s" s
-  | `Concat msgs -> print_msglist outc msgs
-  | `Hash m -> printf "hash (%a) " output_msg m  
-  | `Aenc (m1,m2) -> printf "aenc{ < %a > }%a" output_msg m1 output_msg m2
-  | `Senc (m1,m2) -> printf "senc{ < %a > }%a" output_msg m1 output_msg m2
-  | `Pk rolename -> printf "pk(%s)" rolename
-  | `Sk rolename -> printf "sk(%s)" rolename
-  | `K (r1,r2) -> printf "k(%s,%s)" r1 r2
-
-and print_msglist outc msgs =
-  List.iteri ~f:(fun i m ->
-	output_msg outc m;
-	if i < ((List.length msgs)-1) then output_string outc "." else output_string outc "" ;) msgs;
-;;
-*)
 let rec output_msg msg =
   match msg with
   |`Null -> sprintf "null"
@@ -404,12 +382,12 @@ and getPkAg atoms msgofRolename =
   if (existInit msgofRolename (`Str (!ag))) then !ag else loc^(!ag)
 ;;
 
-let rec genRecvAct rolename i atoms length msgofRolename =
+let rec genRecvAct rolename i m atoms length msgofRolename =
   sprintf "var msg:Message;\n    msgNo:indexType;\nbegin\n" ^
   sprintf "   clear msg;\n   msg := ch[%d].msg;\n   destruct%d(msg,%s);\n" i i (recvAtoms2Str atoms rolename) ^ (* (recvAtoms2Str atoms) *)
   sprintf "   eve_end:= eve_end + 1 ;\n" ^
   sprintf "   systemEvent[eve_end].eveType := receive;\n" ^
-  sprintf "   systemEvent[eve_end].sender := role%s[i].%s;\n" rolename (getSubField rolename) ^  (* the sender of the receive event is not get from ch[%d]: roleA.B or roleB.loc_A/ roleHost.Host or roleServer.loc_host*)
+  sprintf "   systemEvent[eve_end].sender := role%s[i].%s;\n" rolename (getSender rolename m) ^  (* the sender of the receive event is not get from ch[%d]: roleA.B or roleB.loc_A/ roleHost.Host or roleServer.loc_host*)
   sprintf "   systemEvent[eve_end].receiver := ch[%d].receiver;\n" i ^
   sprintf "   systemEvent[eve_end].msg := ch[%d].msg;\n" i ^
   sprintf "   if(%s)then\n" (atoms2Str atoms rolename msgofRolename) ^
@@ -440,7 +418,10 @@ and atoms2Str atoms rolename msgofRolename =
   in
   String.concat ~sep:"&" (remove strlist "true")
 
-and getSubField r =
+and getSender r m =
+  (* match m with
+  |`Aenc(m1,k1) ->
+  |`Senc(m1,k1) -> *)
   if r = "A" then 
     sprintf "B"
   else  sprintf "loc_A"
@@ -458,7 +439,7 @@ let trans act m i rolename length msgOfrolename =
   | Minus -> begin
               genRuleName rolename i ^
               genRecvGuard rolename i ^
-              (genRecvAct rolename i atoms length msgOfrolename)
+              (genRecvAct rolename i m atoms length msgOfrolename)
             end
 ;;
 
@@ -1626,37 +1607,17 @@ let agType2Str rlist =
   String.concat ~sep: ";\n   " (List.map ~f:(fun r -> sprintf "loc_%s : AgentType" r) rlist)
 ;;
 
-let printRecords r m =
-  match m with
-  |`Concat msgs -> begin
-                   let str1 =String.concat (List.mapi ~f:(fun i m1 -> match m1 with
-                                          |`Str r -> sprintf "   %s : AgentType;\n" r
-                                          |`Var n -> sprintf "   %s : NonceType;\n" n                               
-                                          |_ -> sprintf "null\n") msgs)
-                   in
-                  (*List.iteri ~f:(fun i m1 -> 
-                      match m1 with
-                      |`Str r -> printf "   %s : AgentType;\n" r
-                      |`Var n -> printf "   %s : NonceType;\n" n;                               
-                      |_ -> printf "null\n") msgs;
-                  *)
-                  (* let str2 = sprintf "   %s;\n   %s;\n   st: %sStatus;\n" (nonceType) (agentType) r
-                  in *)
-                  (* let str2 = sprintf "   loc_Na : NonceType;\n   loc_Nb : NonceType;\n   loc_A : AgentType;\n   loc_B : AgentType;\n   st : %sStatus;\n" r
-                  in *)
-                  str1 (*^ str2*)
-                  end
-  |_ -> sprintf "null\n"
-;;
 (*return string*)
 let rec printMurphiRecords knw nlist aglist =
   match knw with
   |`Null -> sprintf "null"
   | `Knowledge (r,m) -> let str1 = sprintf "  Role%s : record\n" r in
-                        let str2 = sprintf "   %s;\n   %s;\n   st: %sStatus;\n" (nType2Str nlist) (agType2Str aglist) r
-                        in
-                        let str3 = sprintf "  end;\n" in
-                        str1 ^ printRecords r m ^ str2 ^ str3
+                        let str2 = String.concat ~sep:"\n" (List.map ~f:(fun n -> sprintf "   %s : NonceType;" n) nlist) ^ "\n" in
+                        let str3 = String.concat ~sep:"\n" (List.map ~f:(fun r -> sprintf "   %s : AgentType;" r) aglist) ^ "\n" in
+                        let str4 = sprintf "   %s;\n   %s;\n   st: %sStatus;\n" (nType2Str nlist) (agType2Str aglist) r in
+                        let str5 = sprintf "   commit : boolean;\n" in
+                        let str6 = sprintf "  end;\n" in
+                        str1 ^ str2 ^ str3 ^ str4 ^ str5 ^ str6
   | `Knowledge_list knws ->String.concat (List.map ~f:(fun k -> printMurphiRecords k nlist aglist) knws)
 ;;
 
@@ -1780,8 +1741,16 @@ invariant \"%s\"
 end;\n" seq (output_msg m)
 
 and printAgreeGoal (seq,r1,r2,m) = 
-  sprintf "
-invariant \"%s\"   
+  let mstr = (output_msg m) in
+  sprintf "\ninvariant \"%s\"\n" seq ^
+  sprintf "  forall i: role%sNums do\n" r2 ^
+  sprintf "    role%s[i].commit = true \n    ->\n" r2 ^
+  sprintf "    (exists j: role%sNums do
+      role%s[j].commit = true & role%s[i].%s = role%s[j].%s
+    endexists)
+  endforall;\n" r1 r1 r1 mstr r2 mstr
+(* sprintf "
+ invariant \"%s\"   
   forall i:eventNums do
       (systemEvent[i].eveType = receive & 
        systemEvent[i].receiver = %s & 
@@ -1805,7 +1774,7 @@ invariant \"%s\"
       systemEvent[j].msg.concatPart1 = systemEvent[i].msg.concatPart1 &
       systemEvent[j].msg.concatPart2 = systemEvent[i].msg.concatPart2
      )endexists)
-endforall" seq r1 r2 (output_msg m)
+ endforall" seq r1 r2 (output_msg m) *)
 ;;
 
 let agents2Str rlist =
@@ -1966,8 +1935,8 @@ let create_file filename str =
 
 let genCode outc value =
   match value with
-  |`Null -> create_file "result.m" "null"
-  |`Protocol (n,p) -> create_file "result.m" (output_murphiCode p)
+  |`Null -> create_file "outputs/result.m" "null"
+  |`Protocol (n,p) -> create_file "outputs/result.m" (output_murphiCode p)
 ;;
 
 
