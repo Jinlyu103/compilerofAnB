@@ -403,12 +403,22 @@ procedure isPat7(msg:Message; Var flag:boolean);
     endif;
     flag := flag1;
   end;
-procedure cons1(Na1:NonceType; Gateway:AgentType; Var msg:Message; Var num:indexType);
+procedure cons1(Na1:NonceType; Var msg:Message; Var num:indexType);
+  begin
+    clear msg;
+    clear num;    lookAddPat1(Na1,msg,num);
+  end;
+procedure cons2(Gateway:AgentType; Var msg:Message; Var num:indexType);
+  begin
+    clear msg;
+    clear num;    lookAddPat2(Gateway,msg,num);
+  end;
+procedure cons3(Na1:NonceType; Gateway:AgentType; Var msg:Message; Var num:indexType);
   begin
     clear msg;
     clear num;    lookAddPat3(Na1, Gateway,msg,num);
   end;
-procedure destruct1(msg:Message; Var Na1:NonceType; Var Gateway:AgentType);
+procedure destruct3(msg:Message; Var Na1:NonceType; Var Gateway:AgentType);
   Var msgNum1,msgNum2: Message;
     k: KeyType;
   begin
@@ -417,12 +427,48 @@ procedure destruct1(msg:Message; Var Na1:NonceType; Var Gateway:AgentType);
     msgNum2 := msgs[msg.concatPart2];
     Gateway := msgNum2.ag;
   end;
-procedure cons2(Host:AgentType; Na2:NonceType; HostSk :AgentType; Var msg:Message; Var num:indexType);
+procedure cons4(Host:AgentType; Na2:NonceType; Var msg:Message; Var num:indexType);
+  begin
+    clear msg;
+    clear num;    lookAddPat4(Host, Na2,msg,num);
+  end;
+procedure destruct4(msg:Message; Var Host:AgentType; Var Na2:NonceType);
+  Var msgNum1,msgNum2: Message;
+    k: KeyType;
+  begin
+    msgNum1 := msgs[msg.concatPart1];
+    Host := msgNum1.ag;
+    msgNum2 := msgs[msg.concatPart2];
+    Na2 := msgNum2.noncePart;
+  end;
+procedure cons5(HostSk :AgentType; Var msg:Message; Var num:indexType);
+  begin
+    clear msg;
+    clear num;    lookAddPat5(HostSk,msg,num);
+  end;
+procedure cons6(Host:AgentType; Na2:NonceType; HostSk :AgentType; Var msg:Message; Var num:indexType);
+  begin
+    clear msg;
+    clear num;    lookAddPat6(Host, Na2, HostSk,msg,num);
+  end;
+procedure destruct6(msg:Message; Var Host:AgentType; Var Na2:NonceType; Var HostSk:AgentType);
+  var k1:KeyType;
+    msg1,msgNum1,msgNum2:Message;  begin
+    clear msg1;
+   k1 := msgs[msg.aencKey].k;
+    HostSk := k1.ag;
+    msg1:=msgs[msg.aencMsg];
+     msgNum1:=msgs[msg1.concatPart1];
+    msgNum2:=msgs[msg1.concatPart2];
+    Host:=msgNum1.ag;
+    Na2:=msgNum2.noncePart;
+  end;
+procedure cons7(Host:AgentType; Na2:NonceType; HostSk :AgentType; Var msg:Message; Var num:indexType);
   begin
     clear msg;
     clear num;    lookAddPat7(Host, Na2, HostSk,msg,num);
   end;
-procedure destruct2(msg:Message; Var Host:AgentType; Var Na2:NonceType; Var HostSk:AgentType);
+procedure destruct7(msg:Message; Var Host:AgentType; Var Na2:NonceType; Var HostSk:AgentType);
   Var msgNum1,msgNum2,msgNum3: Message;
     k: KeyType;
   begin
@@ -433,125 +479,6 @@ procedure destruct2(msg:Message; Var Host:AgentType; Var Na2:NonceType; Var Host
     msgNum3 := msgs[msg.concatPart3];
     k := msgs[msgNum3.aencKey].k;
     HostSk := k.ag;
-  end;
-procedure cons3(Host:AgentType; Na2:NonceType; HostSk :AgentType; Var msg:Message; Var num:indexType);
-  begin
-    clear msg;
-    clear num;    lookAddPat7(Host, Na2, HostSk,msg,num);
-  end;
-procedure destruct3(msg:Message; Var Host:AgentType; Var Na2:NonceType; Var HostSk:AgentType);
-  Var msgNum1,msgNum2,msgNum3: Message;
-    k: KeyType;
-  begin
-    msgNum1 := msgs[msg.concatPart1];
-    Host := msgNum1.ag;
-    msgNum2 := msgs[msg.concatPart2];
-    Na2 := msgNum2.noncePart;
-    msgNum3 := msgs[msg.concatPart3];
-    k := msgs[msgNum3.aencKey].k;
-    HostSk := k.ag;
-  end;
-procedure cons4(Server:AgentType; Na3:NonceType; ServerSk :AgentType; Var msg:Message; Var num:indexType);
-  begin
-    clear msg;
-    clear num;    lookAddPat7(Server, Na3, ServerSk,msg,num);
-  end;
-procedure destruct4(msg:Message; Var Server:AgentType; Var Na3:NonceType; Var ServerSk:AgentType);
-  Var msgNum1,msgNum2,msgNum3: Message;
-    k: KeyType;
-  begin
-    msgNum1 := msgs[msg.concatPart1];
-    Server := msgNum1.ag;
-    msgNum2 := msgs[msg.concatPart2];
-    Na3 := msgNum2.noncePart;
-    msgNum3 := msgs[msg.concatPart3];
-    k := msgs[msgNum3.aencKey].k;
-    ServerSk := k.ag;
-  end;
-procedure cons5(Server:AgentType; Na3:NonceType; ServerSk :AgentType; Var msg:Message; Var num:indexType);
-  begin
-    clear msg;
-    clear num;    lookAddPat7(Server, Na3, ServerSk,msg,num);
-  end;
-procedure destruct5(msg:Message; Var Server:AgentType; Var Na3:NonceType; Var ServerSk:AgentType);
-  Var msgNum1,msgNum2,msgNum3: Message;
-    k: KeyType;
-  begin
-    msgNum1 := msgs[msg.concatPart1];
-    Server := msgNum1.ag;
-    msgNum2 := msgs[msg.concatPart2];
-    Na3 := msgNum2.noncePart;
-    msgNum3 := msgs[msg.concatPart3];
-    k := msgs[msgNum3.aencKey].k;
-    ServerSk := k.ag;
-  end;
-procedure cons6(Host:AgentType; Na3:NonceType; HostSk :AgentType; Var msg:Message; Var num:indexType);
-  begin
-    clear msg;
-    clear num;    lookAddPat7(Host, Na3, HostSk,msg,num);
-  end;
-procedure destruct6(msg:Message; Var Host:AgentType; Var Na3:NonceType; Var HostSk:AgentType);
-  Var msgNum1,msgNum2,msgNum3: Message;
-    k: KeyType;
-  begin
-    msgNum1 := msgs[msg.concatPart1];
-    Host := msgNum1.ag;
-    msgNum2 := msgs[msg.concatPart2];
-    Na3 := msgNum2.noncePart;
-    msgNum3 := msgs[msg.concatPart3];
-    k := msgs[msgNum3.aencKey].k;
-    HostSk := k.ag;
-  end;
-procedure cons7(Host:AgentType; Na3:NonceType; HostSk :AgentType; Var msg:Message; Var num:indexType);
-  begin
-    clear msg;
-    clear num;    lookAddPat7(Host, Na3, HostSk,msg,num);
-  end;
-procedure destruct7(msg:Message; Var Host:AgentType; Var Na3:NonceType; Var HostSk:AgentType);
-  Var msgNum1,msgNum2,msgNum3: Message;
-    k: KeyType;
-  begin
-    msgNum1 := msgs[msg.concatPart1];
-    Host := msgNum1.ag;
-    msgNum2 := msgs[msg.concatPart2];
-    Na3 := msgNum2.noncePart;
-    msgNum3 := msgs[msg.concatPart3];
-    k := msgs[msgNum3.aencKey].k;
-    HostSk := k.ag;
-  end;
-procedure cons8(Server:AgentType; Na4:NonceType; ServerSk :AgentType; Var msg:Message; Var num:indexType);
-  begin
-    clear msg;
-    clear num;    lookAddPat7(Server, Na4, ServerSk,msg,num);
-  end;
-procedure destruct8(msg:Message; Var Server:AgentType; Var Na4:NonceType; Var ServerSk:AgentType);
-  Var msgNum1,msgNum2,msgNum3: Message;
-    k: KeyType;
-  begin
-    msgNum1 := msgs[msg.concatPart1];
-    Server := msgNum1.ag;
-    msgNum2 := msgs[msg.concatPart2];
-    Na4 := msgNum2.noncePart;
-    msgNum3 := msgs[msg.concatPart3];
-    k := msgs[msgNum3.aencKey].k;
-    ServerSk := k.ag;
-  end;
-procedure cons9(Server:AgentType; Na4:NonceType; ServerSk :AgentType; Var msg:Message; Var num:indexType);
-  begin
-    clear msg;
-    clear num;    lookAddPat7(Server, Na4, ServerSk,msg,num);
-  end;
-procedure destruct9(msg:Message; Var Server:AgentType; Var Na4:NonceType; Var ServerSk:AgentType);
-  Var msgNum1,msgNum2,msgNum3: Message;
-    k: KeyType;
-  begin
-    msgNum1 := msgs[msg.concatPart1];
-    Server := msgNum1.ag;
-    msgNum2 := msgs[msg.concatPart2];
-    Na4 := msgNum2.noncePart;
-    msgNum3 := msgs[msg.concatPart3];
-    k := msgs[msgNum3.aencKey].k;
-    ServerSk := k.ag;
   end;
 
   procedure get_msgNo(msg:Message; Var num:indexType);
@@ -752,7 +679,7 @@ var msg:Message;
 begin
    clear msg;
    msg := ch[1].msg;
-   destruct1(msg,roleHost[i].loc_Na1,roleHost[i].loc_Gateway);
+   destruct3(msg,roleHost[i].loc_Na1,roleHost[i].loc_Gateway);
    if(roleHost[i].loc_Gateway=roleHost[i].Gateway)then
      ch[1].empty:=true;
      roleHost[i].st := Host2;
@@ -765,7 +692,7 @@ var msg:Message;
     msgNo:indexType;
 begin
    clear msg;
-   cons2(roleHost[i].Host,roleHost[i].Na2,roleHost[i].Host,msg,msgNo);
+   cons7(roleHost[i].Host,roleHost[i].Na2,roleHost[i].Host,msg,msgNo);
    ch[2].empty := false;
    ch[2].msg := msg;
    ch[2].sender := roleHost[i].Host;
@@ -787,7 +714,7 @@ var msg:Message;
 begin
    clear msg;
    msg := ch[3].msg;
-   destruct3(msg,roleHost[i].loc_Server,roleHost[i].loc_Na3,roleHost[i].loc_Server);
+   destruct7(msg,roleHost[i].loc_Server,roleHost[i].loc_Na3,roleHost[i].loc_Server);
    if(roleHost[i].loc_Server=roleHost[i].Server)then
      ch[3].empty:=true;
      roleHost[i].st := Host4;
@@ -800,7 +727,7 @@ var msg:Message;
     msgNo:indexType;
 begin
    clear msg;
-   cons4(roleHost[i].Host,roleHost[i].loc_Na3,roleHost[i].Host,msg,msgNo);
+   cons7(roleHost[i].Host,roleHost[i].loc_Na3,roleHost[i].Host,msg,msgNo);
    ch[4].empty := false;
    ch[4].msg := msg;
    ch[4].sender := roleHost[i].Host;
@@ -822,7 +749,7 @@ var msg:Message;
 begin
    clear msg;
    msg := ch[5].msg;
-   destruct5(msg,roleHost[i].loc_Server,roleHost[i].loc_Na4,roleHost[i].loc_Server);
+   destruct7(msg,roleHost[i].loc_Server,roleHost[i].loc_Na4,roleHost[i].loc_Server);
    if(roleHost[i].loc_Server=roleHost[i].Server)then
      ch[5].empty:=true;
      roleHost[i].st := Host1;
@@ -839,7 +766,7 @@ var msg:Message;
     msgNo:indexType;
 begin
    clear msg;
-   cons1(roleGateway[i].Na1,roleGateway[i].Gateway,msg,msgNo);
+   cons3(roleGateway[i].Na1,roleGateway[i].Gateway,msg,msgNo);
    ch[1].empty := false;
    ch[1].msg := msg;
    ch[1].sender := roleGateway[i].Gateway;
@@ -861,7 +788,7 @@ var msg:Message;
 begin
    clear msg;
    msg := ch[2].msg;
-   destruct2(msg,roleGateway[i].loc_Host,roleGateway[i].loc_Na2,roleGateway[i].loc_Host);
+   destruct7(msg,roleGateway[i].loc_Host,roleGateway[i].loc_Na2,roleGateway[i].loc_Host);
    if(roleGateway[i].loc_Host=roleGateway[i].Host&roleGateway[i].loc_Host=roleGateway[i].Host)then
      ch[2].empty:=true;
      roleGateway[i].st := Gateway3;
@@ -874,7 +801,7 @@ var msg:Message;
     msgNo:indexType;
 begin
    clear msg;
-   cons3(roleGateway[i].Host,roleGateway[i].loc_Na2,roleGateway[i].Host,msg,msgNo);
+   cons7(roleGateway[i].Host,roleGateway[i].loc_Na2,roleGateway[i].Host,msg,msgNo);
    ch[3].empty := false;
    ch[3].msg := msg;
    ch[3].sender := roleGateway[i].Gateway;
@@ -896,7 +823,7 @@ var msg:Message;
 begin
    clear msg;
    msg := ch[4].msg;
-   destruct4(msg,roleGateway[i].loc_Server,roleGateway[i].loc_Na3,roleGateway[i].loc_Server);
+   destruct7(msg,roleGateway[i].loc_Server,roleGateway[i].loc_Na3,roleGateway[i].loc_Server);
    if(roleGateway[i].loc_Server=roleGateway[i].Server&roleGateway[i].loc_Server=roleGateway[i].Server)then
      ch[4].empty:=true;
      roleGateway[i].st := Gateway5;
@@ -909,7 +836,7 @@ var msg:Message;
     msgNo:indexType;
 begin
    clear msg;
-   cons5(roleGateway[i].Server,roleGateway[i].loc_Na3,roleGateway[i].Server,msg,msgNo);
+   cons7(roleGateway[i].Server,roleGateway[i].loc_Na3,roleGateway[i].Server,msg,msgNo);
    ch[5].empty := false;
    ch[5].msg := msg;
    ch[5].sender := roleGateway[i].Gateway;
@@ -931,7 +858,7 @@ var msg:Message;
 begin
    clear msg;
    msg := ch[6].msg;
-   destruct6(msg,roleGateway[i].loc_Host,roleGateway[i].loc_Na3,roleGateway[i].loc_Host);
+   destruct7(msg,roleGateway[i].loc_Host,roleGateway[i].loc_Na3,roleGateway[i].loc_Host);
    if(roleGateway[i].loc_Host=roleGateway[i].Host&roleGateway[i].loc_Host=roleGateway[i].Host)then
      ch[6].empty:=true;
      roleGateway[i].st := Gateway7;
@@ -966,7 +893,7 @@ var msg:Message;
 begin
    clear msg;
    msg := ch[8].msg;
-   destruct8(msg,roleGateway[i].loc_Server,roleGateway[i].loc_Na4,roleGateway[i].loc_Server);
+   destruct7(msg,roleGateway[i].loc_Server,roleGateway[i].loc_Na4,roleGateway[i].loc_Server);
    if(roleGateway[i].loc_Server=roleGateway[i].Server&roleGateway[i].loc_Server=roleGateway[i].Server)then
      ch[8].empty:=true;
      roleGateway[i].st := Gateway9;
@@ -979,7 +906,7 @@ var msg:Message;
     msgNo:indexType;
 begin
    clear msg;
-   cons9(roleGateway[i].Server,roleGateway[i].loc_Na4,roleGateway[i].Server,msg,msgNo);
+   cons7(roleGateway[i].Server,roleGateway[i].loc_Na4,roleGateway[i].Server,msg,msgNo);
    ch[9].empty := false;
    ch[9].msg := msg;
    ch[9].sender := roleGateway[i].Gateway;
@@ -1005,7 +932,7 @@ var msg:Message;
 begin
    clear msg;
    msg := ch[1].msg;
-   destruct1(msg,roleServer[i].loc_Na2,roleServer[i].loc_Host); ---?
+   destruct7(msg,roleServer[i].loc_Host,roleServer[i].loc_Na2,roleServer[i].loc_Host);
    if(roleServer[i].loc_Host=roleServer[i].Host&roleServer[i].loc_Host=roleServer[i].Host)then
      ch[1].empty:=true;
      roleServer[i].st := Server2;
@@ -1018,7 +945,7 @@ var msg:Message;
     msgNo:indexType;
 begin
    clear msg;
-   cons2(roleServer[i].Server,roleServer[i].Na3,roleServer[i].Server,msg,msgNo);
+   cons7(roleServer[i].Server,roleServer[i].Na3,roleServer[i].Server,msg,msgNo);
    ch[2].empty := false;
    ch[2].msg := msg;
    ch[2].sender := roleServer[i].Server;
@@ -1040,7 +967,7 @@ var msg:Message;
 begin
    clear msg;
    msg := ch[3].msg;
-   destruct3(msg,roleServer[i].loc_Host,roleServer[i].loc_Na3,roleServer[i].loc_Host);
+   destruct7(msg,roleServer[i].loc_Host,roleServer[i].loc_Na3,roleServer[i].loc_Host);
    if(roleServer[i].loc_Host=roleServer[i].Host&roleServer[i].loc_Na3=roleServer[i].Na3&roleServer[i].loc_Host=roleServer[i].Host)then
      ch[3].empty:=true;
      roleServer[i].st := Server4;
@@ -1053,7 +980,7 @@ var msg:Message;
     msgNo:indexType;
 begin
    clear msg;
-   cons4(roleServer[i].Server,roleServer[i].Na4,roleServer[i].Server,msg,msgNo);
+   cons7(roleServer[i].Server,roleServer[i].Na4,roleServer[i].Server,msg,msgNo);
    ch[4].empty := false;
    ch[4].msg := msg;
    ch[4].sender := roleServer[i].Server;

@@ -249,6 +249,76 @@ and isSameList msgs1 msgs2 =
   | None -> false 
 ;;
 
+(* Get pattern Set number in Murphi code *)
+let getPatNum pat patList=
+  let len = List.length patList in
+  let patIndex = ref 0 in
+  for i = 0 to len do
+    match List.nth patList i with
+    | Some x -> if isSamePat pat x then patIndex := i+1
+    | None -> ()
+  done;
+  !patIndex
+;;
+
+(* Extracting msg patterns from actions and its sub-patterns *)
+(* Extract msg from action *)
+(*let extractMsg (seq,r1,r2,n,m) = m ;;*)
+let rec getSubMsg msg =
+  match msg with
+  |`Null -> []
+  |`Var nonce -> [`Var nonce]
+  |`Str role  -> [`Str role]
+  |`Concat msgs -> let submsgs = List.concat (List.map ~f:getSubMsg msgs) in
+                    submsgs@msgs@[msg]
+  |`Aenc (m,k) -> (getSubMsg m)@[m;k]@[msg]
+  |`Senc (m,k) -> (getSubMsg m)@[m;k]@[msg]
+  |`Hash m -> (getSubMsg m) @ [msg]
+  |`Pk role -> [`Pk role]
+  |`Sk role -> [`Sk role]
+  |`K (r1,r2) -> [`K (r1,r2)]
+;;
+
+(* To get equivalent msg pattern from patlist. *)
+let rec existSamePat eqvlPats pat = 
+  match eqvlPats with
+  | [] -> false
+  | hd::tl -> if isSamePat hd pat then true else existSamePat tl pat
+;;
+
+let isSubPat y x =
+  let ysubs = getSubMsg y in
+    let boollist = List.map ~f:(fun ysub -> if isSamePat ysub x then true else false) ysubs in
+    match List.reduce ~f:(||) boollist with
+    |Some b -> b
+    |None -> false
+;;
+let rec getEqvlMsgPattern patlist =
+  let non_eqvlPat = ref [] in 
+  let len = List.length patlist in
+  for i = 0 to len do
+	match List.nth patlist i with
+	| None -> ()
+ 	| Some x -> if existSamePat !non_eqvlPat x then () else non_eqvlPat := (insert x !non_eqvlPat) (* insert x into an appropriate position *)
+  done;
+  !non_eqvlPat
+
+and insert x patlist =
+    match patlist with
+    | [] -> x::patlist
+    | [y] -> if isSubPat y x then x::patlist else patlist@[x] (* if x is a subpat of y,then x before y,else x after y*)
+    | hd :: tl -> if isSubPat hd x then x::patlist else hd::(insert x tl)
+;;
+
+let rec getPatList actions =
+  match actions with
+  | `Null -> []
+  | `Act1 (seq,r1,r2,n,m) -> (getSubMsg m) @ [m]
+  | `Act2 (seq,r1,r2,m) -> (getSubMsg m) @ [m] 
+  | `Actlist arr -> List.concat (List.map ~f:getPatList arr)
+;;
+
+
 (* part 4 print murphi rule *)
 let rec getActsList actions rolelist = 
   match actions with
@@ -338,11 +408,12 @@ and existInMsgs msgs atom =
   |None -> false 
 ;;
 
-let rec genSendAct rolename i atoms length msgofRolename =
+let rec genSendAct rolename i m atoms length msgofRolename patlist =
   let atoms = del_duplicate atoms in
   let commitStr = if i = length then sprintf "   role%s[i].commit := true;\n" rolename else "" in
+  let patNum = getPatNum m patlist in
   sprintf "var msg:Message;\n    msgNo:indexType;\nbegin\n" ^
-  sprintf "   clear msg;\n   cons%d(%s,msg,msgNo);\n" i (sendAtoms2Str rolename i atoms msgofRolename) ^
+  sprintf "   clear msg;\n   cons%d(%s,msg,msgNo);\n" patNum (sendAtoms2Str rolename i atoms msgofRolename) ^
   sprintf "   ch[%d].empty := false;\n" i ^
   sprintf "   ch[%d].msg := msg;\n" i ^
   sprintf "   ch[%d].sender := role%s[i].%s;\n" i rolename rolename ^
@@ -379,10 +450,19 @@ and getPkAg atoms msgofRolename =
   if (existInit msgofRolename (`Str (!ag))) then !ag else loc^(!ag)
 ;;
 
-let rec genRecvAct rolename i m atoms length msgofRolename =
-  let commitStr = if i = length then sprintf "   role%s[i].commit := true;\n" rolename else "" in
+(** rolename: the owner of the strand
+    i: i-th node in strand (-,m)
+    m: msg of the i-th node
+    atoms: atoms derived from msg
+    length: strand length
+    msgofRolename: get msg from initial knowledge
+    patlist: Patterns derived from the protocol
+*)
+let rec genRecvAct rolename i m atoms length msgofRolename patlist =
+  let commitStr = if i = length then sprintf "   role%s[i].commit := true;\n" rolename else "" in 
+  let patNum = getPatNum m patlist in
   sprintf "var msg:Message;\n    msgNo:indexType;\nbegin\n" ^
-  sprintf "   clear msg;\n   msg := ch[%d].msg;\n   destruct%d(msg,%s);\n" i i (recvAtoms2Str atoms rolename) ^ (* (recvAtoms2Str atoms) *)
+  sprintf "   clear msg;\n   msg := ch[%d].msg;\n   destruct%d(msg,%s);\n" i patNum (recvAtoms2Str atoms rolename) ^ (* (recvAtoms2Str atoms) *)
   sprintf "   if(%s)then\n" (atoms2Str atoms rolename msgofRolename) ^
   sprintf "     ch[%d].empty:=true;\n" i ^
   sprintf "     role%s[i].st := %s%d;\n" rolename rolename ((i mod length)+1) ^
@@ -420,19 +500,19 @@ and getSender r m =
   else  sprintf "loc_A"
 ;;
 
-let trans act m i rolename length msgOfrolename =
+let trans act m i rolename length msgOfrolename patlist =
   let atoms = getAtoms m in
   let atoms = del_duplicate atoms in
   match (sign act) with
   | Plus -> begin 
               genRuleName rolename i ^
               genSendGuard rolename i ^
-              (genSendAct rolename i atoms length msgOfrolename)
+              (genSendAct rolename i m atoms length msgOfrolename patlist)
             end
   | Minus -> begin
               genRuleName rolename i ^
               genRecvGuard rolename i ^
-              (genRecvAct rolename i m atoms length msgOfrolename)
+              (genRecvAct rolename i m atoms length msgOfrolename patlist)
             end
 ;;
 
@@ -445,6 +525,9 @@ let print_murphiRule actions knws =  (*printf "murphi code"*)
   let rolelist = getRolesFromKnws knws [] in (* Get role list:[A;B;...] *)
   let actsOfAllRls = getActsList actions rolelist in  (* Get act list: [(sign,msg);(sign,msg);...] *)
   let initKnws = getMsgOfRoles knws in 
+  let patlist = getPatList actions in    (* get all patterns from actions *)
+  let non_dup = del_duplicate patlist in (* delete duplicate *)
+  let non_equivalent = getEqvlMsgPattern non_dup in (* delete equivalent class *)
   String.concat (List.mapi ~f:(fun i r -> (*if i = 0  || i = 1 then*)
                             let acts = match List.nth actsOfAllRls i with (* Get the i-th act list of role_i*)
                                       | None -> []
@@ -458,66 +541,11 @@ let print_murphiRule actions knws =  (*printf "murphi code"*)
                             sprintf "ruleset i:role%sNums do\n" r ^
                             String.concat (List.mapi ~f:(fun j act -> match act with
                                                         | None -> sprintf "null"
-                                                        | Some a -> trans a (genMsg a) (j+1) r lenActs msgofRole) acts) ^
+                                                        | Some a -> trans a (genMsg a) (j+1) r lenActs msgofRole non_equivalent) acts) ^
                             sprintf "endruleset;\n\n" ) rolelist);
 ;;
 
-(* Extracting msg patterns from actions and its sub-patterns *)
-(* Extract msg from action *)
-(*let extractMsg (seq,r1,r2,n,m) = m ;;*)
-let rec getSubMsg msg =
-  match msg with
-  |`Null -> []
-  |`Var nonce -> [`Var nonce]
-  |`Str role  -> [`Str role]
-  |`Concat msgs -> let submsgs = List.concat (List.map ~f:getSubMsg msgs) in
-                    submsgs@msgs@[msg]
-  |`Aenc (m,k) -> (getSubMsg m)@[m;k]@[msg]
-  |`Senc (m,k) -> (getSubMsg m)@[m;k]@[msg]
-  |`Hash m -> (getSubMsg m) @ [msg]
-  |`Pk role -> [`Pk role]
-  |`Sk role -> [`Sk role]
-  |`K (r1,r2) -> [`K (r1,r2)]
-;;
 
-(* To get equivalent msg pattern from patlist. *)
-let rec existSamePat eqvlPats pat = 
-  match eqvlPats with
-  | [] -> false
-  | hd::tl -> if isSamePat hd pat then true else existSamePat tl pat
-;;
-
-let isSubPat y x =
-  let ysubs = getSubMsg y in
-    let boollist = List.map ~f:(fun ysub -> if isSamePat ysub x then true else false) ysubs in
-    match List.reduce ~f:(||) boollist with
-    |Some b -> b
-    |None -> false
-;;
-let rec getEqvlMsgPattern patlist =
-  let non_eqvlPat = ref [] in 
-  let len = List.length patlist in
-  for i = 0 to len do
-	match List.nth patlist i with
-	| None -> ()
- 	| Some x -> if existSamePat !non_eqvlPat x then () else non_eqvlPat := (insert x !non_eqvlPat) (* insert x into an appropriate position *)
-  done;
-  !non_eqvlPat
-
-and insert x patlist =
-    match patlist with
-    | [] -> x::patlist
-    | [y] -> if isSubPat y x then x::patlist else patlist@[x] (* if x is a subpat of y,then x before y,else x after y*)
-    | hd :: tl -> if isSubPat hd x then x::patlist else hd::(insert x tl)
-;;
-
-let rec getPatList actions =
-  match actions with
-  | `Null -> []
-  | `Act1 (seq,r1,r2,n,m) -> (getSubMsg m) @ [m]
-  | `Act2 (seq,r1,r2,m) -> (getSubMsg m) @ [m] 
-  | `Actlist arr -> List.concat (List.map ~f:getPatList arr)
-;;
 
 let rec list_max xs =
   match xs with
@@ -537,17 +565,6 @@ let getMaxLenMsg actions =
 (* 2019-12-17 *)
 (* 2019-12-18 *)
 (* encrypt and decrypt / enconcat and deconcat *)
-(* Get pattern Set number in Murphi code *)
-let getPatNum pat patList=
-  let len = List.length patList in
-  let patIndex = ref 0 in
-  for i = 0 to len do
-    match List.nth patList i with
-    | Some x -> if isSamePat pat x then patIndex := i+1
-    | None -> ()
-  done;
-  !patIndex
-;;
 
 (* decryption rules for aenc(Na.A, Pk(B)), aenc(Na.Nb,Pk(A)) and aenc(Nb,Pk(B)) *)
 let rec adecryptRule (m,k) patList=  
@@ -1132,18 +1149,20 @@ let genCons m i patList =
   let atoms = getAtoms m in
   let noDupAtoms = del_duplicate atoms in 
   let j = getPatNum m patList in
-  sprintf "procedure cons%d(%s; Var msg:Message; Var num:indexType);\n" i (atoms2Parms noDupAtoms)^
+  sprintf "procedure cons%d(%s; Var msg:Message; Var num:indexType);\n" j (atoms2Parms noDupAtoms)^
   sprintf "  begin\n    clear msg;\n    clear num;    lookAddPat%d(%s,msg,num);\n" j (atom2Str noDupAtoms)^
   sprintf "  end;\n"
 ;;
 
-let genDestruct m i =
+let genDestruct m i patlist =
   let atoms =getAtoms m in 
   let atoms = del_duplicate atoms in
-  let str1 = sprintf "procedure destruct%d(msg:Message; %s);\n" i (atoms2Parms1 atoms) in
+  let patNum = getPatNum m patlist in
+  let str1 = sprintf "procedure destruct%d(msg:Message; %s);\n" patNum (atoms2Parms1 atoms) in
   match m with
   |`Aenc(m1,k1) ->begin let keyAg=match k1 with
                            |`Pk role -> role^"Pk"
+                           |`Sk role -> role^"Sk"
                            |_ -> "null"
                    in                  
                    match m1 with
@@ -1553,7 +1572,7 @@ let print_procedures actions =
                   in
                   (*genCons / genDestruct by actions *)
                   let msgs = getMsgs actions in
-                  let str2 = String.concat (List.mapi ~f:(fun i m -> genCons m (i+1) non_equivalent ^ genDestruct m (i+1)) msgs)
+                  let str2 = String.concat (List.mapi ~f:(fun i m -> genCons m (i+1) non_equivalent ^ genDestruct m (i+1) non_equivalent) non_equivalent)
                   in
                   (* print get_msgNo: procedure get_msgNo(msg:Message; Var num : indexType); *)
                   let str3 = genGet_msgNoCode () ^ genPrintMsgCode () in
@@ -1567,7 +1586,7 @@ let print_procedures actions =
           let str1 = String.concat (List.mapi ~f:(fun i pat -> (genSynthCode pat (i+1) non_equivalent) ^ genIsPatCode pat (i+1) non_equivalent) non_equivalent)
           in
           let msgs = getMsgs actions in
-          let str2 = String.concat (List.mapi ~f:(fun i m -> genCons m (i+1) non_equivalent ^ genDestruct m (i+1)) msgs)
+          let str2 = String.concat (List.mapi ~f:(fun i m -> genCons m (i+1) non_equivalent ^ genDestruct m (i+1) non_equivalent) msgs)
           in
           (* print get_msgNo: procedure get_msgNo(msg:Message; Var num : indexType); *)
           let str3 = genGet_msgNoCode () ^ genPrintMsgCode () in

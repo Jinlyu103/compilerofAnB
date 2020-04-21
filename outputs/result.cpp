@@ -3380,7 +3380,57 @@ else
 };
 /*** end procedure declaration ***/
 
-void mu_cons1(const mu_1_NonceType& mu_Na, const mu_1_AgentType& mu_A, const mu_1_AgentType& mu_BPk, mu_1_Message& mu_msg, mu_1_indexType& mu_num)
+void mu_cons1(const mu_1_NonceType& mu_Na, mu_1_Message& mu_msg, mu_1_indexType& mu_num)
+{
+mu_msg.clear();
+mu_num.clear();
+mu_lookAddPat1 ( mu_Na, mu_msg, mu_num );
+};
+/*** end procedure declaration ***/
+
+void mu_cons2(const mu_1_AgentType& mu_A, mu_1_Message& mu_msg, mu_1_indexType& mu_num)
+{
+mu_msg.clear();
+mu_num.clear();
+mu_lookAddPat2 ( mu_A, mu_msg, mu_num );
+};
+/*** end procedure declaration ***/
+
+void mu_cons3(const mu_1_NonceType& mu_Na, const mu_1_AgentType& mu_A, mu_1_Message& mu_msg, mu_1_indexType& mu_num)
+{
+mu_msg.clear();
+mu_num.clear();
+mu_lookAddPat3 ( mu_Na, mu_A, mu_msg, mu_num );
+};
+/*** end procedure declaration ***/
+
+void mu_destruct3(mu_1_Message& mu_msg, mu_1_NonceType& mu_Na, mu_1_AgentType& mu_A)
+{
+/*** Variable declaration ***/
+mu_1_Message mu_msgNum1("msgNum1",0);
+
+/*** Variable declaration ***/
+mu_1_Message mu_msgNum2("msgNum2",88);
+
+/*** Variable declaration ***/
+mu_1_KeyType mu_k("k",176);
+
+mu_msgNum1 = mu_msgs[mu_msg.mu_concatPart1];
+mu_Na = mu_msgNum1.mu_noncePart;
+mu_msgNum2 = mu_msgs[mu_msg.mu_concatPart2];
+mu_A = mu_msgNum2.mu_ag;
+};
+/*** end procedure declaration ***/
+
+void mu_cons4(const mu_1_AgentType& mu_BPk, mu_1_Message& mu_msg, mu_1_indexType& mu_num)
+{
+mu_msg.clear();
+mu_num.clear();
+mu_lookAddPat4 ( mu_BPk, mu_msg, mu_num );
+};
+/*** end procedure declaration ***/
+
+void mu_cons5(const mu_1_NonceType& mu_Na, const mu_1_AgentType& mu_A, const mu_1_AgentType& mu_BPk, mu_1_Message& mu_msg, mu_1_indexType& mu_num)
 {
 mu_msg.clear();
 mu_num.clear();
@@ -3388,7 +3438,7 @@ mu_lookAddPat5 ( mu_Na, mu_A, mu_BPk, mu_msg, mu_num );
 };
 /*** end procedure declaration ***/
 
-void mu_destruct1(mu_1_Message& mu_msg, mu_1_NonceType& mu_Na, mu_1_AgentType& mu_A, mu_1_AgentType& mu_BPk)
+void mu_destruct5(mu_1_Message& mu_msg, mu_1_NonceType& mu_Na, mu_1_AgentType& mu_A, mu_1_AgentType& mu_BPk)
 {
 /*** Variable declaration ***/
 mu_1_KeyType mu_k1("k1",0);
@@ -3413,7 +3463,33 @@ mu_A = mu_msgNum2.mu_ag;
 };
 /*** end procedure declaration ***/
 
-void mu_cons2(const mu_1_NonceType& mu_Na, const mu_1_NonceType& mu_Nb, const mu_1_AgentType& mu_APk, mu_1_Message& mu_msg, mu_1_indexType& mu_num)
+void mu_cons6(const mu_1_NonceType& mu_Na, const mu_1_NonceType& mu_Nb, mu_1_Message& mu_msg, mu_1_indexType& mu_num)
+{
+mu_msg.clear();
+mu_num.clear();
+mu_lookAddPat6 ( mu_Na, mu_Nb, mu_msg, mu_num );
+};
+/*** end procedure declaration ***/
+
+void mu_destruct6(mu_1_Message& mu_msg, mu_1_NonceType& mu_Na, mu_1_NonceType& mu_Nb)
+{
+/*** Variable declaration ***/
+mu_1_Message mu_msgNum1("msgNum1",0);
+
+/*** Variable declaration ***/
+mu_1_Message mu_msgNum2("msgNum2",88);
+
+/*** Variable declaration ***/
+mu_1_KeyType mu_k("k",176);
+
+mu_msgNum1 = mu_msgs[mu_msg.mu_concatPart1];
+mu_Na = mu_msgNum1.mu_noncePart;
+mu_msgNum2 = mu_msgs[mu_msg.mu_concatPart2];
+mu_Nb = mu_msgNum2.mu_noncePart;
+};
+/*** end procedure declaration ***/
+
+void mu_cons7(const mu_1_NonceType& mu_Na, const mu_1_NonceType& mu_Nb, const mu_1_AgentType& mu_APk, mu_1_Message& mu_msg, mu_1_indexType& mu_num)
 {
 mu_msg.clear();
 mu_num.clear();
@@ -3421,7 +3497,7 @@ mu_lookAddPat7 ( mu_Na, mu_Nb, mu_APk, mu_msg, mu_num );
 };
 /*** end procedure declaration ***/
 
-void mu_destruct2(mu_1_Message& mu_msg, mu_1_NonceType& mu_Na, mu_1_NonceType& mu_Nb, mu_1_AgentType& mu_APk)
+void mu_destruct7(mu_1_Message& mu_msg, mu_1_NonceType& mu_Na, mu_1_NonceType& mu_Nb, mu_1_AgentType& mu_APk)
 {
 /*** Variable declaration ***/
 mu_1_KeyType mu_k1("k1",0);
@@ -3446,7 +3522,7 @@ mu_Nb = mu_msgNum2.mu_noncePart;
 };
 /*** end procedure declaration ***/
 
-void mu_cons3(const mu_1_NonceType& mu_Nb, const mu_1_AgentType& mu_BPk, mu_1_Message& mu_msg, mu_1_indexType& mu_num)
+void mu_cons8(const mu_1_NonceType& mu_Nb, const mu_1_AgentType& mu_BPk, mu_1_Message& mu_msg, mu_1_indexType& mu_num)
 {
 mu_msg.clear();
 mu_num.clear();
@@ -3454,7 +3530,7 @@ mu_lookAddPat8 ( mu_Nb, mu_BPk, mu_msg, mu_num );
 };
 /*** end procedure declaration ***/
 
-void mu_destruct3(mu_1_Message& mu_msg, mu_1_NonceType& mu_Nb, mu_1_AgentType& mu_BPk)
+void mu_destruct8(mu_1_Message& mu_msg, mu_1_NonceType& mu_Nb, mu_1_AgentType& mu_BPk)
 {
 /*** Variable declaration ***/
 mu_1_KeyType mu_k1("k1",0);
@@ -5989,7 +6065,7 @@ mu_1_indexType mu_msgNo("msgNo",88);
 
 mu_msg.clear();
 mu_msg = mu_ch[3].mu_msg;
-mu_destruct3 ( mu_msg, mu_roleB[mu_i].mu_loc_Nb, mu_roleB[mu_i].mu_loc_B );
+mu_destruct8 ( mu_msg, mu_roleB[mu_i].mu_loc_Nb, mu_roleB[mu_i].mu_loc_B );
 bool mu__boolexpr126;
   if (!((mu_roleB[mu_i].mu_loc_Nb) == (mu_roleB[mu_i].mu_Nb))) mu__boolexpr126 = FALSE ;
   else {
@@ -6075,7 +6151,7 @@ mu_1_Message mu_msg("msg",0);
 mu_1_indexType mu_msgNo("msgNo",88);
 
 mu_msg.clear();
-mu_cons2 ( mu_roleB[mu_i].mu_loc_Na, mu_roleB[mu_i].mu_Nb, mu_roleB[mu_i].mu_loc_A, mu_msg, mu_msgNo );
+mu_cons7 ( mu_roleB[mu_i].mu_loc_Na, mu_roleB[mu_i].mu_Nb, mu_roleB[mu_i].mu_loc_A, mu_msg, mu_msgNo );
 mu_ch[2].mu_empty = mu_false;
 mu_ch[2].mu_msg = mu_msg;
 mu_ch[2].mu_sender = mu_roleB[mu_i].mu_B;
@@ -6163,7 +6239,7 @@ mu_1_indexType mu_msgNo("msgNo",88);
 
 mu_msg.clear();
 mu_msg = mu_ch[1].mu_msg;
-mu_destruct1 ( mu_msg, mu_roleB[mu_i].mu_loc_Na, mu_roleB[mu_i].mu_loc_A, mu_roleB[mu_i].mu_loc_B );
+mu_destruct5 ( mu_msg, mu_roleB[mu_i].mu_loc_Na, mu_roleB[mu_i].mu_loc_A, mu_roleB[mu_i].mu_loc_B );
 if ( (mu_roleB[mu_i].mu_loc_B) == (mu_roleB[mu_i].mu_B) )
 {
 mu_ch[1].mu_empty = mu_true;
@@ -6243,7 +6319,7 @@ mu_1_Message mu_msg("msg",0);
 mu_1_indexType mu_msgNo("msgNo",88);
 
 mu_msg.clear();
-mu_cons3 ( mu_roleA[mu_i].mu_loc_Nb, mu_roleA[mu_i].mu_B, mu_msg, mu_msgNo );
+mu_cons8 ( mu_roleA[mu_i].mu_loc_Nb, mu_roleA[mu_i].mu_B, mu_msg, mu_msgNo );
 mu_ch[3].mu_empty = mu_false;
 mu_ch[3].mu_msg = mu_msg;
 mu_ch[3].mu_sender = mu_roleA[mu_i].mu_A;
@@ -6332,7 +6408,7 @@ mu_1_indexType mu_msgNo("msgNo",88);
 
 mu_msg.clear();
 mu_msg = mu_ch[2].mu_msg;
-mu_destruct2 ( mu_msg, mu_roleA[mu_i].mu_loc_Na, mu_roleA[mu_i].mu_loc_Nb, mu_roleA[mu_i].mu_loc_A );
+mu_destruct7 ( mu_msg, mu_roleA[mu_i].mu_loc_Na, mu_roleA[mu_i].mu_loc_Nb, mu_roleA[mu_i].mu_loc_A );
 bool mu__boolexpr135;
   if (!((mu_roleA[mu_i].mu_loc_Na) == (mu_roleA[mu_i].mu_Na))) mu__boolexpr135 = FALSE ;
   else {
@@ -6417,7 +6493,7 @@ mu_1_Message mu_msg("msg",0);
 mu_1_indexType mu_msgNo("msgNo",88);
 
 mu_msg.clear();
-mu_cons1 ( mu_roleA[mu_i].mu_Na, mu_roleA[mu_i].mu_A, mu_roleA[mu_i].mu_B, mu_msg, mu_msgNo );
+mu_cons5 ( mu_roleA[mu_i].mu_Na, mu_roleA[mu_i].mu_A, mu_roleA[mu_i].mu_B, mu_msg, mu_msgNo );
 mu_ch[1].mu_empty = mu_false;
 mu_ch[1].mu_msg = mu_msg;
 mu_ch[1].mu_sender = mu_roleA[mu_i].mu_A;
