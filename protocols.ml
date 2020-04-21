@@ -781,10 +781,10 @@ let rec getMsgs actions =
   | `Actlist arr -> List.concat (List.map ~f:getMsgs arr)
 ;;
 
-let rec print_murphiRule_byMsgs m i patList =
+let rec print_murphiRule_byMsgs m i patList r =
   let j = getPatNum m patList in
   print_getRules i j ^
-  print_emitRules i j
+  print_emitRules i j r
 
 and print_getRules i j =
   sprintf "\n---rule of intruder to get msg%d \n" i ^
@@ -806,22 +806,24 @@ and print_getRules i j =
   (*printf "    intruder.st := gotmsg%d;\n" i;*)
   sprintf "  end;\n"
 
-and print_emitRules i j=
+and print_emitRules i j r=
   let str1 = sprintf "\n---rule of intruder to emit msg%d.\n" i^sprintf "ruleset i: msgLen do\n"
   in
-  let str2 = if i mod 2 = 1 then
+  let str2 = sprintf "  ruleset j: role%sNums do\n" r in
+  (* let str2 = if i mod 2 = 1 then
                sprintf "  ruleset j: roleBNums do\n"
              else sprintf "  ruleset j: roleANums do\n"
-  in
+  in *)
   let str3 = sprintf "    rule \"intruderEmitMsg%d\"\n" i^sprintf "      ch[%d].empty=true & i <= pat%dSet.length & Spy_known[pat%dSet.content[i]]\n      ==>\n" i j j^
              sprintf "      begin\n        if (!emit[pat%dSet.content[i]] & msgs[msgs[pat%dSet.content[i]].aencKey].k.ag=intruder.B) then\n" j j^
              sprintf "          clear ch[%d];\n" i^sprintf "          ch[%d].msg:=msgs[pat%dSet.content[i]];\n" i j^
              sprintf "          ch[%d].sender:=Intruder;\n" i
   in
-  let str4 = if i mod 2 = 1 then
+  let str4 = sprintf "          ch[%d].receiver:=role%s[j].%s;\n" i r r in
+  (* let str4 = if i mod 2 = 1 then
                 sprintf "          ch[%d].receiver:=roleB[j].B;\n" i  (* roleB[j] should be derived from initial knws roleB *)
             else sprintf "          ch[%d].receiver:=roleA[j].A;\n" i
-  in
+  in *)
   str1 ^ str2 ^ str3^ str4 ^ sprintf "          ch[%d].empty:=false;\n" i^
   sprintf "          emit[pat%dSet.content[i]] := true;\n" j^
   (*printf "          intruder.st:=emitted%d;\n" i;*)
@@ -840,23 +842,27 @@ and print_emitRules i j=
    print get rules of each msg;
    print emit rules of each msg. *)
 let print_murphiRule_ofIntruder actions knws =
+  let rlist = getRolesFromKnws knws [] in
   match actions with
   |`Null -> sprintf "null"
   |`Actlist arr -> let msgs = getMsgs actions in    (* get all msgs from actions *) 
                    let patlist = getPatList actions in    (* get all patterns from actions *)
                    let non_dup = del_duplicate patlist in (* delete duplicate *)
                    let non_equivalent = getEqvlMsgPattern non_dup in
-                   String.concat (List.mapi ~f:(fun i m -> print_murphiRule_byMsgs m (i+1) non_equivalent) msgs)
+                   String.concat (List.map ~f:(fun r -> let s = String.concat (List.mapi ~f:(fun i m -> print_murphiRule_byMsgs m (i+1) non_equivalent r) msgs) in
+                                                    sprintf "%s\n" s)  rlist)                 
   |`Act1 (seq,r1,r2,n,m) -> let msgs = getMsgs actions in    (* get all msgs from actions *)
                            let patlist = getPatList actions in    (* get all patterns from actions *)
                            let non_dup = del_duplicate patlist in (* delete duplicate *)
                            let non_equivalent = getEqvlMsgPattern non_dup in
-                           String.concat (List.mapi ~f:(fun i m -> print_murphiRule_byMsgs m (i+1) non_equivalent) msgs)
+                           String.concat (List.map ~f:(fun r -> String.concat (List.mapi ~f:(fun i m -> print_murphiRule_byMsgs m (i+1) non_equivalent r) msgs)) rlist)
+                           (* String.concat (List.mapi ~f:(fun i m -> print_murphiRule_byMsgs m (i+1) non_equivalent) msgs) *)
   |`Act2 (seq,r1,r2,m) -> let msgs = getMsgs actions in    (* get all msgs from actions *)
                            let patlist = getPatList actions in    (* get all patterns from actions *)
                            let non_dup = del_duplicate patlist in (* delete duplicate *)
                            let non_equivalent = getEqvlMsgPattern non_dup in
-                           String.concat (List.mapi ~f:(fun i m -> print_murphiRule_byMsgs m (i+1) non_equivalent) msgs)
+                           String.concat (List.map ~f:(fun r -> String.concat (List.mapi ~f:(fun i m -> print_murphiRule_byMsgs m (i+1) non_equivalent r) msgs)) rlist)
+                           (* String.concat (List.mapi ~f:(fun i m -> print_murphiRule_byMsgs m (i+1) non_equivalent) msgs) *)
 ;;
 
 (*synthesis of a messages of pati.*)

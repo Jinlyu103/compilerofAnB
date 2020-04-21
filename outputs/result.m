@@ -1021,7 +1021,7 @@ rule "intruderGetMsg1"
 
 ---rule of intruder to emit msg1.
 ruleset i: msgLen do
-  ruleset j: roleBNums do
+  ruleset j: roleHostNums do
     rule "intruderEmitMsg1"
       ch[1].empty=true & i <= pat3Set.length & Spy_known[pat3Set.content[i]]
       ==>
@@ -1030,7 +1030,7 @@ ruleset i: msgLen do
           clear ch[1];
           ch[1].msg:=msgs[pat3Set.content[i]];
           ch[1].sender:=Intruder;
-          ch[1].receiver:=roleB[j].B;
+          ch[1].receiver:=roleHost[j].Host;
           ch[1].empty:=false;
           emit[pat3Set.content[i]] := true;
           put "1. ";
@@ -1068,7 +1068,7 @@ rule "intruderGetMsg2"
 
 ---rule of intruder to emit msg2.
 ruleset i: msgLen do
-  ruleset j: roleANums do
+  ruleset j: roleHostNums do
     rule "intruderEmitMsg2"
       ch[2].empty=true & i <= pat7Set.length & Spy_known[pat7Set.content[i]]
       ==>
@@ -1077,7 +1077,7 @@ ruleset i: msgLen do
           clear ch[2];
           ch[2].msg:=msgs[pat7Set.content[i]];
           ch[2].sender:=Intruder;
-          ch[2].receiver:=roleA[j].A;
+          ch[2].receiver:=roleHost[j].Host;
           ch[2].empty:=false;
           emit[pat7Set.content[i]] := true;
           put "2. ";
@@ -1115,7 +1115,7 @@ rule "intruderGetMsg3"
 
 ---rule of intruder to emit msg3.
 ruleset i: msgLen do
-  ruleset j: roleBNums do
+  ruleset j: roleHostNums do
     rule "intruderEmitMsg3"
       ch[3].empty=true & i <= pat7Set.length & Spy_known[pat7Set.content[i]]
       ==>
@@ -1124,7 +1124,7 @@ ruleset i: msgLen do
           clear ch[3];
           ch[3].msg:=msgs[pat7Set.content[i]];
           ch[3].sender:=Intruder;
-          ch[3].receiver:=roleB[j].B;
+          ch[3].receiver:=roleHost[j].Host;
           ch[3].empty:=false;
           emit[pat7Set.content[i]] := true;
           put "3. ";
@@ -1162,7 +1162,7 @@ rule "intruderGetMsg4"
 
 ---rule of intruder to emit msg4.
 ruleset i: msgLen do
-  ruleset j: roleANums do
+  ruleset j: roleHostNums do
     rule "intruderEmitMsg4"
       ch[4].empty=true & i <= pat7Set.length & Spy_known[pat7Set.content[i]]
       ==>
@@ -1171,7 +1171,7 @@ ruleset i: msgLen do
           clear ch[4];
           ch[4].msg:=msgs[pat7Set.content[i]];
           ch[4].sender:=Intruder;
-          ch[4].receiver:=roleA[j].A;
+          ch[4].receiver:=roleHost[j].Host;
           ch[4].empty:=false;
           emit[pat7Set.content[i]] := true;
           put "4. ";
@@ -1209,7 +1209,7 @@ rule "intruderGetMsg5"
 
 ---rule of intruder to emit msg5.
 ruleset i: msgLen do
-  ruleset j: roleBNums do
+  ruleset j: roleHostNums do
     rule "intruderEmitMsg5"
       ch[5].empty=true & i <= pat7Set.length & Spy_known[pat7Set.content[i]]
       ==>
@@ -1218,7 +1218,7 @@ ruleset i: msgLen do
           clear ch[5];
           ch[5].msg:=msgs[pat7Set.content[i]];
           ch[5].sender:=Intruder;
-          ch[5].receiver:=roleB[j].B;
+          ch[5].receiver:=roleHost[j].Host;
           ch[5].empty:=false;
           emit[pat7Set.content[i]] := true;
           put "5. ";
@@ -1256,7 +1256,7 @@ rule "intruderGetMsg6"
 
 ---rule of intruder to emit msg6.
 ruleset i: msgLen do
-  ruleset j: roleANums do
+  ruleset j: roleHostNums do
     rule "intruderEmitMsg6"
       ch[6].empty=true & i <= pat7Set.length & Spy_known[pat7Set.content[i]]
       ==>
@@ -1265,7 +1265,7 @@ ruleset i: msgLen do
           clear ch[6];
           ch[6].msg:=msgs[pat7Set.content[i]];
           ch[6].sender:=Intruder;
-          ch[6].receiver:=roleA[j].A;
+          ch[6].receiver:=roleHost[j].Host;
           ch[6].empty:=false;
           emit[pat7Set.content[i]] := true;
           put "6. ";
@@ -1303,7 +1303,7 @@ rule "intruderGetMsg7"
 
 ---rule of intruder to emit msg7.
 ruleset i: msgLen do
-  ruleset j: roleBNums do
+  ruleset j: roleHostNums do
     rule "intruderEmitMsg7"
       ch[7].empty=true & i <= pat7Set.length & Spy_known[pat7Set.content[i]]
       ==>
@@ -1312,7 +1312,7 @@ ruleset i: msgLen do
           clear ch[7];
           ch[7].msg:=msgs[pat7Set.content[i]];
           ch[7].sender:=Intruder;
-          ch[7].receiver:=roleB[j].B;
+          ch[7].receiver:=roleHost[j].Host;
           ch[7].empty:=false;
           emit[pat7Set.content[i]] := true;
           put "7. ";
@@ -1350,7 +1350,7 @@ rule "intruderGetMsg8"
 
 ---rule of intruder to emit msg8.
 ruleset i: msgLen do
-  ruleset j: roleANums do
+  ruleset j: roleHostNums do
     rule "intruderEmitMsg8"
       ch[8].empty=true & i <= pat7Set.length & Spy_known[pat7Set.content[i]]
       ==>
@@ -1359,7 +1359,7 @@ ruleset i: msgLen do
           clear ch[8];
           ch[8].msg:=msgs[pat7Set.content[i]];
           ch[8].sender:=Intruder;
-          ch[8].receiver:=roleA[j].A;
+          ch[8].receiver:=roleHost[j].Host;
           ch[8].empty:=false;
           emit[pat7Set.content[i]] := true;
           put "8. ";
@@ -1397,7 +1397,7 @@ rule "intruderGetMsg9"
 
 ---rule of intruder to emit msg9.
 ruleset i: msgLen do
-  ruleset j: roleBNums do
+  ruleset j: roleHostNums do
     rule "intruderEmitMsg9"
       ch[9].empty=true & i <= pat7Set.length & Spy_known[pat7Set.content[i]]
       ==>
@@ -1406,7 +1406,7 @@ ruleset i: msgLen do
           clear ch[9];
           ch[9].msg:=msgs[pat7Set.content[i]];
           ch[9].sender:=Intruder;
-          ch[9].receiver:=roleB[j].B;
+          ch[9].receiver:=roleHost[j].Host;
           ch[9].empty:=false;
           emit[pat7Set.content[i]] := true;
           put "9. ";
@@ -1420,6 +1420,855 @@ ruleset i: msgLen do
       end;
   endruleset;
 endruleset;
+
+
+---rule of intruder to get msg1 
+rule "intruderGetMsg1" 
+  ch[1].empty = false
+  ==>
+  var flag_pat3:boolean;
+      msgNo:indexType;
+      msg:Message;
+  begin
+    msg := ch[1].msg;
+    get_msgNo(msg, msgNo);
+    isPat3(msg,flag_pat3);
+    if (flag_pat3) then
+      if(!exist(pat3Set,msgNo)) then
+        pat3Set.length:=pat3Set.length+1;
+        pat3Set.content[pat3Set.length]:=msgNo;
+        Spy_known[msgNo] := true;
+      endif;
+    endif;
+    ch[1].empty := true;
+  end;
+
+---rule of intruder to emit msg1.
+ruleset i: msgLen do
+  ruleset j: roleGatewayNums do
+    rule "intruderEmitMsg1"
+      ch[1].empty=true & i <= pat3Set.length & Spy_known[pat3Set.content[i]]
+      ==>
+      begin
+        if (!emit[pat3Set.content[i]] & msgs[msgs[pat3Set.content[i]].aencKey].k.ag=intruder.B) then
+          clear ch[1];
+          ch[1].msg:=msgs[pat3Set.content[i]];
+          ch[1].sender:=Intruder;
+          ch[1].receiver:=roleGateway[j].Gateway;
+          ch[1].empty:=false;
+          emit[pat3Set.content[i]] := true;
+          put "1. ";
+          put ch[1].sender;
+          put "   ";
+          put ch[1].receiver;
+          put "   msg: ";
+          printMsg(ch[1].msg);
+          put "\n";
+        endif;
+      end;
+  endruleset;
+endruleset;
+
+---rule of intruder to get msg2 
+rule "intruderGetMsg2" 
+  ch[2].empty = false
+  ==>
+  var flag_pat7:boolean;
+      msgNo:indexType;
+      msg:Message;
+  begin
+    msg := ch[2].msg;
+    get_msgNo(msg, msgNo);
+    isPat7(msg,flag_pat7);
+    if (flag_pat7) then
+      if(!exist(pat7Set,msgNo)) then
+        pat7Set.length:=pat7Set.length+1;
+        pat7Set.content[pat7Set.length]:=msgNo;
+        Spy_known[msgNo] := true;
+      endif;
+    endif;
+    ch[2].empty := true;
+  end;
+
+---rule of intruder to emit msg2.
+ruleset i: msgLen do
+  ruleset j: roleGatewayNums do
+    rule "intruderEmitMsg2"
+      ch[2].empty=true & i <= pat7Set.length & Spy_known[pat7Set.content[i]]
+      ==>
+      begin
+        if (!emit[pat7Set.content[i]] & msgs[msgs[pat7Set.content[i]].aencKey].k.ag=intruder.B) then
+          clear ch[2];
+          ch[2].msg:=msgs[pat7Set.content[i]];
+          ch[2].sender:=Intruder;
+          ch[2].receiver:=roleGateway[j].Gateway;
+          ch[2].empty:=false;
+          emit[pat7Set.content[i]] := true;
+          put "2. ";
+          put ch[2].sender;
+          put "   ";
+          put ch[2].receiver;
+          put "   msg: ";
+          printMsg(ch[2].msg);
+          put "\n";
+        endif;
+      end;
+  endruleset;
+endruleset;
+
+---rule of intruder to get msg3 
+rule "intruderGetMsg3" 
+  ch[3].empty = false
+  ==>
+  var flag_pat7:boolean;
+      msgNo:indexType;
+      msg:Message;
+  begin
+    msg := ch[3].msg;
+    get_msgNo(msg, msgNo);
+    isPat7(msg,flag_pat7);
+    if (flag_pat7) then
+      if(!exist(pat7Set,msgNo)) then
+        pat7Set.length:=pat7Set.length+1;
+        pat7Set.content[pat7Set.length]:=msgNo;
+        Spy_known[msgNo] := true;
+      endif;
+    endif;
+    ch[3].empty := true;
+  end;
+
+---rule of intruder to emit msg3.
+ruleset i: msgLen do
+  ruleset j: roleGatewayNums do
+    rule "intruderEmitMsg3"
+      ch[3].empty=true & i <= pat7Set.length & Spy_known[pat7Set.content[i]]
+      ==>
+      begin
+        if (!emit[pat7Set.content[i]] & msgs[msgs[pat7Set.content[i]].aencKey].k.ag=intruder.B) then
+          clear ch[3];
+          ch[3].msg:=msgs[pat7Set.content[i]];
+          ch[3].sender:=Intruder;
+          ch[3].receiver:=roleGateway[j].Gateway;
+          ch[3].empty:=false;
+          emit[pat7Set.content[i]] := true;
+          put "3. ";
+          put ch[3].sender;
+          put "   ";
+          put ch[3].receiver;
+          put "   msg: ";
+          printMsg(ch[3].msg);
+          put "\n";
+        endif;
+      end;
+  endruleset;
+endruleset;
+
+---rule of intruder to get msg4 
+rule "intruderGetMsg4" 
+  ch[4].empty = false
+  ==>
+  var flag_pat7:boolean;
+      msgNo:indexType;
+      msg:Message;
+  begin
+    msg := ch[4].msg;
+    get_msgNo(msg, msgNo);
+    isPat7(msg,flag_pat7);
+    if (flag_pat7) then
+      if(!exist(pat7Set,msgNo)) then
+        pat7Set.length:=pat7Set.length+1;
+        pat7Set.content[pat7Set.length]:=msgNo;
+        Spy_known[msgNo] := true;
+      endif;
+    endif;
+    ch[4].empty := true;
+  end;
+
+---rule of intruder to emit msg4.
+ruleset i: msgLen do
+  ruleset j: roleGatewayNums do
+    rule "intruderEmitMsg4"
+      ch[4].empty=true & i <= pat7Set.length & Spy_known[pat7Set.content[i]]
+      ==>
+      begin
+        if (!emit[pat7Set.content[i]] & msgs[msgs[pat7Set.content[i]].aencKey].k.ag=intruder.B) then
+          clear ch[4];
+          ch[4].msg:=msgs[pat7Set.content[i]];
+          ch[4].sender:=Intruder;
+          ch[4].receiver:=roleGateway[j].Gateway;
+          ch[4].empty:=false;
+          emit[pat7Set.content[i]] := true;
+          put "4. ";
+          put ch[4].sender;
+          put "   ";
+          put ch[4].receiver;
+          put "   msg: ";
+          printMsg(ch[4].msg);
+          put "\n";
+        endif;
+      end;
+  endruleset;
+endruleset;
+
+---rule of intruder to get msg5 
+rule "intruderGetMsg5" 
+  ch[5].empty = false
+  ==>
+  var flag_pat7:boolean;
+      msgNo:indexType;
+      msg:Message;
+  begin
+    msg := ch[5].msg;
+    get_msgNo(msg, msgNo);
+    isPat7(msg,flag_pat7);
+    if (flag_pat7) then
+      if(!exist(pat7Set,msgNo)) then
+        pat7Set.length:=pat7Set.length+1;
+        pat7Set.content[pat7Set.length]:=msgNo;
+        Spy_known[msgNo] := true;
+      endif;
+    endif;
+    ch[5].empty := true;
+  end;
+
+---rule of intruder to emit msg5.
+ruleset i: msgLen do
+  ruleset j: roleGatewayNums do
+    rule "intruderEmitMsg5"
+      ch[5].empty=true & i <= pat7Set.length & Spy_known[pat7Set.content[i]]
+      ==>
+      begin
+        if (!emit[pat7Set.content[i]] & msgs[msgs[pat7Set.content[i]].aencKey].k.ag=intruder.B) then
+          clear ch[5];
+          ch[5].msg:=msgs[pat7Set.content[i]];
+          ch[5].sender:=Intruder;
+          ch[5].receiver:=roleGateway[j].Gateway;
+          ch[5].empty:=false;
+          emit[pat7Set.content[i]] := true;
+          put "5. ";
+          put ch[5].sender;
+          put "   ";
+          put ch[5].receiver;
+          put "   msg: ";
+          printMsg(ch[5].msg);
+          put "\n";
+        endif;
+      end;
+  endruleset;
+endruleset;
+
+---rule of intruder to get msg6 
+rule "intruderGetMsg6" 
+  ch[6].empty = false
+  ==>
+  var flag_pat7:boolean;
+      msgNo:indexType;
+      msg:Message;
+  begin
+    msg := ch[6].msg;
+    get_msgNo(msg, msgNo);
+    isPat7(msg,flag_pat7);
+    if (flag_pat7) then
+      if(!exist(pat7Set,msgNo)) then
+        pat7Set.length:=pat7Set.length+1;
+        pat7Set.content[pat7Set.length]:=msgNo;
+        Spy_known[msgNo] := true;
+      endif;
+    endif;
+    ch[6].empty := true;
+  end;
+
+---rule of intruder to emit msg6.
+ruleset i: msgLen do
+  ruleset j: roleGatewayNums do
+    rule "intruderEmitMsg6"
+      ch[6].empty=true & i <= pat7Set.length & Spy_known[pat7Set.content[i]]
+      ==>
+      begin
+        if (!emit[pat7Set.content[i]] & msgs[msgs[pat7Set.content[i]].aencKey].k.ag=intruder.B) then
+          clear ch[6];
+          ch[6].msg:=msgs[pat7Set.content[i]];
+          ch[6].sender:=Intruder;
+          ch[6].receiver:=roleGateway[j].Gateway;
+          ch[6].empty:=false;
+          emit[pat7Set.content[i]] := true;
+          put "6. ";
+          put ch[6].sender;
+          put "   ";
+          put ch[6].receiver;
+          put "   msg: ";
+          printMsg(ch[6].msg);
+          put "\n";
+        endif;
+      end;
+  endruleset;
+endruleset;
+
+---rule of intruder to get msg7 
+rule "intruderGetMsg7" 
+  ch[7].empty = false
+  ==>
+  var flag_pat7:boolean;
+      msgNo:indexType;
+      msg:Message;
+  begin
+    msg := ch[7].msg;
+    get_msgNo(msg, msgNo);
+    isPat7(msg,flag_pat7);
+    if (flag_pat7) then
+      if(!exist(pat7Set,msgNo)) then
+        pat7Set.length:=pat7Set.length+1;
+        pat7Set.content[pat7Set.length]:=msgNo;
+        Spy_known[msgNo] := true;
+      endif;
+    endif;
+    ch[7].empty := true;
+  end;
+
+---rule of intruder to emit msg7.
+ruleset i: msgLen do
+  ruleset j: roleGatewayNums do
+    rule "intruderEmitMsg7"
+      ch[7].empty=true & i <= pat7Set.length & Spy_known[pat7Set.content[i]]
+      ==>
+      begin
+        if (!emit[pat7Set.content[i]] & msgs[msgs[pat7Set.content[i]].aencKey].k.ag=intruder.B) then
+          clear ch[7];
+          ch[7].msg:=msgs[pat7Set.content[i]];
+          ch[7].sender:=Intruder;
+          ch[7].receiver:=roleGateway[j].Gateway;
+          ch[7].empty:=false;
+          emit[pat7Set.content[i]] := true;
+          put "7. ";
+          put ch[7].sender;
+          put "   ";
+          put ch[7].receiver;
+          put "   msg: ";
+          printMsg(ch[7].msg);
+          put "\n";
+        endif;
+      end;
+  endruleset;
+endruleset;
+
+---rule of intruder to get msg8 
+rule "intruderGetMsg8" 
+  ch[8].empty = false
+  ==>
+  var flag_pat7:boolean;
+      msgNo:indexType;
+      msg:Message;
+  begin
+    msg := ch[8].msg;
+    get_msgNo(msg, msgNo);
+    isPat7(msg,flag_pat7);
+    if (flag_pat7) then
+      if(!exist(pat7Set,msgNo)) then
+        pat7Set.length:=pat7Set.length+1;
+        pat7Set.content[pat7Set.length]:=msgNo;
+        Spy_known[msgNo] := true;
+      endif;
+    endif;
+    ch[8].empty := true;
+  end;
+
+---rule of intruder to emit msg8.
+ruleset i: msgLen do
+  ruleset j: roleGatewayNums do
+    rule "intruderEmitMsg8"
+      ch[8].empty=true & i <= pat7Set.length & Spy_known[pat7Set.content[i]]
+      ==>
+      begin
+        if (!emit[pat7Set.content[i]] & msgs[msgs[pat7Set.content[i]].aencKey].k.ag=intruder.B) then
+          clear ch[8];
+          ch[8].msg:=msgs[pat7Set.content[i]];
+          ch[8].sender:=Intruder;
+          ch[8].receiver:=roleGateway[j].Gateway;
+          ch[8].empty:=false;
+          emit[pat7Set.content[i]] := true;
+          put "8. ";
+          put ch[8].sender;
+          put "   ";
+          put ch[8].receiver;
+          put "   msg: ";
+          printMsg(ch[8].msg);
+          put "\n";
+        endif;
+      end;
+  endruleset;
+endruleset;
+
+---rule of intruder to get msg9 
+rule "intruderGetMsg9" 
+  ch[9].empty = false
+  ==>
+  var flag_pat7:boolean;
+      msgNo:indexType;
+      msg:Message;
+  begin
+    msg := ch[9].msg;
+    get_msgNo(msg, msgNo);
+    isPat7(msg,flag_pat7);
+    if (flag_pat7) then
+      if(!exist(pat7Set,msgNo)) then
+        pat7Set.length:=pat7Set.length+1;
+        pat7Set.content[pat7Set.length]:=msgNo;
+        Spy_known[msgNo] := true;
+      endif;
+    endif;
+    ch[9].empty := true;
+  end;
+
+---rule of intruder to emit msg9.
+ruleset i: msgLen do
+  ruleset j: roleGatewayNums do
+    rule "intruderEmitMsg9"
+      ch[9].empty=true & i <= pat7Set.length & Spy_known[pat7Set.content[i]]
+      ==>
+      begin
+        if (!emit[pat7Set.content[i]] & msgs[msgs[pat7Set.content[i]].aencKey].k.ag=intruder.B) then
+          clear ch[9];
+          ch[9].msg:=msgs[pat7Set.content[i]];
+          ch[9].sender:=Intruder;
+          ch[9].receiver:=roleGateway[j].Gateway;
+          ch[9].empty:=false;
+          emit[pat7Set.content[i]] := true;
+          put "9. ";
+          put ch[9].sender;
+          put "   ";
+          put ch[9].receiver;
+          put "   msg: ";
+          printMsg(ch[9].msg);
+          put "\n";
+        endif;
+      end;
+  endruleset;
+endruleset;
+
+
+---rule of intruder to get msg1 
+rule "intruderGetMsg1" 
+  ch[1].empty = false
+  ==>
+  var flag_pat3:boolean;
+      msgNo:indexType;
+      msg:Message;
+  begin
+    msg := ch[1].msg;
+    get_msgNo(msg, msgNo);
+    isPat3(msg,flag_pat3);
+    if (flag_pat3) then
+      if(!exist(pat3Set,msgNo)) then
+        pat3Set.length:=pat3Set.length+1;
+        pat3Set.content[pat3Set.length]:=msgNo;
+        Spy_known[msgNo] := true;
+      endif;
+    endif;
+    ch[1].empty := true;
+  end;
+
+---rule of intruder to emit msg1.
+ruleset i: msgLen do
+  ruleset j: roleServerNums do
+    rule "intruderEmitMsg1"
+      ch[1].empty=true & i <= pat3Set.length & Spy_known[pat3Set.content[i]]
+      ==>
+      begin
+        if (!emit[pat3Set.content[i]] & msgs[msgs[pat3Set.content[i]].aencKey].k.ag=intruder.B) then
+          clear ch[1];
+          ch[1].msg:=msgs[pat3Set.content[i]];
+          ch[1].sender:=Intruder;
+          ch[1].receiver:=roleServer[j].Server;
+          ch[1].empty:=false;
+          emit[pat3Set.content[i]] := true;
+          put "1. ";
+          put ch[1].sender;
+          put "   ";
+          put ch[1].receiver;
+          put "   msg: ";
+          printMsg(ch[1].msg);
+          put "\n";
+        endif;
+      end;
+  endruleset;
+endruleset;
+
+---rule of intruder to get msg2 
+rule "intruderGetMsg2" 
+  ch[2].empty = false
+  ==>
+  var flag_pat7:boolean;
+      msgNo:indexType;
+      msg:Message;
+  begin
+    msg := ch[2].msg;
+    get_msgNo(msg, msgNo);
+    isPat7(msg,flag_pat7);
+    if (flag_pat7) then
+      if(!exist(pat7Set,msgNo)) then
+        pat7Set.length:=pat7Set.length+1;
+        pat7Set.content[pat7Set.length]:=msgNo;
+        Spy_known[msgNo] := true;
+      endif;
+    endif;
+    ch[2].empty := true;
+  end;
+
+---rule of intruder to emit msg2.
+ruleset i: msgLen do
+  ruleset j: roleServerNums do
+    rule "intruderEmitMsg2"
+      ch[2].empty=true & i <= pat7Set.length & Spy_known[pat7Set.content[i]]
+      ==>
+      begin
+        if (!emit[pat7Set.content[i]] & msgs[msgs[pat7Set.content[i]].aencKey].k.ag=intruder.B) then
+          clear ch[2];
+          ch[2].msg:=msgs[pat7Set.content[i]];
+          ch[2].sender:=Intruder;
+          ch[2].receiver:=roleServer[j].Server;
+          ch[2].empty:=false;
+          emit[pat7Set.content[i]] := true;
+          put "2. ";
+          put ch[2].sender;
+          put "   ";
+          put ch[2].receiver;
+          put "   msg: ";
+          printMsg(ch[2].msg);
+          put "\n";
+        endif;
+      end;
+  endruleset;
+endruleset;
+
+---rule of intruder to get msg3 
+rule "intruderGetMsg3" 
+  ch[3].empty = false
+  ==>
+  var flag_pat7:boolean;
+      msgNo:indexType;
+      msg:Message;
+  begin
+    msg := ch[3].msg;
+    get_msgNo(msg, msgNo);
+    isPat7(msg,flag_pat7);
+    if (flag_pat7) then
+      if(!exist(pat7Set,msgNo)) then
+        pat7Set.length:=pat7Set.length+1;
+        pat7Set.content[pat7Set.length]:=msgNo;
+        Spy_known[msgNo] := true;
+      endif;
+    endif;
+    ch[3].empty := true;
+  end;
+
+---rule of intruder to emit msg3.
+ruleset i: msgLen do
+  ruleset j: roleServerNums do
+    rule "intruderEmitMsg3"
+      ch[3].empty=true & i <= pat7Set.length & Spy_known[pat7Set.content[i]]
+      ==>
+      begin
+        if (!emit[pat7Set.content[i]] & msgs[msgs[pat7Set.content[i]].aencKey].k.ag=intruder.B) then
+          clear ch[3];
+          ch[3].msg:=msgs[pat7Set.content[i]];
+          ch[3].sender:=Intruder;
+          ch[3].receiver:=roleServer[j].Server;
+          ch[3].empty:=false;
+          emit[pat7Set.content[i]] := true;
+          put "3. ";
+          put ch[3].sender;
+          put "   ";
+          put ch[3].receiver;
+          put "   msg: ";
+          printMsg(ch[3].msg);
+          put "\n";
+        endif;
+      end;
+  endruleset;
+endruleset;
+
+---rule of intruder to get msg4 
+rule "intruderGetMsg4" 
+  ch[4].empty = false
+  ==>
+  var flag_pat7:boolean;
+      msgNo:indexType;
+      msg:Message;
+  begin
+    msg := ch[4].msg;
+    get_msgNo(msg, msgNo);
+    isPat7(msg,flag_pat7);
+    if (flag_pat7) then
+      if(!exist(pat7Set,msgNo)) then
+        pat7Set.length:=pat7Set.length+1;
+        pat7Set.content[pat7Set.length]:=msgNo;
+        Spy_known[msgNo] := true;
+      endif;
+    endif;
+    ch[4].empty := true;
+  end;
+
+---rule of intruder to emit msg4.
+ruleset i: msgLen do
+  ruleset j: roleServerNums do
+    rule "intruderEmitMsg4"
+      ch[4].empty=true & i <= pat7Set.length & Spy_known[pat7Set.content[i]]
+      ==>
+      begin
+        if (!emit[pat7Set.content[i]] & msgs[msgs[pat7Set.content[i]].aencKey].k.ag=intruder.B) then
+          clear ch[4];
+          ch[4].msg:=msgs[pat7Set.content[i]];
+          ch[4].sender:=Intruder;
+          ch[4].receiver:=roleServer[j].Server;
+          ch[4].empty:=false;
+          emit[pat7Set.content[i]] := true;
+          put "4. ";
+          put ch[4].sender;
+          put "   ";
+          put ch[4].receiver;
+          put "   msg: ";
+          printMsg(ch[4].msg);
+          put "\n";
+        endif;
+      end;
+  endruleset;
+endruleset;
+
+---rule of intruder to get msg5 
+rule "intruderGetMsg5" 
+  ch[5].empty = false
+  ==>
+  var flag_pat7:boolean;
+      msgNo:indexType;
+      msg:Message;
+  begin
+    msg := ch[5].msg;
+    get_msgNo(msg, msgNo);
+    isPat7(msg,flag_pat7);
+    if (flag_pat7) then
+      if(!exist(pat7Set,msgNo)) then
+        pat7Set.length:=pat7Set.length+1;
+        pat7Set.content[pat7Set.length]:=msgNo;
+        Spy_known[msgNo] := true;
+      endif;
+    endif;
+    ch[5].empty := true;
+  end;
+
+---rule of intruder to emit msg5.
+ruleset i: msgLen do
+  ruleset j: roleServerNums do
+    rule "intruderEmitMsg5"
+      ch[5].empty=true & i <= pat7Set.length & Spy_known[pat7Set.content[i]]
+      ==>
+      begin
+        if (!emit[pat7Set.content[i]] & msgs[msgs[pat7Set.content[i]].aencKey].k.ag=intruder.B) then
+          clear ch[5];
+          ch[5].msg:=msgs[pat7Set.content[i]];
+          ch[5].sender:=Intruder;
+          ch[5].receiver:=roleServer[j].Server;
+          ch[5].empty:=false;
+          emit[pat7Set.content[i]] := true;
+          put "5. ";
+          put ch[5].sender;
+          put "   ";
+          put ch[5].receiver;
+          put "   msg: ";
+          printMsg(ch[5].msg);
+          put "\n";
+        endif;
+      end;
+  endruleset;
+endruleset;
+
+---rule of intruder to get msg6 
+rule "intruderGetMsg6" 
+  ch[6].empty = false
+  ==>
+  var flag_pat7:boolean;
+      msgNo:indexType;
+      msg:Message;
+  begin
+    msg := ch[6].msg;
+    get_msgNo(msg, msgNo);
+    isPat7(msg,flag_pat7);
+    if (flag_pat7) then
+      if(!exist(pat7Set,msgNo)) then
+        pat7Set.length:=pat7Set.length+1;
+        pat7Set.content[pat7Set.length]:=msgNo;
+        Spy_known[msgNo] := true;
+      endif;
+    endif;
+    ch[6].empty := true;
+  end;
+
+---rule of intruder to emit msg6.
+ruleset i: msgLen do
+  ruleset j: roleServerNums do
+    rule "intruderEmitMsg6"
+      ch[6].empty=true & i <= pat7Set.length & Spy_known[pat7Set.content[i]]
+      ==>
+      begin
+        if (!emit[pat7Set.content[i]] & msgs[msgs[pat7Set.content[i]].aencKey].k.ag=intruder.B) then
+          clear ch[6];
+          ch[6].msg:=msgs[pat7Set.content[i]];
+          ch[6].sender:=Intruder;
+          ch[6].receiver:=roleServer[j].Server;
+          ch[6].empty:=false;
+          emit[pat7Set.content[i]] := true;
+          put "6. ";
+          put ch[6].sender;
+          put "   ";
+          put ch[6].receiver;
+          put "   msg: ";
+          printMsg(ch[6].msg);
+          put "\n";
+        endif;
+      end;
+  endruleset;
+endruleset;
+
+---rule of intruder to get msg7 
+rule "intruderGetMsg7" 
+  ch[7].empty = false
+  ==>
+  var flag_pat7:boolean;
+      msgNo:indexType;
+      msg:Message;
+  begin
+    msg := ch[7].msg;
+    get_msgNo(msg, msgNo);
+    isPat7(msg,flag_pat7);
+    if (flag_pat7) then
+      if(!exist(pat7Set,msgNo)) then
+        pat7Set.length:=pat7Set.length+1;
+        pat7Set.content[pat7Set.length]:=msgNo;
+        Spy_known[msgNo] := true;
+      endif;
+    endif;
+    ch[7].empty := true;
+  end;
+
+---rule of intruder to emit msg7.
+ruleset i: msgLen do
+  ruleset j: roleServerNums do
+    rule "intruderEmitMsg7"
+      ch[7].empty=true & i <= pat7Set.length & Spy_known[pat7Set.content[i]]
+      ==>
+      begin
+        if (!emit[pat7Set.content[i]] & msgs[msgs[pat7Set.content[i]].aencKey].k.ag=intruder.B) then
+          clear ch[7];
+          ch[7].msg:=msgs[pat7Set.content[i]];
+          ch[7].sender:=Intruder;
+          ch[7].receiver:=roleServer[j].Server;
+          ch[7].empty:=false;
+          emit[pat7Set.content[i]] := true;
+          put "7. ";
+          put ch[7].sender;
+          put "   ";
+          put ch[7].receiver;
+          put "   msg: ";
+          printMsg(ch[7].msg);
+          put "\n";
+        endif;
+      end;
+  endruleset;
+endruleset;
+
+---rule of intruder to get msg8 
+rule "intruderGetMsg8" 
+  ch[8].empty = false
+  ==>
+  var flag_pat7:boolean;
+      msgNo:indexType;
+      msg:Message;
+  begin
+    msg := ch[8].msg;
+    get_msgNo(msg, msgNo);
+    isPat7(msg,flag_pat7);
+    if (flag_pat7) then
+      if(!exist(pat7Set,msgNo)) then
+        pat7Set.length:=pat7Set.length+1;
+        pat7Set.content[pat7Set.length]:=msgNo;
+        Spy_known[msgNo] := true;
+      endif;
+    endif;
+    ch[8].empty := true;
+  end;
+
+---rule of intruder to emit msg8.
+ruleset i: msgLen do
+  ruleset j: roleServerNums do
+    rule "intruderEmitMsg8"
+      ch[8].empty=true & i <= pat7Set.length & Spy_known[pat7Set.content[i]]
+      ==>
+      begin
+        if (!emit[pat7Set.content[i]] & msgs[msgs[pat7Set.content[i]].aencKey].k.ag=intruder.B) then
+          clear ch[8];
+          ch[8].msg:=msgs[pat7Set.content[i]];
+          ch[8].sender:=Intruder;
+          ch[8].receiver:=roleServer[j].Server;
+          ch[8].empty:=false;
+          emit[pat7Set.content[i]] := true;
+          put "8. ";
+          put ch[8].sender;
+          put "   ";
+          put ch[8].receiver;
+          put "   msg: ";
+          printMsg(ch[8].msg);
+          put "\n";
+        endif;
+      end;
+  endruleset;
+endruleset;
+
+---rule of intruder to get msg9 
+rule "intruderGetMsg9" 
+  ch[9].empty = false
+  ==>
+  var flag_pat7:boolean;
+      msgNo:indexType;
+      msg:Message;
+  begin
+    msg := ch[9].msg;
+    get_msgNo(msg, msgNo);
+    isPat7(msg,flag_pat7);
+    if (flag_pat7) then
+      if(!exist(pat7Set,msgNo)) then
+        pat7Set.length:=pat7Set.length+1;
+        pat7Set.content[pat7Set.length]:=msgNo;
+        Spy_known[msgNo] := true;
+      endif;
+    endif;
+    ch[9].empty := true;
+  end;
+
+---rule of intruder to emit msg9.
+ruleset i: msgLen do
+  ruleset j: roleServerNums do
+    rule "intruderEmitMsg9"
+      ch[9].empty=true & i <= pat7Set.length & Spy_known[pat7Set.content[i]]
+      ==>
+      begin
+        if (!emit[pat7Set.content[i]] & msgs[msgs[pat7Set.content[i]].aencKey].k.ag=intruder.B) then
+          clear ch[9];
+          ch[9].msg:=msgs[pat7Set.content[i]];
+          ch[9].sender:=Intruder;
+          ch[9].receiver:=roleServer[j].Server;
+          ch[9].empty:=false;
+          emit[pat7Set.content[i]] := true;
+          put "9. ";
+          put ch[9].sender;
+          put "   ";
+          put ch[9].receiver;
+          put "   msg: ";
+          printMsg(ch[9].msg);
+          put "\n";
+        endif;
+      end;
+  endruleset;
+endruleset;
+
 --- enconcat and deconcat rules for pat: concat(Na1.Gateway)
 
 ruleset i:indexType do 
@@ -1655,7 +2504,7 @@ startstate
   roleServer[1].Na4 := Na4;
   roleServer[1].st := Server1;
   roleServer[1].commit := false;
-  intruder.B := Bob;
+  ---intruder.B := Bob;
   for i:chanNums do
     ch[i].empty := true;
   endfor;
