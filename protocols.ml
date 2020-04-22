@@ -604,7 +604,7 @@ and printEncRule (m,k) i i1 i2 =
   sprintf "      i<=pat%dSet.length & Spy_known[pat%dSet.content[i]] &\n      j<=pat%dSet.length & Spy_known[pat%dSet.content[j]] &\n      !Spy_known[construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j])]\n      ==>\n" i1 i1 i2 i2 i i1 i2 i1 i2^
   sprintf "      var encMsgNo:indexType;\n"^
   sprintf "      begin\n"^
-  sprintf "        if (msgs[pat%dSet.content[j]].k.ag=intruder.B) then\n" i2^
+  sprintf "        if (msgs[pat%dSet.content[j]].k.encType=PK) then\n" i2^ (*ag=intruder.B*)
   sprintf "          encMsgNo := construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j]);\n" i i1 i2 i1 i2^
   sprintf "          if (!exist(pat%dSet,encMsgNo)) then\n" i^
   sprintf "            pat%dSet.length := pat%dSet.length+1;\n            pat%dSet.content[pat%dSet.length]:=encMsgNo;\n" i i i i^
@@ -679,12 +679,12 @@ let rec enconcatRule msgs patList =
                                               |`K(r1,r2) -> r1^","^r2) atoms)
                                    in
                                   (str, getPatNum (`Hash m) patList)
-               |Some (`Pk r) -> (r, getPatNum (`Pk r) patList)
-               |Some (`Sk r) -> (r, getPatNum (`Sk r) patList)
-               |Some (`K (r1, r2)) -> let str = sprintf "%s, %s" r1 r2
+                |Some (`Pk r) -> (r, getPatNum (`Pk r) patList)
+                |Some (`Sk r) -> (r, getPatNum (`Sk r) patList)
+                |Some (`K (r1, r2)) -> let str = sprintf "%s, %s" r1 r2
                                       in
                                       (str, getPatNum (`K (r1, r2)) patList)
-               |Some (`Aenc (m1,k1)) -> let atoms = getAtoms (`Aenc(m1,k1)) in
+                |Some (`Aenc (m1,k1)) -> let atoms = getAtoms (`Aenc(m1,k1)) in
                                         let noDupAtoms = del_duplicate atoms in 
                                         let str = String.concat ~sep:"," (List.map ~f:(fun a -> 
                                                   match a with
@@ -717,13 +717,14 @@ and printEnconcatRule msgs i patNumList =
             (String.concat ~sep:" &\n" (List.mapi ~f:(fun k (m,j) -> 
                                        sprintf "      i%d<=pat%dSet.length & Spy_known[pat%dSet.content[i%d]]" k j j k) patNumList))
   in
-  let str2 = " &\n      !(" ^ String.concat ~sep:" = " (List.mapi ~f:(fun k (m,j) -> sprintf "pat%dSet.content[i%d]" j k) patNumList) ^") & \n"
-  in
+  (* let str2 = " &\n      !(" ^ String.concat ~sep:" = " (List.mapi ~f:(fun k (m,j) -> sprintf "pat%dSet.content[i%d]" j k) patNumList) ^") & \n"
+  in *) (* delete this guard condition *)
+  let str2 = "" in
   let subMsgNo = String.concat (List.map ~f:(fun (m,j) -> sprintf "%d" j) patNumList) (* each j in the list should be unique *)
   in
   let patSetStr = String.concat ~sep:"," (List.mapi ~f:(fun k (m,j) -> sprintf "pat%dSet.content[i%d]" j k) patNumList)
   in
-  str1 ^ str2 ^ sprintf "      !Spy_known[construct%dBy%s(%s)]\n      ==>\n" i subMsgNo patSetStr ^ (*pat%dSet.content[i],pat%dSet.content[j]*)
+  str1 ^ str2 ^ sprintf " &\n      !Spy_known[construct%dBy%s(%s)]\n      ==>\n" i subMsgNo patSetStr ^ (*pat%dSet.content[i],pat%dSet.content[j]*)
   sprintf "      var concatMsgNo:indexType;\n      begin\n" ^
   sprintf "        concatMsgNo := construct%dBy%s(%s);\n" i subMsgNo patSetStr ^
   sprintf "        Spy_known[concatMsgNo]:=true;\n" ^
@@ -815,7 +816,7 @@ and print_emitRules i j r=
              else sprintf "  ruleset j: roleANums do\n"
   in *)
   let str3 = sprintf "    rule \"intruderEmitMsg%d\"\n" i^sprintf "      ch[%d].empty=true & i <= pat%dSet.length & Spy_known[pat%dSet.content[i]]\n      ==>\n" i j j^
-             sprintf "      begin\n        if (!emit[pat%dSet.content[i]] & msgs[msgs[pat%dSet.content[i]].aencKey].k.ag=intruder.B) then\n" j j^
+             sprintf "      begin\n        if (!emit[pat%dSet.content[i]] & msgs[msgs[pat%dSet.content[i]].aencKey].k.ag=role%s[j].%s) then\n" j j r r^ (*intruder.B: r*)
              sprintf "          clear ch[%d];\n" i^sprintf "          ch[%d].msg:=msgs[pat%dSet.content[i]];\n" i j^
              sprintf "          ch[%d].sender:=Intruder;\n" i
   in
@@ -1681,7 +1682,8 @@ let rec printMuriphiStart env k =
 
 (* pritn startstate of arrays *)
 let printImpofStart actions knws =
-  let str1 = sprintf "  intruder.B := Bob;
+  let rlist = getRolesFromKnws knws [] in
+  let str1 = sprintf "  ---intruder.B := Bob;
   for i:chanNums do
     ch[i].empty := true;
   endfor;
@@ -1719,16 +1721,25 @@ let printImpofStart actions knws =
   Spy_known[msg_end] := true;
   " kNum kNum kNum kNum
   in
-  let str4 = sprintf "
-  msg_end := msg_end+1;  
-  msgs[msg_end].msgType := key;
-  msgs[msg_end].k.ag:=Bob;
-  msgs[msg_end].k.encType:=PK;
+  let str4 = String.concat (List.map ~f:(fun r -> sprintf "  for i : role%sNums do\n" r ^
+                                                  sprintf "    msg_end := msg_end+1;\n    msgs[msg_end].msgType := key;\n" ^
+                                                  sprintf "    msgs[msg_end].k.ag := role%s[i].%s;\n" r r^
+                                                  sprintf "    msgs[msg_end].k.encType:=PK;\n    pat%dSet.length := pat%dSet.length + 1;\n" kNum kNum ^
+                                                  sprintf "    pat%dSet.content[pat%dSet.length] :=msg_end;\n" kNum kNum ^
+                                                  sprintf "    Spy_known[msg_end] := true;\n"^
+                                                  sprintf "  endfor;\n"
+                            ) rlist)
+    
+    (* sprintf "
+  ---msg_end := msg_end+1;  
+  ---msgs[msg_end].msgType := key;
+  ---msgs[msg_end].k.ag:=Bob;
+  ---msgs[msg_end].k.encType:=PK;
 
-  pat%dSet.length := pat%dSet.length + 1; 
-  pat%dSet.content[pat%dSet.length] :=msg_end;
-  Spy_known[msg_end] := true;
-  " kNum kNum kNum kNum
+  ---pat%dSet.length := pat%dSet.length + 1; 
+  ---pat%dSet.content[pat%dSet.length] :=msg_end;
+  ---Spy_known[msg_end] := true;
+  " kNum kNum kNum kNum *)
   in
   str1 ^ str2 ^ 
   "  endfor;
@@ -1736,11 +1747,7 @@ let printImpofStart actions knws =
     Spy_known[i] := false;
   endfor;\n" ^
   str3 ^ str4 ^
-  "
-  ---eve_end := 0;  
-  ---for i:eventNums do
-  ---   systemEvent[i].eveType := empty;
-  ---endfor;\n"
+  "\n"
 ;;
 
 let rec printGoal2Murphi g =
@@ -1856,8 +1863,7 @@ let printMurphiConsTypeVars actions k env=
   String.concat ~sep:"\n" (List.map ~f:(fun r -> sprintf "  role%sNum:1;" r) rlist) ^
   "
   totalFact:20;
-  chanNum:3;
-  eventNum:30;\n" ^
+  chanNum:30;\n" ^
 
   (* print type*)
   sprintf "type
@@ -1865,8 +1871,7 @@ let printMurphiConsTypeVars actions k env=
   String.concat ~sep:"\n" (List.map ~f:(fun r -> sprintf "  role%sNums:1..role%sNum;" r r) rlist) ^
   "
   msgLen:0..totalFact;
-  chanNums:1..chanNum;
-  eventNums:0..eventNum;\n"^
+  chanNums:1..chanNum;\n"^
 
   sprintf "
   AgentType : enum{%s}; 
@@ -1882,7 +1887,6 @@ let printMurphiConsTypeVars actions k env=
   BStatus : enum {B1,B2,B3};*)
   ^"
   MsgType : enum {null,agent,nonce,key,aenc,senc,concat,hash};
-  EveType : enum {empty,send,receive};
   Message: record
     msgType : MsgType;
     ag : AgentType;
@@ -1900,27 +1904,20 @@ let printMurphiConsTypeVars actions k env=
     empty : boolean;
   end;\n" ^ printMurphiRecords k nlist rlist ^ (* print records of principals *)
   "
-  RoleIntruder: record
-    B : AgentType;
-  end;
+  ---RoleIntruder: record
+  ---  B : AgentType;
+  ---send;
 
   msgSet: record
     content : Array[msgLen] of indexType;
     length : msgLen;
   end;
 
-  Event: record
-    eveType : EveType;
-    sender  : AgentType;
-    receiver: AgentType;
-    msg	: Message;
-  end;
-
 var
   ch : Array[chanNums] of Channel;\n"^
   sprintf "  %s;\n" (rlistToVars rlist )^
   "
-  intruder    : RoleIntruder;
+  ---intruder    : RoleIntruder;
   msgs : Array[indexType] of Message;
   msg_end: indexType;
   "^
