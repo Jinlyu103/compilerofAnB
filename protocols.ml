@@ -426,7 +426,7 @@ let rec genSendAct rolename i m atoms length msgofRolename patlist =
 
 and sendAtoms2Str rolename i atoms msgofRolename =
   let s = "role" ^ rolename ^"[i]." in
-  let loc = "role"^rolename^"[i].loc_" in
+  let loc = "role"^rolename^"[i].loc" in
   String.concat ~sep:"," (List.map ~f:(fun a ->                         
                         match a with
                         |`Var n -> if (existInit msgofRolename a)  then s ^ n else loc ^ n  (*if i = 1 then s ^ n else loc ^ n *)
@@ -446,7 +446,7 @@ and getPkAg atoms msgofRolename =
     in
     if ag' <> "" then ag := ag' else ()
   done;
-  let loc = "loc_" in
+  let loc = "loc" in
   if (existInit msgofRolename (`Str (!ag))) then !ag else loc^(!ag)
 ;;
 
@@ -470,7 +470,7 @@ let rec genRecvAct rolename i m atoms length msgofRolename patlist =
   sprintf "end;\n"
 
 and recvAtoms2Str atoms rolename = 
-  let loc = "role"^rolename^"[i].loc_" in
+  let loc = "role"^rolename^"[i].loc" in
   String.concat ~sep:"," (List.map ~f:(fun a ->
   match a with
   |`Var n -> loc ^ n
@@ -480,24 +480,30 @@ and recvAtoms2Str atoms rolename =
   |_ -> "null") atoms)
 
 and atoms2Str atoms rolename msgofRolename = 
-  let loc = "role"^rolename^"[i].loc_" in  
+  (* let loc = "role"^rolename^"[i].loc_" in   *)
   let strlist = (List.map ~f:(fun  a ->
   match a with
-  |`Var n -> if (existInit msgofRolename a) then loc ^ n ^ "=role" ^ rolename ^ "[i]." ^ n else "true" (* if j <> 1 then loc ^ n ^ "=role" ^ rolename^ "[i]." ^ n else " true " *)
-  |`Str r -> if (existInit msgofRolename a) then loc ^ r ^ "=role" ^ rolename ^ "[i]." ^ r else "true"  (*loc ^ r ^ "=role" ^ rolename ^ "[i]." ^ r*)
-  |`Pk r -> loc ^ r ^ "=role" ^ rolename ^ "[i]." ^ r
-  |`Sk r -> loc ^ r ^ "=role" ^ rolename ^ "[i]." ^ r
+  |`Var n -> sprintf "matchNonce(role%s[i].loc%s, role%s[i].%s)" rolename n rolename n
+  (* if (existInit msgofRolename a) then loc ^ n ^ "=role" ^ rolename ^ "[i]." ^ n else "true"  *)
+  (* if j <> 1 then loc ^ n ^ "=role" ^ rolename^ "[i]." ^ n else " true " *)
+  |`Str r -> sprintf "matchAgent(role%s[i].loc%s, role%s[i].%s)" rolename r rolename r
+  (* if (existInit msgofRolename a) then loc ^ r ^ "=role" ^ rolename ^ "[i]." ^ r else "true" *)
+  (*loc ^ r ^ "=role" ^ rolename ^ "[i]." ^ r*)
+  |`Pk r -> sprintf "matchAgent(role%s[i].loc%s, role%s[i].%s)" rolename r rolename r
+  (* loc ^ r ^ "=role" ^ rolename ^ "[i]." ^ r *)
+  |`Sk r -> sprintf "matchAgent(role%s[i].loc%s, role%s[i].%s)" rolename r rolename r
+  (* loc ^ r ^ "=role" ^ rolename ^ "[i]." ^ r *)
   |_ -> "null" ) atoms)
   in
-  String.concat ~sep:"&" (remove strlist "true")
+  String.concat ~sep:" & " (remove strlist "true")
 
-and getSender r m =
+(* and getSender r m =
   (* match m with
   |`Aenc(m1,k1) ->
   |`Senc(m1,k1) -> *)
   if r = "A" then 
     sprintf "B"
-  else  sprintf "loc_A"
+  else  sprintf "locA" *)
 ;;
 
 let trans act m i rolename length msgOfrolename patlist =
@@ -1547,27 +1553,42 @@ let genExistCode () =
   end;\n";
 ;;
 
-let genMsgContains () =
-  sprintf "function msgContains(msg1: Message; Na: NonceType):boolean;  ---if msg1 contains msg2 then return true else return false
+(* Generating function matchAgent() code *)
+let genMatchAgent () =
+  sprintf "function matchAgent(Var locAg: AgentType; Var Ag: AgentType):boolean;  ---if ag equals to locAg which was derived from recieving msg, or anyAgent, then true
   var flag : boolean;
   begin
     flag := false;
-    if (msg1.msgType = nonce) then
-      if (msg1.noncePart = Na) then
-        flag := true;
-      endif;
-    elsif (msg1.msgType = aenc) then
-      flag := msgContains(msgs[msg1.aencMsg],Na);
-    elsif (msg1.msgType = senc) then
-      flag := msgContains(msgs[msg1.sencMsg],Na);
-    elsif (msg1.msgType = concat) then
-      if (msgContains(msgs[msg1.concatPart1],Na) | msgContains(msgs[msg1.concatPart2],Na)) then
-        flag := true;
-      endif;
+    if (Ag = anyAgent) then
+      flag := true;
+      Ag := locAg;
+    elsif (locAg = locAg) then
+      flag := true;
+    else
+      flag := false;
     endif;
     return flag;
   end;\n"
 ;;
+
+(* Generating function matchNonce() code *)
+let genMatchNonce () =
+  sprintf "function matchNonce(Var locNa: NonceType; Var Na: NonceType):boolean;  ---if Na equals to locNa which was derived from recieving msg, or anyNonce, then true
+  var flag : boolean;
+  begin
+    flag := false;
+    if (Na = anyNonce) then
+      flag := true;
+      Na := locNa;
+    elsif (locNa = Na) then
+      flag:=true;
+    else
+      flag := false;
+    endif;
+    return flag;
+  end;\n"
+;;
+
 (* print procedures and functions. *)
 let print_procedures actions =
   match actions with
@@ -1585,7 +1606,7 @@ let print_procedures actions =
                   let str3 = genGet_msgNoCode () ^ genPrintMsgCode () in
                   (* print functions: inverseKey/lookUp/constructsAbyBC*)
                   let str4 = genInverseKeyCode ()^ genLookUpCode () ^ String.concat (List.map ~f:(fun pat -> consMsgBySubs pat non_equivalent) non_equivalent) in
-                  str1 ^ str2 ^ str3 ^ str4 ^ genExistCode () ^genMsgContains ();
+                  str1 ^ str2 ^ str3 ^ str4 ^ genExistCode () ^genMatchAgent () ^ genMatchNonce ();
   | _ ->  begin
           let patlist = getPatList actions in    (* get all patterns from actions *)
           let non_dup = del_duplicate patlist in (* delete duplicate *)
@@ -1599,7 +1620,7 @@ let print_procedures actions =
           let str3 = genGet_msgNoCode () ^ genPrintMsgCode () in
           (* print functions: inverseKey/lookUp/constructsAbyBC*)
           let str4 = genInverseKeyCode ()^ genLookUpCode () ^ String.concat (List.map ~f:(fun pat -> consMsgBySubs pat non_equivalent) non_equivalent) in
-          str1 ^ str2 ^ str3 ^ str4 ^ genExistCode () ^ genMsgContains ();
+          str1 ^ str2 ^ str3 ^ str4 ^ genExistCode () ^ genMatchAgent () ^ genMatchNonce ();
           end;
   
 ;;
@@ -1619,11 +1640,11 @@ and getNoncesOfMsg m =
 ;;
 
 let nType2Str nlist = 
-  String.concat ~sep:";\n   " (List.map ~f:(fun n -> sprintf "loc_%s : NonceType" n) nlist)
+  String.concat ~sep:";\n   " (List.map ~f:(fun n -> sprintf "loc%s : NonceType" n) nlist)
 ;;
 
 let agType2Str rlist =
-  String.concat ~sep: ";\n   " (List.map ~f:(fun r -> sprintf "loc_%s : AgentType" r) rlist)
+  String.concat ~sep: ";\n   " (List.map ~f:(fun r -> sprintf "loc%s : AgentType" r) rlist)
 ;;
 
 (*return string*)
@@ -1647,8 +1668,14 @@ let rec printMurphiRecords knw nlist aglist =
 let trActionsToMurphi actions knws =
   match actions with
   |`Null -> sprintf "null"
-  |`Act1 (seq,r1,r2,n,m) -> print_murphiRule actions knws
-  |`Act2 (seq,r1,r2,m) -> print_murphiRule actions knws
+  |`Act1 (seq,r1,r2,n,m) -> print_procedures actions ^ (* print prcedures and functions. *)                   
+                            print_murphiRule actions knws^ (* print rules for roleA and roleB *)
+                            print_murphiRule_ofIntruder actions knws^ (* print rules for intruder *)
+                            print_murphiRules_EncsDecs actions knws(* encryption and decryption rules, enconcat and deconcat rules *)
+  |`Act2 (seq,r1,r2,m) -> print_procedures actions ^ (* print prcedures and functions. *)                   
+                          print_murphiRule actions knws^ (* print rules for roleA and roleB *)
+                          print_murphiRule_ofIntruder actions knws^ (* print rules for intruder *)
+                          print_murphiRules_EncsDecs actions knws(* encryption and decryption rules, enconcat and deconcat rules *)
   |`Actlist arr -> print_procedures actions ^ (* print prcedures and functions. *)                   
                    print_murphiRule actions knws^ (* print rules for roleA and roleB *)
                    print_murphiRule_ofIntruder actions knws^ (* print rules for intruder *)
@@ -1657,19 +1684,34 @@ let trActionsToMurphi actions knws =
 
 let print_startstate r num m knws =
   let msgOfKnws = getMsgOfRoles knws in
+  let nlist = getNonces msgOfKnws in
+  let rlist = getRolesFromKnws knws [] in
   String.concat (List.map ~f:(fun m1 -> if isSamePat m m1 then
-                                                     match (m,m1) with
-                                                     |(`Concat msgs,`Concat msgs1) -> let strs = (List.map2_exn ~f:(fun m' m1' -> 
-                                                                                        match (m',m1') with
-                                                                                        |(`Var n,`Var n1) -> "role"^r^"["^(string_of_int num)^"]."^n1^" := "^n^";\n"
-                                                                                        |(`Str role,`Str role1) ->"role"^r^"["^(string_of_int num)^"]."^ role1^" := "^role^";\n" 
-                                                                                        |_ -> "error: mismatching!\n") msgs msgs1) 
-                                                                                      in
-                                                                                      (String.concat (List.map ~f:(fun s -> sprintf "  %s" s) strs)) ^ 
-                                                                                      sprintf "  role%s[%d].st := %s1;\n" r num r ^
-                                                                                      sprintf "  role%s[%d].commit := false;\n" r num
-                                                     |_ -> sprintf "null\n"
-                                                  else sprintf "" ) msgOfKnws)
+                                          let atoms = getAtoms m1 in
+                                          let str1 = match (m,m1) with
+                                          |(`Concat msgs,`Concat msgs1) -> let strs = (List.map2_exn ~f:(fun m' m1' -> 
+                                                                            match (m',m1') with
+                                                                            |(`Var n,`Var n1) -> sprintf "role%s[%d].%s := %s;\n" r num n1 n
+                                                                            (* "role"^r^"["^(string_of_int num)^"]."^n1^" := "^n^";\n" *)
+                                                                            |(`Str role,`Str role1) -> sprintf "role%s[%d].%s := %s;\n" r num role1 role
+                                                                            (* "role"^r^"["^(string_of_int num)^"]."^ role1^" := "^role^";\n"  *)
+                                                                            |_ -> "error: mismatching!\n") msgs msgs1) 
+                                                                          in
+                                                                          (String.concat (List.map ~f:(fun s -> sprintf "  %s" s) strs)) ^ 
+                                                                          sprintf "  role%s[%d].st := %s1;\n" r num r ^
+                                                                          sprintf "  role%s[%d].commit := false;\n" r num
+                                          |_ -> sprintf "null\n"
+                                          in
+                                          let str2 = String.concat (List.map ~f:(fun n -> 
+                                                                    if listwithout atoms (`Var n) then sprintf "  role%s[%d].%s := anyNonce;\n" r num n
+                                                                    else "" ) nlist)                                  
+                                          in
+                                          let str3 = String.concat (List.map ~f:(fun r1 -> 
+                                                                    if listwithout atoms (`Str r1) then sprintf "  role%s[%d].%s := anyAgent;\n" r num r1
+                                                                    else "") rlist)                                            
+                                          in
+                                          str1 ^ str2 ^ str3
+                                        else sprintf "" ) msgOfKnws)
 ;;
 (*startstate of roleA and role B*)
 let rec printMuriphiStart env k =
@@ -1874,8 +1916,8 @@ let printMurphiConsTypeVars actions k env=
   chanNums:1..chanNum;\n"^
 
   sprintf "
-  AgentType : enum{%s}; 
-  NonceType : enum{%s};  \n" (agents2Str rolesOfEnv) (nonce2Str nonceOfEnv)
+  AgentType : enum{%s, anyAgent}; 
+  NonceType : enum{%s, anyNonce};  \n" (agents2Str rolesOfEnv) (nonce2Str nonceOfEnv)
   ^
   sprintf "
   EncryptType : enum{PK,SK,Symk};
