@@ -372,11 +372,13 @@ let genRuleName rolename i =
 ;;
 
 let genSendGuard rolename i =
-  sprintf "role%s[i].st = %s%d & ch[%d].empty = true \n==>\n" rolename rolename i i
+  sprintf "role%s[i].st = %s%d & ch[%d].empty = true \n==>\n" rolename rolename i i 
+  (* sprintf "role%s[i].st = %s%d & ch.empty = true \n==>\n" rolename rolename i  *)
 ;;
 
 let genRecvGuard rolename i =
-  sprintf "role%s[i].st = %s%d & ch[%d].empty = false ---& ch[%d].receiver = role%s[i].%s\n==>\n" rolename rolename i i i rolename rolename
+  sprintf "role%s[i].st = %s%d & ch[%d].empty = false ---& ch[%d].receiver = role%s[i].%s\n==>\n" rolename rolename i i i rolename rolename 
+  (* sprintf "role%s[i].st = %s%d & ch.empty = false \n==>\n" rolename rolename i  *)
 ;;
 
 let rec existInit msg atom =
@@ -414,7 +416,7 @@ let rec genSendAct rolename i m atoms length msgofRolename patlist =
   let patNum = getPatNum m patlist in
   sprintf "var msg:Message;\n    msgNo:indexType;\nbegin\n" ^
   sprintf "   clear msg;\n   cons%d(%s,msg,msgNo);\n" patNum (sendAtoms2Str rolename i atoms msgofRolename) ^
-  sprintf "   ch[%d].empty := false;\n" i ^
+  sprintf "   ch[%d].empty := false;\n" i ^ (* ch[%d].empty := false i*)
   sprintf "   ch[%d].msg := msg;\n" i ^
   sprintf "   ch[%d].sender := role%s[i].%s;\n" i rolename rolename ^
   sprintf "   ch[%d].receiver := Intruder;\n" i  (* role%s[i].%s: rolename (getPkAg atoms msgofRolename) *)^
@@ -461,7 +463,7 @@ and getPkAg atoms msgofRolename =
 let rec genRecvAct rolename i m atoms length msgofRolename patlist =
   let commitStr = if i = length then sprintf "   role%s[i].commit := true;\n" rolename else "" in 
   let patNum = getPatNum m patlist in
-  sprintf "var msg:Message;\n    msgNo:indexType;\nbegin\n" ^
+  sprintf "var msg:Message;\n    msgNo:indexType;\nbegin\n" ^ (* msg := ch[%d] i*)
   sprintf "   clear msg;\n   msg := ch[%d].msg;\n   destruct%d(msg,%s);\n" i patNum (recvAtoms2Str atoms rolename) ^ (* (recvAtoms2Str atoms) *)
   sprintf "   if(%s)then\n" (atoms2Str atoms rolename msgofRolename) ^
   sprintf "     ch[%d].empty:=true;\n" i ^
@@ -795,11 +797,11 @@ let rec print_murphiRule_byMsgs m i patList r =
 
 and print_getRules i j =
   sprintf "\n---rule of intruder to get msg%d \n" i ^
-  sprintf "rule \"intruderGetMsg%d\" \n" i ^
-  sprintf "  ch[%d].empty = false\n  ==>\n" i^
+  sprintf "rule \"intruderGetMsg%d\" \n" i ^ (* ch[%d] i*)
+  sprintf "  ch[%d].empty = false\n  ==>\n" i ^
   sprintf "  var flag_pat%d:boolean;\n      msgNo:indexType;\n      msg:Message;\n" j^
   sprintf "  begin\n" ^
-  sprintf "    msg := ch[%d].msg;\n" i^ 
+  sprintf "    msg := ch[%d].msg;\n" i ^ 
   sprintf "    get_msgNo(msg, msgNo);\n"^ 
   sprintf "    isPat%d(msg,flag_pat%d);\n" j j^ 
   sprintf "    if (flag_pat%d) then\n" j^
@@ -809,7 +811,7 @@ and print_getRules i j =
   sprintf "        Spy_known[msgNo] := true;\n"^
   sprintf "      endif;\n" ^
   sprintf "    endif;\n" ^
-  sprintf "    ch[%d].empty := true;\n" i^
+  sprintf "    ch[%d].empty := true;\n" i ^
   (*printf "    intruder.st := gotmsg%d;\n" i;*)
   sprintf "  end;\n"
 
@@ -821,23 +823,19 @@ and print_emitRules i j r=
                sprintf "  ruleset j: roleBNums do\n"
              else sprintf "  ruleset j: roleANums do\n"
   in *)
-  let str3 = sprintf "    rule \"intruderEmitMsg%d\"\n" i^sprintf "      ch[%d].empty=true & i <= pat%dSet.length & Spy_known[pat%dSet.content[i]]\n      ==>\n" i j j^
+  let str3 = sprintf "    rule \"intruderEmitMsg%d\"\n" i^sprintf "      ch[%d].empty=true & i <= pat%dSet.length & Spy_known[pat%dSet.content[i]]\n      ==>\n" i j j^ (* ch[%d] i*)
              sprintf "      begin\n        if (!emit[pat%dSet.content[i]] & msgs[msgs[pat%dSet.content[i]].aencKey].k.ag=role%s[j].%s) then\n" j j r r^ (*intruder.B: r*)
-             sprintf "          clear ch[%d];\n" i^sprintf "          ch[%d].msg:=msgs[pat%dSet.content[i]];\n" i j^
+             sprintf "          clear ch[%d];\n" i ^sprintf "          ch[%d].msg:=msgs[pat%dSet.content[i]];\n" i j^
              sprintf "          ch[%d].sender:=Intruder;\n" i
   in
   let str4 = sprintf "          ch[%d].receiver:=role%s[j].%s;\n" i r r in
-  (* let str4 = if i mod 2 = 1 then
-                sprintf "          ch[%d].receiver:=roleB[j].B;\n" i  (* roleB[j] should be derived from initial knws roleB *)
-            else sprintf "          ch[%d].receiver:=roleA[j].A;\n" i
-  in *)
-  str1 ^ str2 ^ str3^ str4 ^ sprintf "          ch[%d].empty:=false;\n" i^
+  str1 ^ str2 ^ str3^ str4 ^ sprintf "          ch[%d].empty:=false;\n" i^ (* ch[%d] i*)
   sprintf "          emit[pat%dSet.content[i]] := true;\n" j^
   (*printf "          intruder.st:=emitted%d;\n" i;*)
   sprintf "          put \"%d. \";\n          put ch[%d].sender;\n" i i^
-  sprintf "          put \"   \";\n          put ch[%d].receiver;\n" i^
+  sprintf "          put \"   \";\n          put ch[%d].receiver;\n" i ^
   sprintf "          put \"   msg: \";\n"^
-  sprintf "          printMsg(ch[%d].msg);\n" i^
+  sprintf "          printMsg(ch[%d].msg);\n" i ^
   sprintf "          put \"\\n\";\n"^
   sprintf "        endif;\n"^
   sprintf "      end;\n"^
