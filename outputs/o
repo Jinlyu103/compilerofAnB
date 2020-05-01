@@ -33,13 +33,13 @@ Algorithm:
 
 Memory usage:
 
-	* The size of each state is 7576 bits (rounded up to 952 bytes).
+	* The size of each state is 7984 bits (rounded up to 1000 bytes).
 	* The memory allocated for the hash table and state queue is
 	  8 Mbytes.
 	  With two words of overhead per state, the maximum size of
-	  the state space is 8329 states.
+	  the state space is 7933 states.
 	   * Use option "-k" or "-m" to increase this, if necessary.
-	* Capacity in queue for breadth-first search: 832 states.
+	* Capacity in queue for breadth-first search: 793 states.
 	   * Change the constant gPercentActiveStates in mu_prolog.inc
 	     to increase this, if necessary.
 
@@ -48,18 +48,19 @@ Warning: No trace will not be printed in the case of protocol errors!
 1. ch[1].sender:GatewayIP
    ch[1].receiver:Intruder
    msg: concat(Na1,GatewayIP)
+2. ch[2].sender:HostID
+   ch[2].receiver:Intruder
+   msg: concat(HostID,Na2)
 
 ==========================================================================
 
-Result:
+Status:
 
-	The undefined value at msg.concatPart3 is referenced
-	in rule:
-	 roleServer1 , i:1
+	No error found.
 
 State Space Explored:
 
-	3 states, 4 rules fired in 0.10s.
+	6 states, 11 rules fired in 0.10s.
 
 Rules Information:
 
@@ -10906,7 +10907,7 @@ Rules Information:
 	Fired 0 times	- Rule "intruderEmitMsg2, j:1, i:18"
 	Fired 0 times	- Rule "intruderEmitMsg2, j:1, i:19"
 	Fired 0 times	- Rule "intruderEmitMsg2, j:1, i:20"
-	Fired 0 times	- Rule "intruderGetMsg2"
+	Fired 1 times	- Rule "intruderGetMsg2"
 	Fired 0 times	- Rule "intruderEmitMsg1, j:1, i:0"
 	Fired 0 times	- Rule "intruderEmitMsg1, j:1, i:1"
 	Fired 0 times	- Rule "intruderEmitMsg1, j:1, i:2"
@@ -11104,7 +11105,7 @@ Rules Information:
 	Fired 0 times	- Rule "intruderEmitMsg2, j:1, i:18"
 	Fired 0 times	- Rule "intruderEmitMsg2, j:1, i:19"
 	Fired 0 times	- Rule "intruderEmitMsg2, j:1, i:20"
-	Fired 0 times	- Rule "intruderGetMsg2"
+	Fired 1 times	- Rule "intruderGetMsg2"
 	Fired 0 times	- Rule "intruderEmitMsg1, j:1, i:0"
 	Fired 0 times	- Rule "intruderEmitMsg1, j:1, i:1"
 	Fired 0 times	- Rule "intruderEmitMsg1, j:1, i:2"
@@ -11302,7 +11303,7 @@ Rules Information:
 	Fired 0 times	- Rule "intruderEmitMsg2, j:1, i:18"
 	Fired 0 times	- Rule "intruderEmitMsg2, j:1, i:19"
 	Fired 0 times	- Rule "intruderEmitMsg2, j:1, i:20"
-	Fired 0 times	- Rule "intruderGetMsg2"
+	Fired 1 times	- Rule "intruderGetMsg2"
 	Fired 0 times	- Rule "intruderEmitMsg1, j:1, i:0"
 	Fired 0 times	- Rule "intruderEmitMsg1, j:1, i:1"
 	Fired 0 times	- Rule "intruderEmitMsg1, j:1, i:2"
@@ -11328,7 +11329,7 @@ Rules Information:
 	Fired 0 times	- Rule " roleServer4 , i:1"
 	Fired 0 times	- Rule " roleServer3 , i:1"
 	Fired 0 times	- Rule " roleServer2 , i:1"
-	Fired 0 times	- Rule " roleServer1 , i:1"
+	Fired 1 times	- Rule " roleServer1 , i:1"
 	Fired 0 times	- Rule " roleGateway9 , i:1"
 	Fired 0 times	- Rule " roleGateway8 , i:1"
 	Fired 0 times	- Rule " roleGateway7 , i:1"
@@ -11336,10 +11337,10 @@ Rules Information:
 	Fired 0 times	- Rule " roleGateway5 , i:1"
 	Fired 0 times	- Rule " roleGateway4 , i:1"
 	Fired 0 times	- Rule " roleGateway3 , i:1"
-	Fired 0 times	- Rule " roleGateway2 , i:1"
+	Fired 1 times	- Rule " roleGateway2 , i:1"
 	Fired 1 times	- Rule " roleGateway1 , i:1"
 	Fired 0 times	- Rule " roleHost5 , i:1"
 	Fired 0 times	- Rule " roleHost4 , i:1"
 	Fired 0 times	- Rule " roleHost3 , i:1"
-	Fired 0 times	- Rule " roleHost2 , i:1"
-	Fired 0 times	- Rule " roleHost1 , i:1"
+	Fired 1 times	- Rule " roleHost2 , i:1"
+	Fired 1 times	- Rule " roleHost1 , i:1"

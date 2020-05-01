@@ -463,11 +463,14 @@ and getPkAg atoms msgofRolename =
 let rec genRecvAct rolename i m atoms length msgofRolename patlist =
   let commitStr = if i = length then sprintf "   role%s[i].commit := true;\n" rolename else "" in 
   let patNum = getPatNum m patlist in
-  sprintf "var msg:Message;\n    msgNo:indexType;\nbegin\n" ^ (* msg := ch[%d] i*)
-  sprintf "   clear msg;\n   msg := ch[%d].msg;\n   destruct%d(msg,%s);\n" i patNum (recvAtoms2Str atoms rolename) ^ (* (recvAtoms2Str atoms) *)
-  sprintf "   if(%s)then\n" (atoms2Str atoms rolename msgofRolename) ^
-  sprintf "     ch[%d].empty:=true;\n" i ^
-  sprintf "     role%s[i].st := %s%d;\n" rolename rolename ((i mod length)+1) ^
+  sprintf "var flag_pat%d:boolean;\n    msg:Message;\n    msgNo:indexType;\nbegin\n" patNum ^ (* msg := ch[%d] i*)
+  sprintf "   clear msg;\n   msg := ch[%d].msg;\n   isPat%d(msg, flag_pat%d);\n" i patNum patNum  ^ (* (recvAtoms2Str atoms) *)
+  sprintf "   if(flag_pat%d) then\n" patNum ^
+  sprintf "     destruct%d(msg,%s);\n" patNum (recvAtoms2Str atoms rolename) ^
+  sprintf "     if(%s)then\n" (atoms2Str atoms rolename msgofRolename) ^
+  sprintf "       ch[%d].empty:=true;\n" i ^
+  sprintf "       role%s[i].st := %s%d;\n" rolename rolename ((i mod length)+1) ^
+  sprintf "     endif;\n"^
   sprintf "   endif;\n" ^ commitStr ^
   sprintf "end;\n"
 
@@ -809,6 +812,13 @@ and print_getRules i j =
   sprintf "        pat%dSet.length:=pat%dSet.length+1;\n" j j^
   sprintf "        pat%dSet.content[pat%dSet.length]:=msgNo;\n" j j^
   sprintf "        Spy_known[msgNo] := true;\n"^
+
+  (* sprintf "          put \"%d \";\n          put ch[%d].sender;\n" i i^
+  sprintf "          put \"   \";\n          put ch[%d].receiver;\n" i ^
+  sprintf "          put \"   msg: \";\n"^
+  sprintf "          printMsg(ch[%d].msg);\n" i ^
+  sprintf "          put \"\\n\";\n"^ *)
+
   sprintf "      endif;\n" ^
   sprintf "    endif;\n" ^
   sprintf "    ch[%d].empty := true;\n" i ^
@@ -928,7 +938,7 @@ let genSynthCode m i patList =
                   sprintf "     endif;\n"^
                   sprintf "   endfor;\n"^
                   sprintf "   if(index=0) then\n"^
-                  sprintf "     msg_end := msg_end + 1 ;\n     index := msg_end;\n     msgs[index].msgType := aenc;\n     msgs[index].aencMsg:=i1; \n     msgs[index].aencKey:=i2; \n"^
+                  sprintf "     msg_end := msg_end + 1 ;\n     index := msg_end;\n     msgs[index].msgType := aenc;\n     msgs[index].aencMsg:=i1; \n     msgs[index].aencKey:=i2; \n    msgs[index].length := 1;"^
                   sprintf "   endif;\n"^
                   sprintf "   num:=index;\n   msg:=msgs[index];\n  end;\n"; 
                   end;
@@ -987,7 +997,7 @@ let genSynthCode m i patList =
                   in
                   str1 ^ str2 ^ str3 ^ str4 ^
                   sprintf "   for i : msgLen do\n"^
-                  sprintf "     if (msgs[i].msgType = concat) then\n"^
+                  sprintf "     if (msgs[i].msgType = concat & msgs[i].length = %d) then\n" (List.length msgs)^
                   sprintf "       if (%s) then\n" str5 ^ 
                   sprintf "          index:=i;\n"^
                   sprintf "       endif;\n"^
@@ -996,7 +1006,7 @@ let genSynthCode m i patList =
                   sprintf "   if(index=0) then\n"^
                   sprintf "     msg_end := msg_end + 1 ;\n     index := msg_end;\n     msgs[index].msgType := concat;\n"^
                   sprintf "%s; \n" str6 ^
-                  sprintf "   endif;\n"^
+                  sprintf "     msgs[index].length := %d;\n    endif;\n" (List.length msgs)^
                   sprintf "   num:=index;\n   msg:=msgs[index];\n  end;\n";
                 end
   |`Str s ->str1 ^ sprintf " Var index : indexType;\n begin
@@ -1011,8 +1021,9 @@ let genSynthCode m i patList =
    if(index=0) then
      msg_end := msg_end + 1 ;
      index := msg_end;
-     msgs[index].msgType := agent;\n
+     msgs[index].msgType := agent;
      msgs[index].ag:=%s; 
+     msgs[index].length := 1;
    endif;
    num:=index;
    msg:=msgs[index];
@@ -1032,6 +1043,7 @@ let genSynthCode m i patList =
       msgs[index].msgType := key;
       msgs[index].k.encType:=PK; 
       msgs[index].k.ag:=%sPk;
+      msgs[index].length := 1;
     endif;
     num:=index;
     msg:=msgs[index];
@@ -1069,6 +1081,7 @@ let genSynthCode m i patList =
         index := msg_end;
         msgs[index].msgType := nonce;
         msgs[index].noncePart:=%s; 
+        msgs[index].length := 1;
       endif;
       num:=index;
       msg:=msgs[index];
@@ -1732,8 +1745,9 @@ let printImpofStart actions knws =
     emit[i]:=false;
   endfor;
 
-  for i:indexType do
+  for i:msgLen do
     msgs[i].msgType := null;
+    msgs[i].length := 0;
   endfor;
 
   msg_end := 0;
@@ -1756,6 +1770,7 @@ let printImpofStart actions knws =
   msgs[msg_end].msgType := key;
   msgs[msg_end].k.ag:=Intruder;
   msgs[msg_end].k.encType:=SK;
+  msgs[msg_end].length := 1;
   pat%dSet.length := pat%dSet.length + 1; 
   pat%dSet.content[pat%dSet.length] :=msg_end;
   Spy_known[msg_end] := true;
@@ -1764,7 +1779,7 @@ let printImpofStart actions knws =
   let str4 = String.concat (List.map ~f:(fun r -> sprintf "  for i : role%sNums do\n" r ^
                                                   sprintf "    msg_end := msg_end+1;\n    msgs[msg_end].msgType := key;\n" ^
                                                   sprintf "    msgs[msg_end].k.ag := role%s[i].%s;\n" r r^
-                                                  sprintf "    msgs[msg_end].k.encType:=PK;\n    pat%dSet.length := pat%dSet.length + 1;\n" kNum kNum ^
+                                                  sprintf "    msgs[msg_end].k.encType:=PK;\n    msgs[msg_end].length := 1;\n    pat%dSet.length := pat%dSet.length + 1;\n" kNum kNum ^
                                                   sprintf "    pat%dSet.content[pat%dSet.length] :=msg_end;\n" kNum kNum ^
                                                   sprintf "    Spy_known[msg_end] := true;\n"^
                                                   sprintf "  endfor;\n"
@@ -1936,6 +1951,7 @@ let printMurphiConsTypeVars actions k env=
     aencKey : indexType;
     sencMsg : indexType;
     sencKey : indexType;"^ !concatParts ^ "
+    length : msgLen;
   end;
   Channel: record
     msg : Message;
