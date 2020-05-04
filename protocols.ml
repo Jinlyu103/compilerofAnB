@@ -421,7 +421,7 @@ let rec genSendAct rolename i m atoms length msgofRolename patlist =
   sprintf "   ch[%d].sender := role%s[i].%s;\n" i rolename rolename ^
   sprintf "   ch[%d].receiver := Intruder;\n" i  (* role%s[i].%s: rolename (getPkAg atoms msgofRolename) *)^
   sprintf "   role%s[i].st := %s%d;\n" rolename rolename ((i mod length)+1) ^
-  sprintf "   put \"%d. \";\n   put ch[%d].sender;\n   put \"   \";\n   put ch[%d].receiver;\n   put \"   msg: \";\n   printMsg(ch[%d].msg);\n   put \"\\n\";\n" i i i i ^
+  sprintf "   put \"send%d. \";\n   put ch[%d].sender;\n   put \"   \";\n   put ch[%d].receiver;\n   put \"   msg: \";\n   printMsg(ch[%d].msg);\n   put \"\\n\";\n" i i i i ^
   commitStr ^
   sprintf "end;\n"
   (* (i+1) should be (i+1) % length of the strand list *)
@@ -471,7 +471,9 @@ let rec genRecvAct rolename i m atoms length msgofRolename patlist =
   sprintf "       ch[%d].empty:=true;\n" i ^
   sprintf "       role%s[i].st := %s%d;\n" rolename rolename ((i mod length)+1) ^
   sprintf "     endif;\n"^
-  sprintf "   endif;\n" ^ commitStr ^
+  sprintf "   endif;\n" ^
+  sprintf "   put \"recv%d. \";\n   put ch[%d].sender;\n   put \"   \";\n   put ch[%d].receiver;\n   put \"   msg: \";\n   printMsg(ch[%d].msg);\n   put \"\\n\";\n" i i i i ^
+  commitStr ^
   sprintf "end;\n"
 
 and recvAtoms2Str atoms rolename = 
@@ -1190,13 +1192,17 @@ let genDestruct m i patlist =
                            |_ -> "null"
                    in                  
                    match m1 with
-                  |`Concat msgs ->let str2 = sprintf "  var k1:KeyType;\n    msg1,msgNum1,msgNum2:Message;" ^
-                                             sprintf "  begin\n    clear msg1;\n   k1 := msgs[msg.aencKey].k;\n    %s := k1.ag;\n    msg1:=msgs[msg.aencMsg];\n     msgNum1:=msgs[msg1.concatPart1];\n    msgNum2:=msgs[msg1.concatPart2];\n" keyAg
+                  |`Concat msgs ->let msgNums = String.concat ~sep:"," (List.mapi ~f:(fun i m -> sprintf "msgNum%d" (i+1)) msgs) in
+                                  let str2 = sprintf "  var k1:KeyType;\n    msg1,%s:Message;\n" msgNums ^
+                                             sprintf "  begin\n    clear msg1;\n   k1 := msgs[msg.aencKey].k;\n   %s := k1.ag;\n    msg1:=msgs[msg.aencMsg];\n" keyAg^
+                                             String.concat ~sep:"\n" (List.mapi ~f:(fun i m -> sprintf "    msgNum%d:=msgs[msg1.concatPart%d];" (i+1) (i+1)) msgs)
                                   in 
-                                  str1 ^ str2^ (String.concat (List.mapi ~f:(fun i m'-> match m' with
-                                                                                        |`Var n -> sprintf "    %s:=msgNum%d.noncePart;\n" n (i+1)
-                                                                                        |`Str r -> sprintf "    %s:=msgNum%d.ag;\n" r (i+1)
-                                                                                        |_ -> sprintf "" )msgs)) ^ "  end;\n"
+                                  let str3 = (String.concat (List.mapi ~f:(fun i m'-> match m' with
+                                              |`Var n -> sprintf "    %s:=msgNum%d.noncePart;\n" n (i+1)
+                                              |`Str r -> sprintf "    %s:=msgNum%d.ag;\n" r (i+1)
+                                              |_ -> sprintf "" )msgs))
+                                  in
+                                  str1 ^ str2^ "\n" ^str3 ^ "  end;\n"
                   |`Var n -> str1 ^ sprintf "  var k1:KeyType;\n    msg1,msgNum1,msgNum2:Message;\n   begin\n
     clear msg1;
     k1 := msgs[msg.aencKey].k;
@@ -1291,6 +1297,8 @@ let genPrintMsgCode () =
         printMsg(msgs[msg.concatPart1]);
         put \",\";
         printMsg(msgs[msg.concatPart2]);
+        put \",\";
+        put msg.length;
         put\")\";
       endif;
     end;\n"
@@ -1314,7 +1322,7 @@ let genInverseKeyCode ()=
 ;;
 
 let genLookUpCode () =
-  sprintf "function lookUp(msg: Message): indexType;
+  sprintf "function lookUp(msg: Message): indexType; --- not used.
   var index : indexType;
   begin
     index:=0;
@@ -1830,32 +1838,6 @@ and printAgreeGoal (seq,r1,r2,m) =
       role%s[j].commit = true & role%s[i].%s = role%s[j].%s
     endexists)
   endforall;\n" r1 r1 r1 mstr r2 mstr
-(* sprintf "
- invariant \"%s\"   
-  forall i:eventNums do
-      (systemEvent[i].eveType = receive & 
-       systemEvent[i].receiver = %s & 
-       systemEvent[i].sender = %s &
-       msgContains(systemEvent[i].msg,%s) )
-      -> 
-      (exists j:eventNums do
-      (systemEvent[j].eveType = send &
-      systemEvent[j].receiver = systemEvent[i].receiver &
-      systemEvent[j].sender = systemEvent[i].sender &
-      systemEvent[j].msg.msgType = systemEvent[i].msg.msgType &      
-      ---systemEvent[j].msg.ag =systemEvent[i].sender &
-      systemEvent[j].msg.ag = systemEvent[i].msg.ag &
-      systemEvent[j].msg.k.encType = systemEvent[i].msg.k.encType &
-      systemEvent[j].msg.k.ag = systemEvent[i].msg.k.ag &
-      systemEvent[j].msg.noncePart = systemEvent[i].msg.noncePart &
-      systemEvent[j].msg.aencMsg = systemEvent[i].msg.aencMsg &
-      systemEvent[j].msg.aencKey = systemEvent[i].msg.aencKey &
-      systemEvent[j].msg.sencMsg = systemEvent[i].msg.sencMsg &
-      systemEvent[j].msg.sencKey = systemEvent[i].msg.sencKey &
-      systemEvent[j].msg.concatPart1 = systemEvent[i].msg.concatPart1 &
-      systemEvent[j].msg.concatPart2 = systemEvent[i].msg.concatPart2
-     )endexists)
- endforall" seq r1 r2 (output_msg m) *)
 ;;
 
 let agents2Str rlist =
@@ -1950,7 +1932,7 @@ let printMurphiConsTypeVars actions k env=
     aencMsg : indexType;
     aencKey : indexType;
     sencMsg : indexType;
-    sencKey : indexType;"^ !concatParts ^ "
+    sencKey : indexType;"^ !concatParts ^ "--- concatParts could be written in arrays: concatPart: Array[msgLen] of indexType" ^"
     length : msgLen;
   end;
   Channel: record
