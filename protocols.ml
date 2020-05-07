@@ -1297,8 +1297,11 @@ let genPrintMsgCode () =
         printMsg(msgs[msg.concatPart1]);
         put \",\";
         printMsg(msgs[msg.concatPart2]);
-        put \",\";
-        put msg.length;
+        if msg.length = 3 then
+          put \",\";
+          ---printMsg(msgs[msg.concatPart3]);
+          put msg.length;
+        endif;
         put\")\";
       endif;
     end;\n"
@@ -1581,7 +1584,7 @@ let genMatchAgent () =
     if (Ag = anyAgent) then
       flag := true;
       Ag := locAg;
-    elsif (locAg = locAg) then
+    elsif (locAg = Ag) then
       flag := true;
     else
       flag := false;
@@ -1835,13 +1838,15 @@ and printAgreeGoal (seq,r1,r2,m) =
   sprintf "  forall i: role%sNums do\n" r2 ^
   sprintf "    role%s[i].commit = true \n    ->\n" r2 ^
   sprintf "    (exists j: role%sNums do
-      role%s[j].commit = true & role%s[i].%s = role%s[j].%s
+      ---role%s[j].commit = true &
+      role%s[i].%s = role%s[j].%s
     endexists)
   endforall;\n" r1 r1 r1 mstr r2 mstr
 ;;
 
 let agents2Str rlist =
-  String.concat ~sep:", " rlist
+  let intruStr = if listwithout rlist ("Intruder") then "Intruder, " else "" in
+  intruStr ^ String.concat ~sep:", " rlist
 ;;
 
 let nonce2Str nlist =
@@ -1911,7 +1916,7 @@ let printMurphiConsTypeVars actions k env=
   chanNums:1..chanNum;\n"^
 
   sprintf "
-  AgentType : enum{%s, anyAgent}; 
+  AgentType : enum{%s,anyAgent}; ---Intruder 
   NonceType : enum{%s, anyNonce};  \n" (agents2Str rolesOfEnv) (nonce2Str nonceOfEnv)
   ^
   sprintf "

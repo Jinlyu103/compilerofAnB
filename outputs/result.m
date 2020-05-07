@@ -10,7 +10,7 @@ type
   msgLen:0..totalFact;
   chanNums:1..chanNum;
 
-  AgentType : enum{Alice, Intruder, Bob, anyAgent}; 
+  AgentType : enum{Intruder, Alice, Bob,anyAgent}; ---Intruder 
   NonceType : enum{Na, Nb, anyNonce};  
 
   EncryptType : enum{PK,SK,Symk};
@@ -568,10 +568,11 @@ procedure destruct8(msg:Message; Var Nb:NonceType; Var BPk:AgentType);
         printMsg(msgs[msg.concatPart1]);
         put ",";
         printMsg(msgs[msg.concatPart2]);
-	if msg.length = 3 then
+        if msg.length = 3 then
           put ",";
-          printMsg(msgs[msg.concatPart3]);
-	endif;
+          ---printMsg(msgs[msg.concatPart3]);
+          put msg.length;
+        endif;
         put")";
       endif;
     end;
@@ -590,7 +591,7 @@ function inverseKey(msgK:Message):Message;
     endif;
     return key_inv;
   end;
-function lookUp(msg: Message): indexType;
+function lookUp(msg: Message): indexType; --- not used.
   var index : indexType;
   begin
     index:=0;
@@ -715,7 +716,6 @@ function matchAgent(Var locAg: AgentType; Var Ag: AgentType):boolean;  ---if ag 
     else
       flag := false;
     endif;
-    
     return flag;
   end;
 function matchNonce(Var locNa: NonceType; Var Na: NonceType):boolean;  ---if Na equals to locNa which was derived from recieving msg, or anyNonce, then true
@@ -1419,7 +1419,7 @@ endruleset;
 
 startstate
   roleA[1].A := Alice;
-  roleA[1].B := Intruder;
+  roleA[1].B := Bob;
   roleA[1].Na := Na;
   roleA[1].st := A1;
   roleA[1].commit := false;
@@ -1501,6 +1501,7 @@ invariant "auth1"
     roleA[i].commit = true 
     ->
     (exists j: roleBNums do
-      roleB[j].commit = true & roleB[i].Na = roleA[j].Na
+      ---roleB[j].commit = true &
+      roleB[i].Na = roleA[j].Na
     endexists)
   endforall;
