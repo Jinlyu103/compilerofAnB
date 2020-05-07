@@ -646,14 +646,14 @@ let rec deconcatRule msgs patList =
 
 and printDeconcatRule msgs i i1 i2 =
   let str1 = sprintf "  rule \"deconcat %d\"	---pat%d\n" i i^
-             sprintf "    i<=pat%dSet.length & Spy_known[pat%dSet.content[i]] &\n    !(Spy_known[msgs[pat%dSet.content[i]].concatPart1] & Spy_known[msgs[pat%dSet.content[i]].concatPart2])\n    ==>\n" i i i i
+             sprintf "    i<=pat%dSet.length & Spy_known[pat%dSet.content[i]] &\n    !(Spy_known[msgs[pat%dSet.content[i]].concatPart[1]] & Spy_known[msgs[pat%dSet.content[i]].concatPart[2]])\n    ==>\n" i i i i
   in
   let (i1_1,i1_2) = if i1 = i2 then (11,12) else (i1,i2) in 
   str1 ^ sprintf "    var msgPat%d,msgPat%d:indexType;\n        flag_pat%d,flag_pat%d:boolean;\n" i1_1 i1_2 i1_1 i1_2^
   sprintf "    begin\n"^
-  sprintf "      if (!Spy_known[msgs[pat%dSet.content[i]].concatPart1]) then\n" i^
-  sprintf "        Spy_known[msgs[pat%dSet.content[i]].concatPart1]:=true;\n" i^
-  sprintf "        msgPat%d := msgs[pat%dSet.content[i]].concatPart1;\n" i1_1 i^
+  sprintf "      if (!Spy_known[msgs[pat%dSet.content[i]].concatPart[1]]) then\n" i^
+  sprintf "        Spy_known[msgs[pat%dSet.content[i]].concatPart[1]]:=true;\n" i^
+  sprintf "        msgPat%d := msgs[pat%dSet.content[i]].concatPart[1];\n" i1_1 i^
   sprintf "        isPat%d(msgs[msgPat%d],flag_pat%d);\n" i1 i1_1 i1_1^
   sprintf "        if (flag_pat%d) then\n" i1_1^
   sprintf "          if(!exist(pat%dSet,msgPat%d)) then\n" i1 i1_1^
@@ -661,9 +661,9 @@ and printDeconcatRule msgs i i1 i2 =
   sprintf "          endif;\n"^
   sprintf "        endif;\n"^
   sprintf "      endif;\n"^
-  sprintf "      if (!Spy_known[msgs[pat%dSet.content[i]].concatPart2]) then\n" i^
-  sprintf "        Spy_known[msgs[pat%dSet.content[i]].concatPart2]:=true;\n" i^
-  sprintf "        msgPat%d := msgs[pat%dSet.content[i]].concatPart2;\n" i1_2 i^
+  sprintf "      if (!Spy_known[msgs[pat%dSet.content[i]].concatPart[2]]) then\n" i^
+  sprintf "        Spy_known[msgs[pat%dSet.content[i]].concatPart[2]]:=true;\n" i^
+  sprintf "        msgPat%d := msgs[pat%dSet.content[i]].concatPart[2];\n" i1_2 i^
   sprintf "        isPat%d(msgs[msgPat%d],flag_pat%d);\n" i2 i1_2 i1_2^
   sprintf "        if (flag_pat%d) then\n" i1_2^
   sprintf "          if(!exist(pat%dSet,msgPat%d)) then\n" i2 i1_2^
@@ -828,7 +828,7 @@ and print_getRules i j =
   sprintf "  end;\n"
 
 and print_emitRules i j r=
-  let str1 = sprintf "\n---rule of intruder to emit msg%d.\n" i^sprintf "ruleset i: msgLen do\n"
+  let str1 = sprintf "\n---rule of intruder to emit msg%d.\n" i^sprintf "ruleset i: indexType do\n"
   in
   let str2 = sprintf "  ruleset j: role%sNums do\n" r in
   (* let str2 = if i mod 2 = 1 then
@@ -932,7 +932,7 @@ let genSynthCode m i patList =
                   sprintf "   index:=0;\n"^
                   sprintf "   lookAddPat%d(%s,msg1,i1);\n" i1 (atom2Str m1Atoms)^
                   sprintf "   lookAddPat%d(%s,msg2,i2);\n" i2 keyAg^               
-                  sprintf "   for i : msgLen do\n"^
+                  sprintf "   for i : indexType do\n"^
                   sprintf "     if (msgs[i].msgType = aenc) then\n"^
                   sprintf "       if (msgs[i].aencMsg = i1 & msgs[i].aencKey = i2) then\n"^
                   sprintf "          index:=i;\n"^
@@ -940,9 +940,9 @@ let genSynthCode m i patList =
                   sprintf "     endif;\n"^
                   sprintf "   endfor;\n"^
                   sprintf "   if(index=0) then\n"^
-                  sprintf "     msg_end := msg_end + 1 ;\n     index := msg_end;\n     msgs[index].msgType := aenc;\n     msgs[index].aencMsg:=i1; \n     msgs[index].aencKey:=i2; \n    msgs[index].length := 1;"^
+                  sprintf "     msg_end := msg_end + 1 ;\n     index := msg_end;\n     msgs[index].msgType := aenc;\n     msgs[index].aencMsg:=i1; \n     msgs[index].aencKey:=i2; \n     msgs[index].length := 1;\n"^
                   sprintf "   endif;\n"^
-                  sprintf "   num:=index;\n   msg:=msgs[index];\n  end;\n"; 
+                  sprintf "   num:=index;\n   msg:=msgs[index];\n  end;\n\n"; 
                   end;
   |`Concat msgs -> begin  (* concat(Na,Nb), concat(Na,A), concat(Server, Na), concat(Server, Na, aenc{concat(Server, Na)}sk(Server))*)
                   let patNumList = ref [] in
@@ -993,12 +993,12 @@ let genSynthCode m i patList =
                   in
                   let str4 = String.concat ~sep: ";\n" (List.mapi ~f:(fun i (m,j) -> sprintf "   lookAddPat%d(%s,msg%d,i%d)" j m (i+1) (i+1)) !patNumList) ^ ";\n"
                   in
-                  let str5 = String.concat ~sep:" & " (List.mapi ~f:(fun i m -> sprintf "msgs[i].concatPart%d = i%d" (i+1) (i+1)) msgs)
+                  let str5 = String.concat ~sep:" & " (List.mapi ~f:(fun i m -> sprintf "msgs[i].concatPart[%d] = i%d" (i+1) (i+1)) msgs)
                   in
-                  let str6 = String.concat ~sep:";\n" (List.mapi ~f:(fun i m -> sprintf "     msgs[index].concatPart%d := i%d" (i+1) (i+1)) msgs)
+                  let str6 = String.concat ~sep:";\n" (List.mapi ~f:(fun i m -> sprintf "     msgs[index].concatPart[%d] := i%d" (i+1) (i+1)) msgs)
                   in
                   str1 ^ str2 ^ str3 ^ str4 ^
-                  sprintf "   for i : msgLen do\n"^
+                  sprintf "   for i : indexType do\n"^
                   sprintf "     if (msgs[i].msgType = concat & msgs[i].length = %d) then\n" (List.length msgs)^
                   sprintf "       if (%s) then\n" str5 ^ 
                   sprintf "          index:=i;\n"^
@@ -1009,11 +1009,11 @@ let genSynthCode m i patList =
                   sprintf "     msg_end := msg_end + 1 ;\n     index := msg_end;\n     msgs[index].msgType := concat;\n"^
                   sprintf "%s; \n" str6 ^
                   sprintf "     msgs[index].length := %d;\n    endif;\n" (List.length msgs)^
-                  sprintf "   num:=index;\n   msg:=msgs[index];\n  end;\n";
+                  sprintf "   num:=index;\n   msg:=msgs[index];\n  end;\n\n";
                 end
   |`Str s ->str1 ^ sprintf " Var index : indexType;\n begin
    index:=0;
-   for i: msgLen do
+   for i: indexType do
     if (msgs[i].msgType = agent) then
       if (msgs[i].ag = %s) then
         index:=i;
@@ -1029,10 +1029,10 @@ let genSynthCode m i patList =
    endif;
    num:=index;
    msg:=msgs[index];
-  end;\n" s s
+  end;\n\n" s s
   |`Pk role -> str1 ^ sprintf "  Var index : indexType;\n  begin
     index:=0;
-    for i: msgLen do
+    for i: indexType do
       if (msgs[i].msgType = key) then
         if (msgs[i].k.encType = PK & msgs[i].k.ag = %sPk) then
           index:=i;
@@ -1049,10 +1049,10 @@ let genSynthCode m i patList =
     endif;
     num:=index;
     msg:=msgs[index];
-  end;\n" role role
+  end;\n\n" role role
   |`Sk role -> str1 ^ sprintf "  Var index : indexType;\n  begin
     index:=0;
-    for i: msgLen do
+    for i: indexType do
       if (msgs[i].msgType = key) then
         if (msgs[i].k.encType = SK & msgs[i].k.ag = %sSk) then
           index:=i;
@@ -1068,10 +1068,10 @@ let genSynthCode m i patList =
     endif;
     num:=index;
     msg:=msgs[index];
-  end;\n" role role
+  end;\n\n" role role
   |`Var n ->str1 ^ sprintf "  Var index : indexType;\n  begin
       index:=0;
-      for i: msgLen do
+      for i: indexType do
         if(msgs[i].msgType=nonce) then
           if(msgs[i].noncePart=%s) then
             index:=i;
@@ -1087,7 +1087,7 @@ let genSynthCode m i patList =
       endif;
       num:=index;
       msg:=msgs[index];
-  end;\n" n n;
+  end;\n\n" n n;
   |_ -> ""
 ;;
 
@@ -1099,8 +1099,7 @@ let genIsPatCode m i patList =
   |`Aenc(m1,k1) ->begin
                   let i1= getPatNum m1 patList in
                   let i2= getPatNum k1 patList in
-                  str1 ^ sprintf "
-  var flag1,flagPart1,flagPart2 : boolean;\n  begin
+                  str1 ^ sprintf "  var flag1,flagPart1,flagPart2 : boolean;\n  begin
     flag1 := false;
     flagPart1 := false;
     flagPart2 := false;
@@ -1111,7 +1110,7 @@ let genIsPatCode m i patList =
         flag1 := true;
       endif;
     endif;
-    flag := flag1;\n  end;\n" i1 i2
+    flag := flag1;\n  end;\n\n" i1 i2
   end;
   |`Concat msgs ->begin
                   let type2str = match List.nth atoms 1 with
@@ -1119,25 +1118,23 @@ let genIsPatCode m i patList =
                               |Some (`Str r) -> "agent"
                               |_ -> ""
                   in
-                  str1 ^ sprintf "
-  var flag1 : boolean;\n  begin\n
+                  str1 ^ sprintf "  var flag1 : boolean;\n  begin
     flag1 := false;
     if (msg.msgType = concat) then 
-      if (msgs[msg.concatPart1].msgType=nonce & msgs[msg.concatPart2].msgType=%s) then 
+      if (msgs[msg.concatPart[1]].msgType=nonce & msgs[msg.concatPart[2]].msgType=%s) then 
         flag1 := true;
       endif;
     endif;
     flag := flag1;
-  end;\n" type2str
+  end;\n\n" type2str
   end;
   |`Str s ->begin
-            str1 ^ sprintf "
-  var flag1 : boolean;\n  begin
+            str1 ^ sprintf "  var flag1 : boolean;\n  begin
     flag1 := false;
     if (msg.msgType = agent) then
       flag1 := true;
     endif;
-    flag := flag1;\n  end;\n"
+    flag := flag1;\n  end;\n\n"
   end;
   |`Pk role ->begin
               str1 ^ sprintf "  var flag1 : boolean;\n  begin
@@ -1147,7 +1144,7 @@ let genIsPatCode m i patList =
         flag1 := true;
       endif;
     endif;
-    flag := flag1;\n  end;\n"
+    flag := flag1;\n  end;\n\n"
   end;
   |`Sk role ->begin
     str1 ^ sprintf "  var flag1 : boolean;\n  begin
@@ -1157,16 +1154,15 @@ let genIsPatCode m i patList =
         flag1 := true;
       endif;
     endif;
-    flag := flag1;\n  end;\n"
+    flag := flag1;\n  end;\n\n"
   end;
   |`Var n ->begin
-            str1 ^ sprintf "
-  var flag1 : boolean;\n  begin
+            str1 ^ sprintf "  var flag1 : boolean;\n  begin
     flag1 := false;
     if (msg.msgType = nonce) then
       flag1 := true;
     endif;
-    flag := flag1;\n  end;\n"
+    flag := flag1;\n  end;\n\n"
   end;
   |_ -> ""
 ;;
@@ -1195,7 +1191,7 @@ let genDestruct m i patlist =
                   |`Concat msgs ->let msgNums = String.concat ~sep:"," (List.mapi ~f:(fun i m -> sprintf "msgNum%d" (i+1)) msgs) in
                                   let str2 = sprintf "  var k1:KeyType;\n    msg1,%s:Message;\n" msgNums ^
                                              sprintf "  begin\n    clear msg1;\n   k1 := msgs[msg.aencKey].k;\n   %s := k1.ag;\n    msg1:=msgs[msg.aencMsg];\n" keyAg^
-                                             String.concat ~sep:"\n" (List.mapi ~f:(fun i m -> sprintf "    msgNum%d:=msgs[msg1.concatPart%d];" (i+1) (i+1)) msgs)
+                                             String.concat ~sep:"\n" (List.mapi ~f:(fun i m -> sprintf "    msgNum%d:=msgs[msg1.concatPart[%d]];" (i+1) (i+1)) msgs)
                                   in 
                                   let str3 = (String.concat (List.mapi ~f:(fun i m'-> match m' with
                                               |`Var n -> sprintf "    %s:=msgNum%d.noncePart;\n" n (i+1)
@@ -1203,7 +1199,7 @@ let genDestruct m i patlist =
                                               |_ -> sprintf "" )msgs))
                                   in
                                   str1 ^ str2^ "\n" ^str3 ^ "  end;\n"
-                  |`Var n -> str1 ^ sprintf "  var k1:KeyType;\n    msg1,msgNum1,msgNum2:Message;\n   begin\n
+                  |`Var n -> str1 ^ sprintf "  var k1:KeyType;\n    msg1,msgNum1,msgNum2:Message;\n   begin
     clear msg1;
     k1 := msgs[msg.aencKey].k;
     %s := k1.ag;
@@ -1214,16 +1210,16 @@ let genDestruct m i patlist =
   end   
   |`Concat msgs -> let msgNums = String.concat ~sep:"," (List.mapi ~f:(fun i m -> sprintf "msgNum%d" (i+1)) msgs) in
                    let stats = String.concat ~sep:";\n" (List.mapi ~f:(fun i m -> match m with
-                      |`Str r -> sprintf "    msgNum%d := msgs[msg.concatPart%d];\n" (i+1) (i+1) ^
+                      |`Str r -> sprintf "    msgNum%d := msgs[msg.concatPart[%d]];\n" (i+1) (i+1) ^
                                  sprintf "    %s := msgNum%d.ag" r (i+1)
-                      |`Var n -> sprintf "    msgNum%d := msgs[msg.concatPart%d];\n" (i+1) (i+1) ^
+                      |`Var n -> sprintf "    msgNum%d := msgs[msg.concatPart[%d]];\n" (i+1) (i+1) ^
                                  sprintf "    %s := msgNum%d.noncePart" n (i+1)
                       |`Aenc(m1,k1) -> let keyAg = match k1 with 
                                                    |`Pk r -> r ^ "Pk"
                                                    |`Sk r -> r ^ "Sk"
                                                    |_ -> "" 
                                         in
-                                        sprintf "    msgNum%d := msgs[msg.concatPart%d];\n" (i+1) (i+1)^
+                                        sprintf "    msgNum%d := msgs[msg.concatPart[%d]];\n" (i+1) (i+1)^
                                         sprintf "    k := msgs[msgNum%d.aencKey].k;\n" (i+1) ^
                                         sprintf "    %s := k.ag" keyAg
                       |_ -> "") msgs) in
@@ -1240,7 +1236,7 @@ let genGet_msgNoCode () =
     var index:indexType;
     begin
       index:=0;
-      for i: msgLen do
+      for i: indexType do
         if (msgs[i].msgType = msg.msgType) then
           if ( (msg.msgType=agent & msgs[i].ag=msg.ag)
           | (msg.msgType=nonce & msgs[i].noncePart=msg.noncePart)
@@ -1294,12 +1290,12 @@ let genPrintMsgCode () =
         put \"}\\n\";
       elsif msg.msgType=concat then
         put \"concat(\";
-        printMsg(msgs[msg.concatPart1]);
+        printMsg(msgs[msg.concatPart[1]]);
         put \",\";
-        printMsg(msgs[msg.concatPart2]);
+        printMsg(msgs[msg.concatPart[2]]);
         if msg.length = 3 then
           put \",\";
-          ---printMsg(msgs[msg.concatPart3]);
+          ---printMsg(msgs[msg.concatPart[3]]);
           put msg.length;
         endif;
         put\")\";
@@ -1341,7 +1337,7 @@ let genLookUpCode () =
           index := i;
         elsif(msgs[i].msgType = senc & (msgs[i].sencKey=msg.sencKey & msgs[i].sencMsg=msg.sencMsg)) then
           index := i;
-        elsif(msgs[i].msgType = concat & (msgs[i].concatPart1=msg.concatPart1 & msgs[i].concatPart2=msg.concatPart2)) then
+        elsif(msgs[i].msgType = concat & (msgs[i].concatPart[1]=msg.concatPart[1] & msgs[i].concatPart[2]=msg.concatPart[2])) then
           index := i;
         endif;
       endif;
@@ -1365,10 +1361,10 @@ let rec consMsgBySubs m patList =
                     sprintf "function construct%dBy%s(%s:indexType):indexType;\n" i subMsgNo msgNoStr ^
                     sprintf "  var index : indexType;\n"^
                     sprintf "      %s;\n" (atoms2Str1 noDupAtoms)^
-                    sprintf "      k_ag : AgentType;\n"^
+                    (* sprintf "      k_ag : AgentType;\n"^ *)
                     sprintf "      msg : Message;\n  begin\n"^
                     sprintf "   index := 0;\n"^
-                    sprintf "   %s;\n" (atoms2Statm atoms m patList)^
+                    sprintf "%s\n" (atoms2Statm atoms m patList)^
                     (* sprintf "   k_ag := msgs[msgNo%d].k.ag;\n" i2^ *)
                     sprintf "   lookAddPat%d(%s,msg,index);\n" i (atoms2Str2 noDupAtoms)^
                     sprintf "   return index;\n" ^
@@ -1408,16 +1404,18 @@ and atoms2Str2 atoms=
 and atoms2Statm atoms m patList=
     match m with 
     |`Concat msgs -> let j = getPatNum m patList in
-                     String.concat ~sep:";\n   " (List.mapi ~f:(fun i atom -> 
+                     String.concat ~sep:"\n" (List.mapi ~f:(fun i atom -> 
                       match atom with
-                      |`Var n -> "loc"^n^":= msgs[msgs[msgNo"^ string_of_int j^"].concatPart"^(string_of_int (i+1))^"].noncePart"
-                      |`Str r -> "loc"^r^":= msgs[msgs[msgNo"^ string_of_int j^"].concatPart"^(string_of_int (i+1))^"].ag"
+                      |`Var n -> sprintf "   loc%s := msgs[msgs[msgNo%d].concatPart[%d]].noncePart;" n j (i+1)
+                      |`Str r -> sprintf "   loc%s := msgs[msgs[msgNo%d].concatPart[%d]].ag;" r j (i+1)
                       |_ -> "") atoms)
     |`Var n -> let j = getPatNum m patList in
-              "loc"^n^":=msgs[msgNo"^string_of_int j^"].noncePart"
+              sprintf "   loc%s := msgs[msgNo%d].noncePart;\n" n j
     |`Pk r -> let j = getPatNum m patList in
-              "loc"^r^"Pk := msgs[msgNo"^ string_of_int j ^"].k.ag"
-    |`Aenc(m1,k1)-> atoms2Statm atoms m1 patList ^ ";\n" ^atoms2Statm atoms k1 patList
+              sprintf "   loc%sPk := msgs[msgNo%d].k.ag;" r j
+    |`Sk r -> let j = getPatNum m patList in
+              sprintf "   loc%sSk := msgs[msgNo%d].k.ag;" r j
+    |`Aenc(m1,k1)-> atoms2Statm atoms m1 patList ^atoms2Statm atoms k1 patList
     |_ -> ""
 
 and atoms2Statm1 atoms msgs = (* occurred some problem *)
@@ -1546,8 +1544,8 @@ and atoms2Statm atoms m patList=
   let j = getPatNum m patList in
   match m with 
   |`Concat msgs -> String.concat ~sep:";\n   " (List.mapi ~f:(fun i atom -> match atom with
-                                                |`Var n -> "loc"^n^":= msgs[msgs[msgNo"^ string_of_int j^"].concatPart"^(string_of_int (i+1))^"].noncePart"
-                                                |`Str r -> "loc"^r^":= msgs[msgs[msgNo"^ string_of_int j^"].concatPart"^(string_of_int (i+1))^"].ag"
+                                                |`Var n -> "loc"^n^":= msgs[msgs[msgNo"^ string_of_int j^"].concatPart["^(string_of_int (i+1))^"]].noncePart"
+                                                |`Str r -> "loc"^r^":= msgs[msgs[msgNo"^ string_of_int j^"].concatPart["^(string_of_int (i+1))^"]].ag"
                                                 |_ -> "") atoms)
   |`Var n -> "loc"^n^":=msgs[msgNo"^string_of_int j^"].noncePart"
   |_ -> ""
@@ -1756,13 +1754,13 @@ let printImpofStart actions knws =
     emit[i]:=false;
   endfor;
 
-  for i:msgLen do
+  for i:indexType do
     msgs[i].msgType := null;
     msgs[i].length := 0;
   endfor;
 
   msg_end := 0;
-  for i:msgLen do\n"
+  for i:indexType do\n"
   in
   let patlist = getPatList actions in    (* get all patterns from actions *)
   let non_dup = del_duplicate patlist in (* delete duplicate *)
@@ -1826,7 +1824,7 @@ let rec printGoal2Murphi g =
 and printSecGoal (seq,m) =
   sprintf "
 invariant \"%s\"
-  forall i:msgLen do
+  forall i:indexType do
     (msgs[i].msgType=nonce & msgs[i].noncePart = %s)
     ->
     Spy_known[i] = false
@@ -1896,15 +1894,17 @@ let printMurphiConsTypeVars actions k env=
   let pats = getEqvlMsgPattern non_dup in
 
   let maxMsgLen = getMaxLenMsg actions in
-  let concatParts = ref ""  in
+  let concatParts = ref "\n    concatPart: Array[msgLen] of indexType;" in
+  (* let concatParts = ref ""  in
   for i = 1 to maxMsgLen do
     concatParts := sprintf "%s\n    concatPart%d : indexType;" !concatParts i
-  done;
+  done; *)
 
   sprintf "const\n" ^
   String.concat ~sep:"\n" (List.map ~f:(fun r -> sprintf "  role%sNum:1;" r) rlist) ^
   "
   totalFact:20;
+  msgLength:5;
   chanNum:30;\n" ^
 
   (* print type*)
@@ -1912,7 +1912,7 @@ let printMurphiConsTypeVars actions k env=
   indexType:0..totalFact;\n"^
   String.concat ~sep:"\n" (List.map ~f:(fun r -> sprintf "  role%sNums:1..role%sNum;" r r) rlist) ^
   "
-  msgLen:0..totalFact;
+  msgLen:0..msgLength;
   chanNums:1..chanNum;\n"^
 
   sprintf "
@@ -1938,7 +1938,7 @@ let printMurphiConsTypeVars actions k env=
     aencKey : indexType;
     sencMsg : indexType;
     sencKey : indexType;"^ !concatParts ^ "--- concatParts could be written in arrays: concatPart: Array[msgLen] of indexType" ^"
-    length : msgLen;
+    length : indexType;
   end;
   Channel: record
     msg : Message;
@@ -1952,8 +1952,8 @@ let printMurphiConsTypeVars actions k env=
   ---send;
 
   msgSet: record
-    content : Array[msgLen] of indexType;
-    length : msgLen;
+    content : Array[indexType] of indexType;
+    length : indexType;
   end;
 
 var
