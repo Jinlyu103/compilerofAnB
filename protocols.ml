@@ -1627,9 +1627,10 @@ let genMatchMsg () =
 	    return match(msgs[m1.sencMsg], msgs[m2.sencMsg]) & match(msgs[m1.sencKey], msgs[m2.sencKey]);
     elsif (m1.msgType=concat & m2.msgType=concat) & (m1.length = m2.length)  then
       concatFlag := true;
-      i = m1.length;
+      i := m1.length;
       while (i > 0 & concatFlag)do
-        concatFlag := concatFlag & match(msgs[m1.concatPart[i], msgs[m2.concatPart[i]]]);
+        concatFlag := concatFlag & match(msgs[m1.concatPart[i]], msgs[m2.concatPart[i]]);
+        i := i-1;
       end;
 	    return concatFlag;
     else

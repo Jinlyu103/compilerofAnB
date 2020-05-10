@@ -190,7 +190,7 @@ class mu_1_AgentType: public mu__byte
   };
 };
 
-const char *mu_1_AgentType::values[] = {"Intruder","Alice","Bob","anyAgent",NULL };
+const char *mu_1_AgentType::values[] = {"Alice","Intruder","Bob","anyAgent",NULL };
 
 /*** end of enum declaration ***/
 mu_1_AgentType mu_1_AgentType_undefined_var;
@@ -2489,8 +2489,8 @@ const int mu_roleBNum = 1;
 const int mu_totalFact = 20;
 const int mu_msgLength = 15;
 const int mu_chanNum = 30;
-const int mu_Intruder = 1;
-const int mu_Alice = 2;
+const int mu_Alice = 1;
+const int mu_Intruder = 2;
 const int mu_Bob = 3;
 const int mu_anyAgent = 4;
 const int mu_Na = 5;
@@ -2924,7 +2924,7 @@ else
 };
 /*** end procedure declaration ***/
 
-void mu_lookAddPat6(const mu_1_NonceType& mu_Na, const mu_1_NonceType& mu_Nb, const mu_1_AgentType& mu_B, mu_1_Message& mu_msg, mu_1_indexType& mu_num)
+void mu_lookAddPat6(const mu_1_NonceType& mu_Na, const mu_1_NonceType& mu_Nb, mu_1_Message& mu_msg, mu_1_indexType& mu_num)
 {
 /*** Variable declaration ***/
 mu_1_Message mu_msg1("msg1",0);
@@ -2933,42 +2933,30 @@ mu_1_Message mu_msg1("msg1",0);
 mu_1_Message mu_msg2("msg2",208);
 
 /*** Variable declaration ***/
-mu_1_Message mu_msg3("msg3",416);
+mu_1_indexType mu_index("index",416);
 
 /*** Variable declaration ***/
-mu_1_indexType mu_index("index",624);
+mu_1_indexType mu_i1("i1",424);
 
 /*** Variable declaration ***/
-mu_1_indexType mu_i1("i1",632);
-
-/*** Variable declaration ***/
-mu_1_indexType mu_i2("i2",640);
-
-/*** Variable declaration ***/
-mu_1_indexType mu_i3("i3",648);
+mu_1_indexType mu_i2("i2",432);
 
 mu_index = 0;
 mu_lookAddPat1 ( mu_Na, mu_msg1, mu_i1 );
 mu_lookAddPat1 ( mu_Nb, mu_msg2, mu_i2 );
-mu_lookAddPat2 ( mu_B, mu_msg3, mu_i3 );
 {
 for(int mu_i = 0; mu_i <= 20; mu_i++) {
 bool mu__boolexpr14;
   if (!((mu_msgs[mu_i].mu_msgType) == (mu_concat))) mu__boolexpr14 = FALSE ;
   else {
-  mu__boolexpr14 = ((mu_msgs[mu_i].mu_length) == (3)) ; 
+  mu__boolexpr14 = ((mu_msgs[mu_i].mu_length) == (2)) ; 
 }
 if ( mu__boolexpr14 )
 {
 bool mu__boolexpr15;
-bool mu__boolexpr16;
-  if (!((mu_msgs[mu_i].mu_concatPart[1]) == (mu_i1))) mu__boolexpr16 = FALSE ;
+  if (!((mu_msgs[mu_i].mu_concatPart[1]) == (mu_i1))) mu__boolexpr15 = FALSE ;
   else {
-  mu__boolexpr16 = ((mu_msgs[mu_i].mu_concatPart[2]) == (mu_i2)) ; 
-}
-  if (!(mu__boolexpr16)) mu__boolexpr15 = FALSE ;
-  else {
-  mu__boolexpr15 = ((mu_msgs[mu_i].mu_concatPart[3]) == (mu_i3)) ; 
+  mu__boolexpr15 = ((mu_msgs[mu_i].mu_concatPart[2]) == (mu_i2)) ; 
 }
 if ( mu__boolexpr15 )
 {
@@ -2993,11 +2981,7 @@ if (mu_i2.isundefined())
   mu_msgs[mu_index].mu_concatPart[2].undefine();
 else
   mu_msgs[mu_index].mu_concatPart[2] = mu_i2;
-if (mu_i3.isundefined())
-  mu_msgs[mu_index].mu_concatPart[3].undefine();
-else
-  mu_msgs[mu_index].mu_concatPart[3] = mu_i3;
-mu_msgs[mu_index].mu_length = 3;
+mu_msgs[mu_index].mu_length = 2;
 }
 if (mu_index.isundefined())
   mu_num.undefine();
@@ -3015,12 +2999,12 @@ mu_0_boolean mu_flag1("flag1",0);
 mu_flag1 = mu_false;
 if ( (mu_msg.mu_msgType) == (mu_concat) )
 {
-bool mu__boolexpr17;
-  if (!((mu_msgs[mu_msg.mu_concatPart[1]].mu_msgType) == (mu_nonce))) mu__boolexpr17 = FALSE ;
+bool mu__boolexpr16;
+  if (!((mu_msgs[mu_msg.mu_concatPart[1]].mu_msgType) == (mu_nonce))) mu__boolexpr16 = FALSE ;
   else {
-  mu__boolexpr17 = ((mu_msgs[mu_msg.mu_concatPart[2]].mu_msgType) == (mu_nonce)) ; 
+  mu__boolexpr16 = ((mu_msgs[mu_msg.mu_concatPart[2]].mu_msgType) == (mu_nonce)) ; 
 }
-if ( mu__boolexpr17 )
+if ( mu__boolexpr16 )
 {
 mu_flag1 = mu_true;
 }
@@ -3032,7 +3016,7 @@ else
 };
 /*** end procedure declaration ***/
 
-void mu_lookAddPat7(const mu_1_NonceType& mu_Na, const mu_1_NonceType& mu_Nb, const mu_1_AgentType& mu_B, const mu_1_AgentType& mu_APk, mu_1_Message& mu_msg, mu_1_indexType& mu_num)
+void mu_lookAddPat7(const mu_1_NonceType& mu_Na, const mu_1_NonceType& mu_Nb, const mu_1_AgentType& mu_APk, mu_1_Message& mu_msg, mu_1_indexType& mu_num)
 {
 /*** Variable declaration ***/
 mu_1_Message mu_msg1("msg1",0);
@@ -3050,18 +3034,18 @@ mu_1_indexType mu_i1("i1",424);
 mu_1_indexType mu_i2("i2",432);
 
 mu_index = 0;
-mu_lookAddPat6 ( mu_Na, mu_Nb, mu_B, mu_msg1, mu_i1 );
+mu_lookAddPat6 ( mu_Na, mu_Nb, mu_msg1, mu_i1 );
 mu_lookAddPat4 ( mu_APk, mu_msg2, mu_i2 );
 {
 for(int mu_i = 0; mu_i <= 20; mu_i++) {
 if ( (mu_msgs[mu_i].mu_msgType) == (mu_aenc) )
 {
-bool mu__boolexpr18;
-  if (!((mu_msgs[mu_i].mu_aencMsg) == (mu_i1))) mu__boolexpr18 = FALSE ;
+bool mu__boolexpr17;
+  if (!((mu_msgs[mu_i].mu_aencMsg) == (mu_i1))) mu__boolexpr17 = FALSE ;
   else {
-  mu__boolexpr18 = ((mu_msgs[mu_i].mu_aencKey) == (mu_i2)) ; 
+  mu__boolexpr17 = ((mu_msgs[mu_i].mu_aencKey) == (mu_i2)) ; 
 }
-if ( mu__boolexpr18 )
+if ( mu__boolexpr17 )
 {
 mu_index = mu_i;
 }
@@ -3112,12 +3096,12 @@ if ( (mu_msg.mu_msgType) == (mu_aenc) )
 {
 mu_isPat6 ( mu_msgs[mu_msg.mu_aencMsg], mu_flagPart1 );
 mu_isPat4 ( mu_msgs[mu_msg.mu_aencKey], mu_flagPart2 );
-bool mu__boolexpr19;
-  if (!(mu_flagPart1)) mu__boolexpr19 = FALSE ;
+bool mu__boolexpr18;
+  if (!(mu_flagPart1)) mu__boolexpr18 = FALSE ;
   else {
-  mu__boolexpr19 = (mu_flagPart2) ; 
+  mu__boolexpr18 = (mu_flagPart2) ; 
 }
-if ( mu__boolexpr19 )
+if ( mu__boolexpr18 )
 {
 mu_flag1 = mu_true;
 }
@@ -3153,12 +3137,12 @@ mu_lookAddPat4 ( mu_BPk, mu_msg2, mu_i2 );
 for(int mu_i = 0; mu_i <= 20; mu_i++) {
 if ( (mu_msgs[mu_i].mu_msgType) == (mu_aenc) )
 {
-bool mu__boolexpr20;
-  if (!((mu_msgs[mu_i].mu_aencMsg) == (mu_i1))) mu__boolexpr20 = FALSE ;
+bool mu__boolexpr19;
+  if (!((mu_msgs[mu_i].mu_aencMsg) == (mu_i1))) mu__boolexpr19 = FALSE ;
   else {
-  mu__boolexpr20 = ((mu_msgs[mu_i].mu_aencKey) == (mu_i2)) ; 
+  mu__boolexpr19 = ((mu_msgs[mu_i].mu_aencKey) == (mu_i2)) ; 
 }
-if ( mu__boolexpr20 )
+if ( mu__boolexpr19 )
 {
 mu_index = mu_i;
 }
@@ -3209,12 +3193,12 @@ if ( (mu_msg.mu_msgType) == (mu_aenc) )
 {
 mu_isPat1 ( mu_msgs[mu_msg.mu_aencMsg], mu_flagPart1 );
 mu_isPat4 ( mu_msgs[mu_msg.mu_aencKey], mu_flagPart2 );
-bool mu__boolexpr21;
-  if (!(mu_flagPart1)) mu__boolexpr21 = FALSE ;
+bool mu__boolexpr20;
+  if (!(mu_flagPart1)) mu__boolexpr20 = FALSE ;
   else {
-  mu__boolexpr21 = (mu_flagPart2) ; 
+  mu__boolexpr20 = (mu_flagPart2) ; 
 }
-if ( mu__boolexpr21 )
+if ( mu__boolexpr20 )
 {
 mu_flag1 = mu_true;
 }
@@ -3309,15 +3293,15 @@ mu_A = mu_msgNum2.mu_ag;
 };
 /*** end procedure declaration ***/
 
-void mu_cons6(const mu_1_NonceType& mu_Na, const mu_1_NonceType& mu_Nb, const mu_1_AgentType& mu_B, mu_1_Message& mu_msg, mu_1_indexType& mu_num)
+void mu_cons6(const mu_1_NonceType& mu_Na, const mu_1_NonceType& mu_Nb, mu_1_Message& mu_msg, mu_1_indexType& mu_num)
 {
 mu_msg.clear();
 mu_num.clear();
-mu_lookAddPat6 ( mu_Na, mu_Nb, mu_B, mu_msg, mu_num );
+mu_lookAddPat6 ( mu_Na, mu_Nb, mu_msg, mu_num );
 };
 /*** end procedure declaration ***/
 
-void mu_destruct6(mu_1_Message& mu_msg, mu_1_NonceType& mu_Na, mu_1_NonceType& mu_Nb, mu_1_AgentType& mu_B)
+void mu_destruct6(mu_1_Message& mu_msg, mu_1_NonceType& mu_Na, mu_1_NonceType& mu_Nb)
 {
 /*** Variable declaration ***/
 mu_1_Message mu_msgNum1("msgNum1",0);
@@ -3326,29 +3310,24 @@ mu_1_Message mu_msgNum1("msgNum1",0);
 mu_1_Message mu_msgNum2("msgNum2",208);
 
 /*** Variable declaration ***/
-mu_1_Message mu_msgNum3("msgNum3",416);
-
-/*** Variable declaration ***/
-mu_1_KeyType mu_k("k",624);
+mu_1_KeyType mu_k("k",416);
 
 mu_msgNum1 = mu_msgs[mu_msg.mu_concatPart[1]];
 mu_Na = mu_msgNum1.mu_noncePart;
 mu_msgNum2 = mu_msgs[mu_msg.mu_concatPart[2]];
 mu_Nb = mu_msgNum2.mu_noncePart;
-mu_msgNum3 = mu_msgs[mu_msg.mu_concatPart[3]];
-mu_B = mu_msgNum3.mu_ag;
 };
 /*** end procedure declaration ***/
 
-void mu_cons7(const mu_1_NonceType& mu_Na, const mu_1_NonceType& mu_Nb, const mu_1_AgentType& mu_B, const mu_1_AgentType& mu_APk, mu_1_Message& mu_msg, mu_1_indexType& mu_num)
+void mu_cons7(const mu_1_NonceType& mu_Na, const mu_1_NonceType& mu_Nb, const mu_1_AgentType& mu_APk, mu_1_Message& mu_msg, mu_1_indexType& mu_num)
 {
 mu_msg.clear();
 mu_num.clear();
-mu_lookAddPat7 ( mu_Na, mu_Nb, mu_B, mu_APk, mu_msg, mu_num );
+mu_lookAddPat7 ( mu_Na, mu_Nb, mu_APk, mu_msg, mu_num );
 };
 /*** end procedure declaration ***/
 
-void mu_destruct7(mu_1_Message& mu_msg, mu_1_NonceType& mu_Na, mu_1_NonceType& mu_Nb, mu_1_AgentType& mu_B, mu_1_AgentType& mu_APk)
+void mu_destruct7(mu_1_Message& mu_msg, mu_1_NonceType& mu_Na, mu_1_NonceType& mu_Nb, mu_1_AgentType& mu_APk)
 {
 /*** Variable declaration ***/
 mu_1_KeyType mu_k1("k1",0);
@@ -3362,19 +3341,14 @@ mu_1_Message mu_msgNum1("msgNum1",224);
 /*** Variable declaration ***/
 mu_1_Message mu_msgNum2("msgNum2",432);
 
-/*** Variable declaration ***/
-mu_1_Message mu_msgNum3("msgNum3",640);
-
 mu_msg1.clear();
 mu_k1 = mu_msgs[mu_msg.mu_aencKey].mu_k;
 mu_APk = mu_k1.mu_ag;
 mu_msg1 = mu_msgs[mu_msg.mu_aencMsg];
 mu_msgNum1 = mu_msgs[mu_msg1.mu_concatPart[1]];
 mu_msgNum2 = mu_msgs[mu_msg1.mu_concatPart[2]];
-mu_msgNum3 = mu_msgs[mu_msg1.mu_concatPart[3]];
 mu_Na = mu_msgNum1.mu_noncePart;
 mu_Nb = mu_msgNum2.mu_noncePart;
-mu_B = mu_msgNum3.mu_ag;
 };
 /*** end procedure declaration ***/
 
@@ -3418,67 +3392,67 @@ mu_index = 0;
 for(int mu_i = 0; mu_i <= 20; mu_i++) {
 if ( (mu_msgs[mu_i].mu_msgType) == (mu_msg.mu_msgType) )
 {
+bool mu__boolexpr21;
 bool mu__boolexpr22;
 bool mu__boolexpr23;
 bool mu__boolexpr24;
 bool mu__boolexpr25;
-bool mu__boolexpr26;
-  if (!((mu_msg.mu_msgType) == (mu_agent))) mu__boolexpr26 = FALSE ;
+  if (!((mu_msg.mu_msgType) == (mu_agent))) mu__boolexpr25 = FALSE ;
   else {
-  mu__boolexpr26 = ((mu_msgs[mu_i].mu_ag) == (mu_msg.mu_ag)) ; 
-}
-  if (mu__boolexpr26) mu__boolexpr25 = TRUE ;
-  else {
-bool mu__boolexpr27;
-  if (!((mu_msg.mu_msgType) == (mu_nonce))) mu__boolexpr27 = FALSE ;
-  else {
-  mu__boolexpr27 = ((mu_msgs[mu_i].mu_noncePart) == (mu_msg.mu_noncePart)) ; 
-}
-  mu__boolexpr25 = (mu__boolexpr27) ; 
+  mu__boolexpr25 = ((mu_msgs[mu_i].mu_ag) == (mu_msg.mu_ag)) ; 
 }
   if (mu__boolexpr25) mu__boolexpr24 = TRUE ;
   else {
-bool mu__boolexpr28;
-  if (!((mu_msg.mu_msgType) == (mu_key))) mu__boolexpr28 = FALSE ;
+bool mu__boolexpr26;
+  if (!((mu_msg.mu_msgType) == (mu_nonce))) mu__boolexpr26 = FALSE ;
   else {
-bool mu__boolexpr29;
-  if (!((mu_msgs[mu_i].mu_k.mu_encType) == (mu_msg.mu_k.mu_encType))) mu__boolexpr29 = FALSE ;
-  else {
-  mu__boolexpr29 = ((mu_msgs[mu_i].mu_k.mu_ag) == (mu_msg.mu_k.mu_ag)) ; 
+  mu__boolexpr26 = ((mu_msgs[mu_i].mu_noncePart) == (mu_msg.mu_noncePart)) ; 
 }
-  mu__boolexpr28 = (mu__boolexpr29) ; 
-}
-  mu__boolexpr24 = (mu__boolexpr28) ; 
+  mu__boolexpr24 = (mu__boolexpr26) ; 
 }
   if (mu__boolexpr24) mu__boolexpr23 = TRUE ;
   else {
-bool mu__boolexpr30;
-  if (!((mu_msg.mu_msgType) == (mu_aenc))) mu__boolexpr30 = FALSE ;
+bool mu__boolexpr27;
+  if (!((mu_msg.mu_msgType) == (mu_key))) mu__boolexpr27 = FALSE ;
   else {
-bool mu__boolexpr31;
-  if (!((mu_msgs[mu_i].mu_aencMsg) == (mu_msg.mu_aencMsg))) mu__boolexpr31 = FALSE ;
+bool mu__boolexpr28;
+  if (!((mu_msgs[mu_i].mu_k.mu_encType) == (mu_msg.mu_k.mu_encType))) mu__boolexpr28 = FALSE ;
   else {
-  mu__boolexpr31 = ((mu_msgs[mu_i].mu_aencKey) == (mu_msg.mu_aencKey)) ; 
+  mu__boolexpr28 = ((mu_msgs[mu_i].mu_k.mu_ag) == (mu_msg.mu_k.mu_ag)) ; 
 }
-  mu__boolexpr30 = (mu__boolexpr31) ; 
+  mu__boolexpr27 = (mu__boolexpr28) ; 
 }
-  mu__boolexpr23 = (mu__boolexpr30) ; 
+  mu__boolexpr23 = (mu__boolexpr27) ; 
 }
   if (mu__boolexpr23) mu__boolexpr22 = TRUE ;
   else {
+bool mu__boolexpr29;
+  if (!((mu_msg.mu_msgType) == (mu_aenc))) mu__boolexpr29 = FALSE ;
+  else {
+bool mu__boolexpr30;
+  if (!((mu_msgs[mu_i].mu_aencMsg) == (mu_msg.mu_aencMsg))) mu__boolexpr30 = FALSE ;
+  else {
+  mu__boolexpr30 = ((mu_msgs[mu_i].mu_aencKey) == (mu_msg.mu_aencKey)) ; 
+}
+  mu__boolexpr29 = (mu__boolexpr30) ; 
+}
+  mu__boolexpr22 = (mu__boolexpr29) ; 
+}
+  if (mu__boolexpr22) mu__boolexpr21 = TRUE ;
+  else {
+bool mu__boolexpr31;
+  if (!((mu_msg.mu_msgType) == (mu_senc))) mu__boolexpr31 = FALSE ;
+  else {
 bool mu__boolexpr32;
-  if (!((mu_msg.mu_msgType) == (mu_senc))) mu__boolexpr32 = FALSE ;
+  if (!((mu_msgs[mu_i].mu_sencMsg) == (mu_msg.mu_sencMsg))) mu__boolexpr32 = FALSE ;
   else {
-bool mu__boolexpr33;
-  if (!((mu_msgs[mu_i].mu_sencMsg) == (mu_msg.mu_sencMsg))) mu__boolexpr33 = FALSE ;
-  else {
-  mu__boolexpr33 = ((mu_msgs[mu_i].mu_sencKey) == (mu_msg.mu_sencKey)) ; 
+  mu__boolexpr32 = ((mu_msgs[mu_i].mu_sencKey) == (mu_msg.mu_sencKey)) ; 
 }
-  mu__boolexpr32 = (mu__boolexpr33) ; 
+  mu__boolexpr31 = (mu__boolexpr32) ; 
 }
-  mu__boolexpr22 = (mu__boolexpr32) ; 
+  mu__boolexpr21 = (mu__boolexpr31) ; 
 }
-if ( mu__boolexpr22 )
+if ( mu__boolexpr21 )
 {
 mu_index = mu_i;
 }
@@ -3620,10 +3594,21 @@ mu_index = 0;
 for(int mu_i = 0; mu_i <= 20; mu_i++) {
 if ( (mu_msgs[mu_i].mu_msgType) == (mu_msg.mu_msgType) )
 {
-bool mu__boolexpr34;
-  if (!((mu_msgs[mu_i].mu_msgType) == (mu_agent))) mu__boolexpr34 = FALSE ;
+bool mu__boolexpr33;
+  if (!((mu_msgs[mu_i].mu_msgType) == (mu_agent))) mu__boolexpr33 = FALSE ;
   else {
-  mu__boolexpr34 = ((mu_msgs[mu_i].mu_ag) == (mu_msg.mu_ag)) ; 
+  mu__boolexpr33 = ((mu_msgs[mu_i].mu_ag) == (mu_msg.mu_ag)) ; 
+}
+if ( mu__boolexpr33 )
+{
+mu_index = mu_i;
+}
+else
+{
+bool mu__boolexpr34;
+  if (!((mu_msgs[mu_i].mu_msgType) == (mu_nonce))) mu__boolexpr34 = FALSE ;
+  else {
+  mu__boolexpr34 = ((mu_msgs[mu_i].mu_noncePart) == (mu_msg.mu_noncePart)) ; 
 }
 if ( mu__boolexpr34 )
 {
@@ -3632,9 +3617,14 @@ mu_index = mu_i;
 else
 {
 bool mu__boolexpr35;
-  if (!((mu_msgs[mu_i].mu_msgType) == (mu_nonce))) mu__boolexpr35 = FALSE ;
+  if (!((mu_msgs[mu_i].mu_msgType) == (mu_key))) mu__boolexpr35 = FALSE ;
   else {
-  mu__boolexpr35 = ((mu_msgs[mu_i].mu_noncePart) == (mu_msg.mu_noncePart)) ; 
+bool mu__boolexpr36;
+  if (!((mu_msgs[mu_i].mu_k.mu_encType) == (mu_msg.mu_k.mu_encType))) mu__boolexpr36 = FALSE ;
+  else {
+  mu__boolexpr36 = ((mu_msgs[mu_i].mu_k.mu_ag) == (mu_msg.mu_k.mu_ag)) ; 
+}
+  mu__boolexpr35 = (mu__boolexpr36) ; 
 }
 if ( mu__boolexpr35 )
 {
@@ -3642,65 +3632,49 @@ mu_index = mu_i;
 }
 else
 {
-bool mu__boolexpr36;
-  if (!((mu_msgs[mu_i].mu_msgType) == (mu_key))) mu__boolexpr36 = FALSE ;
-  else {
 bool mu__boolexpr37;
-  if (!((mu_msgs[mu_i].mu_k.mu_encType) == (mu_msg.mu_k.mu_encType))) mu__boolexpr37 = FALSE ;
+  if (!((mu_msgs[mu_i].mu_msgType) == (mu_aenc))) mu__boolexpr37 = FALSE ;
   else {
-  mu__boolexpr37 = ((mu_msgs[mu_i].mu_k.mu_ag) == (mu_msg.mu_k.mu_ag)) ; 
-}
-  mu__boolexpr36 = (mu__boolexpr37) ; 
-}
-if ( mu__boolexpr36 )
-{
-mu_index = mu_i;
-}
-else
-{
 bool mu__boolexpr38;
-  if (!((mu_msgs[mu_i].mu_msgType) == (mu_aenc))) mu__boolexpr38 = FALSE ;
+  if (!((mu_msgs[mu_i].mu_aencKey) == (mu_msg.mu_aencKey))) mu__boolexpr38 = FALSE ;
   else {
+  mu__boolexpr38 = ((mu_msgs[mu_i].mu_aencMsg) == (mu_msg.mu_aencMsg)) ; 
+}
+  mu__boolexpr37 = (mu__boolexpr38) ; 
+}
+if ( mu__boolexpr37 )
+{
+mu_index = mu_i;
+}
+else
+{
 bool mu__boolexpr39;
-  if (!((mu_msgs[mu_i].mu_aencKey) == (mu_msg.mu_aencKey))) mu__boolexpr39 = FALSE ;
+  if (!((mu_msgs[mu_i].mu_msgType) == (mu_senc))) mu__boolexpr39 = FALSE ;
   else {
-  mu__boolexpr39 = ((mu_msgs[mu_i].mu_aencMsg) == (mu_msg.mu_aencMsg)) ; 
-}
-  mu__boolexpr38 = (mu__boolexpr39) ; 
-}
-if ( mu__boolexpr38 )
-{
-mu_index = mu_i;
-}
-else
-{
 bool mu__boolexpr40;
-  if (!((mu_msgs[mu_i].mu_msgType) == (mu_senc))) mu__boolexpr40 = FALSE ;
+  if (!((mu_msgs[mu_i].mu_sencKey) == (mu_msg.mu_sencKey))) mu__boolexpr40 = FALSE ;
   else {
-bool mu__boolexpr41;
-  if (!((mu_msgs[mu_i].mu_sencKey) == (mu_msg.mu_sencKey))) mu__boolexpr41 = FALSE ;
-  else {
-  mu__boolexpr41 = ((mu_msgs[mu_i].mu_sencMsg) == (mu_msg.mu_sencMsg)) ; 
+  mu__boolexpr40 = ((mu_msgs[mu_i].mu_sencMsg) == (mu_msg.mu_sencMsg)) ; 
 }
-  mu__boolexpr40 = (mu__boolexpr41) ; 
+  mu__boolexpr39 = (mu__boolexpr40) ; 
 }
-if ( mu__boolexpr40 )
+if ( mu__boolexpr39 )
 {
 mu_index = mu_i;
 }
 else
 {
+bool mu__boolexpr41;
+  if (!((mu_msgs[mu_i].mu_msgType) == (mu_concat))) mu__boolexpr41 = FALSE ;
+  else {
 bool mu__boolexpr42;
-  if (!((mu_msgs[mu_i].mu_msgType) == (mu_concat))) mu__boolexpr42 = FALSE ;
+  if (!((mu_msgs[mu_i].mu_concatPart[1]) == (mu_msg.mu_concatPart[1]))) mu__boolexpr42 = FALSE ;
   else {
-bool mu__boolexpr43;
-  if (!((mu_msgs[mu_i].mu_concatPart[1]) == (mu_msg.mu_concatPart[1]))) mu__boolexpr43 = FALSE ;
-  else {
-  mu__boolexpr43 = ((mu_msgs[mu_i].mu_concatPart[2]) == (mu_msg.mu_concatPart[2])) ; 
+  mu__boolexpr42 = ((mu_msgs[mu_i].mu_concatPart[2]) == (mu_msg.mu_concatPart[2])) ; 
 }
-  mu__boolexpr42 = (mu__boolexpr43) ; 
+  mu__boolexpr41 = (mu__boolexpr42) ; 
 }
-if ( mu__boolexpr42 )
+if ( mu__boolexpr41 )
 {
 mu_index = mu_i;
 }
@@ -3767,7 +3741,7 @@ return mu_index;
 };
 /*** end function declaration ***/
 
-mu_1_indexType mu_construct6By112(const mu_1_indexType& mu_msgNo1,const mu_1_indexType& mu_msgNo2,const mu_1_indexType& mu_msgNo3)
+mu_1_indexType mu_construct6By11(const mu_1_indexType& mu_msgNo1,const mu_1_indexType& mu_msgNo2)
 {
 /*** Variable declaration ***/
 mu_1_indexType mu_index("index",0);
@@ -3779,18 +3753,14 @@ mu_1_NonceType mu_locNa("locNa",8);
 mu_1_NonceType mu_locNb("locNb",16);
 
 /*** Variable declaration ***/
-mu_1_AgentType mu_locB("locB",24);
-
-/*** Variable declaration ***/
-mu_1_Message mu_msg("msg",32);
+mu_1_Message mu_msg("msg",24);
 
 mu_index = 0;
 mu_locNa = mu_msgs[mu_msgNo1].mu_noncePart;
 mu_locNb = mu_msgs[mu_msgNo2].mu_noncePart;
-mu_locB = mu_msgs[mu_msgNo3].mu_ag;
-mu_lookAddPat6 ( mu_locNa, mu_locNb, mu_locB, mu_msg, mu_index );
+mu_lookAddPat6 ( mu_locNa, mu_locNb, mu_msg, mu_index );
 return mu_index;
-	Error.Error("The end of function construct6By112 reached without returning values.");
+	Error.Error("The end of function construct6By11 reached without returning values.");
 };
 /*** end function declaration ***/
 
@@ -3806,20 +3776,16 @@ mu_1_NonceType mu_locNa("locNa",8);
 mu_1_NonceType mu_locNb("locNb",16);
 
 /*** Variable declaration ***/
-mu_1_AgentType mu_locB("locB",24);
+mu_1_AgentType mu_locAPk("locAPk",24);
 
 /*** Variable declaration ***/
-mu_1_AgentType mu_locAPk("locAPk",32);
-
-/*** Variable declaration ***/
-mu_1_Message mu_msg("msg",40);
+mu_1_Message mu_msg("msg",32);
 
 mu_index = 0;
 mu_locNa = mu_msgs[mu_msgs[mu_msgNo6].mu_concatPart[1]].mu_noncePart;
 mu_locNb = mu_msgs[mu_msgs[mu_msgNo6].mu_concatPart[2]].mu_noncePart;
-mu_locB = mu_msgs[mu_msgs[mu_msgNo6].mu_concatPart[3]].mu_ag;
 mu_locAPk = mu_msgs[mu_msgNo4].mu_k.mu_ag;
-mu_lookAddPat7 ( mu_locNa, mu_locNb, mu_locB, mu_locAPk, mu_msg, mu_index );
+mu_lookAddPat7 ( mu_locNa, mu_locNb, mu_locAPk, mu_msg, mu_index );
 return mu_index;
 	Error.Error("The end of function construct7By64 reached without returning values.");
 };
@@ -3935,135 +3901,136 @@ mu_0_boolean mu_concatFlag("concatFlag",0);
 /*** Variable declaration ***/
 mu_1_indexType mu_i("i",8);
 
-bool mu__boolexpr44;
-  if (!((mu_m1.mu_msgType) == (mu_agent))) mu__boolexpr44 = FALSE ;
+bool mu__boolexpr43;
+  if (!((mu_m1.mu_msgType) == (mu_agent))) mu__boolexpr43 = FALSE ;
   else {
-  mu__boolexpr44 = ((mu_m2.mu_msgType) == (mu_agent)) ; 
+  mu__boolexpr43 = ((mu_m2.mu_msgType) == (mu_agent)) ; 
 }
-if ( mu__boolexpr44 )
+if ( mu__boolexpr43 )
 {
+bool mu__boolexpr44;
 bool mu__boolexpr45;
-bool mu__boolexpr46;
-  if (!((mu_m1.mu_ag) != (mu_anyAgent))) mu__boolexpr46 = FALSE ;
+  if (!((mu_m1.mu_ag) != (mu_anyAgent))) mu__boolexpr45 = FALSE ;
   else {
-  mu__boolexpr46 = ((mu_m2.mu_ag) != (mu_anyAgent)) ; 
+  mu__boolexpr45 = ((mu_m2.mu_ag) != (mu_anyAgent)) ; 
 }
-  if (!(mu__boolexpr46)) mu__boolexpr45 = FALSE ;
+  if (!(mu__boolexpr45)) mu__boolexpr44 = FALSE ;
   else {
-  mu__boolexpr45 = (mu_matchAgent( mu_m1.mu_ag, mu_m2.mu_ag )) ; 
+  mu__boolexpr44 = (mu_matchAgent( mu_m1.mu_ag, mu_m2.mu_ag )) ; 
 }
-return mu__boolexpr45;
+return mu__boolexpr44;
 }
 else
+{
+bool mu__boolexpr46;
+  if (!((mu_m1.mu_msgType) == (mu_nonce))) mu__boolexpr46 = FALSE ;
+  else {
+  mu__boolexpr46 = ((mu_m2.mu_msgType) == (mu_nonce)) ; 
+}
+if ( mu__boolexpr46 )
 {
 bool mu__boolexpr47;
-  if (!((mu_m1.mu_msgType) == (mu_nonce))) mu__boolexpr47 = FALSE ;
-  else {
-  mu__boolexpr47 = ((mu_m2.mu_msgType) == (mu_nonce)) ; 
-}
-if ( mu__boolexpr47 )
-{
 bool mu__boolexpr48;
-bool mu__boolexpr49;
-  if (!((mu_m1.mu_noncePart) != (mu_anyNonce))) mu__boolexpr49 = FALSE ;
+  if (!((mu_m1.mu_noncePart) != (mu_anyNonce))) mu__boolexpr48 = FALSE ;
   else {
-  mu__boolexpr49 = ((mu_m2.mu_noncePart) != (mu_anyNonce)) ; 
+  mu__boolexpr48 = ((mu_m2.mu_noncePart) != (mu_anyNonce)) ; 
 }
-  if (!(mu__boolexpr49)) mu__boolexpr48 = FALSE ;
+  if (!(mu__boolexpr48)) mu__boolexpr47 = FALSE ;
   else {
-  mu__boolexpr48 = (mu_matchNonce( mu_m1.mu_noncePart, mu_m2.mu_noncePart )) ; 
+  mu__boolexpr47 = (mu_matchNonce( mu_m1.mu_noncePart, mu_m2.mu_noncePart )) ; 
 }
-return mu__boolexpr48;
+return mu__boolexpr47;
 }
 else
+{
+bool mu__boolexpr49;
+  if (!((mu_m1.mu_msgType) == (mu_key))) mu__boolexpr49 = FALSE ;
+  else {
+  mu__boolexpr49 = ((mu_m2.mu_msgType) == (mu_key)) ; 
+}
+if ( mu__boolexpr49 )
 {
 bool mu__boolexpr50;
-  if (!((mu_m1.mu_msgType) == (mu_key))) mu__boolexpr50 = FALSE ;
+  if (!((mu_m1.mu_k.mu_encType) == (mu_m2.mu_k.mu_encType))) mu__boolexpr50 = FALSE ;
   else {
-  mu__boolexpr50 = ((mu_m2.mu_msgType) == (mu_key)) ; 
+  mu__boolexpr50 = (mu_matchAgent( mu_m1.mu_k.mu_ag, mu_m2.mu_k.mu_ag )) ; 
 }
-if ( mu__boolexpr50 )
+return mu__boolexpr50;
+}
+else
 {
 bool mu__boolexpr51;
-  if (!((mu_m1.mu_k.mu_encType) == (mu_m2.mu_k.mu_encType))) mu__boolexpr51 = FALSE ;
+  if (!((mu_m1.mu_msgType) == (mu_aenc))) mu__boolexpr51 = FALSE ;
   else {
-  mu__boolexpr51 = (mu_matchAgent( mu_m1.mu_k.mu_ag, mu_m2.mu_k.mu_ag )) ; 
+  mu__boolexpr51 = ((mu_m2.mu_msgType) == (mu_aenc)) ; 
 }
-return mu__boolexpr51;
-}
-else
+if ( mu__boolexpr51 )
 {
 bool mu__boolexpr52;
-  if (!((mu_m1.mu_msgType) == (mu_aenc))) mu__boolexpr52 = FALSE ;
+  if (!(mu_match( mu_msgs[mu_m1.mu_aencMsg], mu_msgs[mu_m2.mu_aencMsg] ))) mu__boolexpr52 = FALSE ;
   else {
-  mu__boolexpr52 = ((mu_m2.mu_msgType) == (mu_aenc)) ; 
+  mu__boolexpr52 = (mu_match( mu_msgs[mu_m1.mu_aencKey], mu_msgs[mu_m2.mu_aencKey] )) ; 
 }
-if ( mu__boolexpr52 )
+return mu__boolexpr52;
+}
+else
 {
 bool mu__boolexpr53;
-  if (!(mu_match( mu_msgs[mu_m1.mu_aencMsg], mu_msgs[mu_m2.mu_aencMsg] ))) mu__boolexpr53 = FALSE ;
+  if (!((mu_m1.mu_msgType) == (mu_senc))) mu__boolexpr53 = FALSE ;
   else {
-  mu__boolexpr53 = (mu_match( mu_msgs[mu_m1.mu_aencKey], mu_msgs[mu_m2.mu_aencKey] )) ; 
+  mu__boolexpr53 = ((mu_m2.mu_msgType) == (mu_senc)) ; 
 }
-return mu__boolexpr53;
-}
-else
+if ( mu__boolexpr53 )
 {
 bool mu__boolexpr54;
-  if (!((mu_m1.mu_msgType) == (mu_senc))) mu__boolexpr54 = FALSE ;
+  if (!(mu_match( mu_msgs[mu_m1.mu_sencMsg], mu_msgs[mu_m2.mu_sencMsg] ))) mu__boolexpr54 = FALSE ;
   else {
-  mu__boolexpr54 = ((mu_m2.mu_msgType) == (mu_senc)) ; 
+  mu__boolexpr54 = (mu_match( mu_msgs[mu_m1.mu_sencKey], mu_msgs[mu_m2.mu_sencKey] )) ; 
 }
-if ( mu__boolexpr54 )
-{
-bool mu__boolexpr55;
-  if (!(mu_match( mu_msgs[mu_m1.mu_sencMsg], mu_msgs[mu_m2.mu_sencMsg] ))) mu__boolexpr55 = FALSE ;
-  else {
-  mu__boolexpr55 = (mu_match( mu_msgs[mu_m1.mu_sencKey], mu_msgs[mu_m2.mu_sencKey] )) ; 
-}
-return mu__boolexpr55;
+return mu__boolexpr54;
 }
 else
 {
+bool mu__boolexpr55;
 bool mu__boolexpr56;
-bool mu__boolexpr57;
-  if (!((mu_m1.mu_msgType) == (mu_concat))) mu__boolexpr57 = FALSE ;
+  if (!((mu_m1.mu_msgType) == (mu_concat))) mu__boolexpr56 = FALSE ;
   else {
-  mu__boolexpr57 = ((mu_m2.mu_msgType) == (mu_concat)) ; 
+  mu__boolexpr56 = ((mu_m2.mu_msgType) == (mu_concat)) ; 
 }
-  if (!(mu__boolexpr57)) mu__boolexpr56 = FALSE ;
+  if (!(mu__boolexpr56)) mu__boolexpr55 = FALSE ;
   else {
-  mu__boolexpr56 = ((mu_m1.mu_length) == (mu_m2.mu_length)) ; 
+  mu__boolexpr55 = ((mu_m1.mu_length) == (mu_m2.mu_length)) ; 
 }
-if ( mu__boolexpr56 )
+if ( mu__boolexpr55 )
 {
 mu_concatFlag = mu_true;
 mu_i = mu_m1.mu_length;
-bool mu__boolexpr60;
-  if (!((mu_i) > (0))) mu__boolexpr60 = FALSE ;
+bool mu__boolexpr59;
+  if (!((mu_i) > (0))) mu__boolexpr59 = FALSE ;
   else {
-  mu__boolexpr60 = (mu_concatFlag) ; 
+  mu__boolexpr59 = (mu_concatFlag) ; 
 }
 {
-  bool mu__while_expr_59;  mu__while_expr_59 = mu__boolexpr60;
-int mu__counter_58 = 0;
-while (mu__while_expr_59) {
-if ( ++mu__counter_58 > args->loopmax.value )
+  bool mu__while_expr_58;  mu__while_expr_58 = mu__boolexpr59;
+int mu__counter_57 = 0;
+while (mu__while_expr_58) {
+if ( ++mu__counter_57 > args->loopmax.value )
   Error.Error("Too many iterations in while loop.");
 {
-bool mu__boolexpr61;
-  if (!(mu_concatFlag)) mu__boolexpr61 = FALSE ;
+bool mu__boolexpr60;
+  if (!(mu_concatFlag)) mu__boolexpr60 = FALSE ;
   else {
-  mu__boolexpr61 = (mu_match( mu_msgs[mu_m1.mu_concatPart[mu_i]], mu_msgs[mu_m2.mu_concatPart[mu_i]] )) ; 
+  mu__boolexpr60 = (mu_match( mu_msgs[mu_m1.mu_concatPart[mu_i]], mu_msgs[mu_m2.mu_concatPart[mu_i]] )) ; 
 }
-mu_concatFlag = mu__boolexpr61;
+mu_concatFlag = mu__boolexpr60;
+mu_i = (mu_i) - (1);
 };
-bool mu__boolexpr62;
-  if (!((mu_i) > (0))) mu__boolexpr62 = FALSE ;
+bool mu__boolexpr61;
+  if (!((mu_i) > (0))) mu__boolexpr61 = FALSE ;
   else {
-  mu__boolexpr62 = (mu_concatFlag) ; 
+  mu__boolexpr61 = (mu_concatFlag) ; 
 }
-mu__while_expr_59 = mu__boolexpr62;
+mu__while_expr_58 = mu__boolexpr61;
 }
 };
 return mu_concatFlag;
@@ -4263,27 +4230,27 @@ public:
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
+bool mu__boolexpr62;
 bool mu__boolexpr63;
 bool mu__boolexpr64;
 bool mu__boolexpr65;
-bool mu__boolexpr66;
-  if (!((mu_i) <= (mu_pat1Set.mu_length))) mu__boolexpr66 = FALSE ;
+  if (!((mu_i) <= (mu_pat1Set.mu_length))) mu__boolexpr65 = FALSE ;
   else {
-  mu__boolexpr66 = (mu_Spy_known[mu_pat1Set.mu_content[mu_i]]) ; 
-}
-  if (!(mu__boolexpr66)) mu__boolexpr65 = FALSE ;
-  else {
-  mu__boolexpr65 = ((mu_j) <= (mu_pat4Set.mu_length)) ; 
+  mu__boolexpr65 = (mu_Spy_known[mu_pat1Set.mu_content[mu_i]]) ; 
 }
   if (!(mu__boolexpr65)) mu__boolexpr64 = FALSE ;
   else {
-  mu__boolexpr64 = (mu_Spy_known[mu_pat4Set.mu_content[mu_j]]) ; 
+  mu__boolexpr64 = ((mu_j) <= (mu_pat4Set.mu_length)) ; 
 }
   if (!(mu__boolexpr64)) mu__boolexpr63 = FALSE ;
   else {
-  mu__boolexpr63 = (!(mu_Spy_known[mu_construct8By14( mu_pat1Set.mu_content[mu_i], mu_pat4Set.mu_content[mu_j] )])) ; 
+  mu__boolexpr63 = (mu_Spy_known[mu_pat4Set.mu_content[mu_j]]) ; 
 }
-    return mu__boolexpr63;
+  if (!(mu__boolexpr63)) mu__boolexpr62 = FALSE ;
+  else {
+  mu__boolexpr62 = (!(mu_Spy_known[mu_construct8By14( mu_pat1Set.mu_content[mu_i], mu_pat4Set.mu_content[mu_j] )])) ; 
+}
+    return mu__boolexpr62;
   }
 
   void NextRule(unsigned & what_rule)
@@ -4298,27 +4265,27 @@ bool mu__boolexpr66;
     while (what_rule < 441 )
       {
 	if ( ( TRUE  ) ) {
+bool mu__boolexpr66;
 bool mu__boolexpr67;
 bool mu__boolexpr68;
 bool mu__boolexpr69;
-bool mu__boolexpr70;
-  if (!((mu_i) <= (mu_pat1Set.mu_length))) mu__boolexpr70 = FALSE ;
+  if (!((mu_i) <= (mu_pat1Set.mu_length))) mu__boolexpr69 = FALSE ;
   else {
-  mu__boolexpr70 = (mu_Spy_known[mu_pat1Set.mu_content[mu_i]]) ; 
-}
-  if (!(mu__boolexpr70)) mu__boolexpr69 = FALSE ;
-  else {
-  mu__boolexpr69 = ((mu_j) <= (mu_pat4Set.mu_length)) ; 
+  mu__boolexpr69 = (mu_Spy_known[mu_pat1Set.mu_content[mu_i]]) ; 
 }
   if (!(mu__boolexpr69)) mu__boolexpr68 = FALSE ;
   else {
-  mu__boolexpr68 = (mu_Spy_known[mu_pat4Set.mu_content[mu_j]]) ; 
+  mu__boolexpr68 = ((mu_j) <= (mu_pat4Set.mu_length)) ; 
 }
   if (!(mu__boolexpr68)) mu__boolexpr67 = FALSE ;
   else {
-  mu__boolexpr67 = (!(mu_Spy_known[mu_construct8By14( mu_pat1Set.mu_content[mu_i], mu_pat4Set.mu_content[mu_j] )])) ; 
+  mu__boolexpr67 = (mu_Spy_known[mu_pat4Set.mu_content[mu_j]]) ; 
 }
-	      if (mu__boolexpr67) {
+  if (!(mu__boolexpr67)) mu__boolexpr66 = FALSE ;
+  else {
+  mu__boolexpr66 = (!(mu_Spy_known[mu_construct8By14( mu_pat1Set.mu_content[mu_i], mu_pat4Set.mu_content[mu_j] )])) ; 
+}
+	      if (mu__boolexpr66) {
 		if ( ( TRUE  ) )
 		  return;
 		else
@@ -4387,17 +4354,17 @@ public:
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
+bool mu__boolexpr70;
 bool mu__boolexpr71;
-bool mu__boolexpr72;
-  if (!((mu_i) <= (mu_pat8Set.mu_length))) mu__boolexpr72 = FALSE ;
+  if (!((mu_i) <= (mu_pat8Set.mu_length))) mu__boolexpr71 = FALSE ;
   else {
-  mu__boolexpr72 = (mu_Spy_known[mu_pat8Set.mu_content[mu_i]]) ; 
+  mu__boolexpr71 = (mu_Spy_known[mu_pat8Set.mu_content[mu_i]]) ; 
 }
-  if (!(mu__boolexpr72)) mu__boolexpr71 = FALSE ;
+  if (!(mu__boolexpr71)) mu__boolexpr70 = FALSE ;
   else {
-  mu__boolexpr71 = (!(mu_Spy_known[mu_msgs[mu_pat8Set.mu_content[mu_i]].mu_aencMsg])) ; 
+  mu__boolexpr70 = (!(mu_Spy_known[mu_msgs[mu_pat8Set.mu_content[mu_i]].mu_aencMsg])) ; 
 }
-    return mu__boolexpr71;
+    return mu__boolexpr70;
   }
 
   void NextRule(unsigned & what_rule)
@@ -4409,17 +4376,17 @@ bool mu__boolexpr72;
     while (what_rule < 462 )
       {
 	if ( ( TRUE  ) ) {
+bool mu__boolexpr72;
 bool mu__boolexpr73;
-bool mu__boolexpr74;
-  if (!((mu_i) <= (mu_pat8Set.mu_length))) mu__boolexpr74 = FALSE ;
+  if (!((mu_i) <= (mu_pat8Set.mu_length))) mu__boolexpr73 = FALSE ;
   else {
-  mu__boolexpr74 = (mu_Spy_known[mu_pat8Set.mu_content[mu_i]]) ; 
+  mu__boolexpr73 = (mu_Spy_known[mu_pat8Set.mu_content[mu_i]]) ; 
 }
-  if (!(mu__boolexpr74)) mu__boolexpr73 = FALSE ;
+  if (!(mu__boolexpr73)) mu__boolexpr72 = FALSE ;
   else {
-  mu__boolexpr73 = (!(mu_Spy_known[mu_msgs[mu_pat8Set.mu_content[mu_i]].mu_aencMsg])) ; 
+  mu__boolexpr72 = (!(mu_Spy_known[mu_msgs[mu_pat8Set.mu_content[mu_i]].mu_aencMsg])) ; 
 }
-	      if (mu__boolexpr73) {
+	      if (mu__boolexpr72) {
 		if ( ( TRUE  ) )
 		  return;
 		else
@@ -4497,27 +4464,27 @@ public:
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
+bool mu__boolexpr74;
 bool mu__boolexpr75;
 bool mu__boolexpr76;
 bool mu__boolexpr77;
-bool mu__boolexpr78;
-  if (!((mu_i) <= (mu_pat6Set.mu_length))) mu__boolexpr78 = FALSE ;
+  if (!((mu_i) <= (mu_pat6Set.mu_length))) mu__boolexpr77 = FALSE ;
   else {
-  mu__boolexpr78 = (mu_Spy_known[mu_pat6Set.mu_content[mu_i]]) ; 
-}
-  if (!(mu__boolexpr78)) mu__boolexpr77 = FALSE ;
-  else {
-  mu__boolexpr77 = ((mu_j) <= (mu_pat4Set.mu_length)) ; 
+  mu__boolexpr77 = (mu_Spy_known[mu_pat6Set.mu_content[mu_i]]) ; 
 }
   if (!(mu__boolexpr77)) mu__boolexpr76 = FALSE ;
   else {
-  mu__boolexpr76 = (mu_Spy_known[mu_pat4Set.mu_content[mu_j]]) ; 
+  mu__boolexpr76 = ((mu_j) <= (mu_pat4Set.mu_length)) ; 
 }
   if (!(mu__boolexpr76)) mu__boolexpr75 = FALSE ;
   else {
-  mu__boolexpr75 = (!(mu_Spy_known[mu_construct7By64( mu_pat6Set.mu_content[mu_i], mu_pat4Set.mu_content[mu_j] )])) ; 
+  mu__boolexpr75 = (mu_Spy_known[mu_pat4Set.mu_content[mu_j]]) ; 
 }
-    return mu__boolexpr75;
+  if (!(mu__boolexpr75)) mu__boolexpr74 = FALSE ;
+  else {
+  mu__boolexpr74 = (!(mu_Spy_known[mu_construct7By64( mu_pat6Set.mu_content[mu_i], mu_pat4Set.mu_content[mu_j] )])) ; 
+}
+    return mu__boolexpr74;
   }
 
   void NextRule(unsigned & what_rule)
@@ -4532,27 +4499,27 @@ bool mu__boolexpr78;
     while (what_rule < 903 )
       {
 	if ( ( TRUE  ) ) {
+bool mu__boolexpr78;
 bool mu__boolexpr79;
 bool mu__boolexpr80;
 bool mu__boolexpr81;
-bool mu__boolexpr82;
-  if (!((mu_i) <= (mu_pat6Set.mu_length))) mu__boolexpr82 = FALSE ;
+  if (!((mu_i) <= (mu_pat6Set.mu_length))) mu__boolexpr81 = FALSE ;
   else {
-  mu__boolexpr82 = (mu_Spy_known[mu_pat6Set.mu_content[mu_i]]) ; 
-}
-  if (!(mu__boolexpr82)) mu__boolexpr81 = FALSE ;
-  else {
-  mu__boolexpr81 = ((mu_j) <= (mu_pat4Set.mu_length)) ; 
+  mu__boolexpr81 = (mu_Spy_known[mu_pat6Set.mu_content[mu_i]]) ; 
 }
   if (!(mu__boolexpr81)) mu__boolexpr80 = FALSE ;
   else {
-  mu__boolexpr80 = (mu_Spy_known[mu_pat4Set.mu_content[mu_j]]) ; 
+  mu__boolexpr80 = ((mu_j) <= (mu_pat4Set.mu_length)) ; 
 }
   if (!(mu__boolexpr80)) mu__boolexpr79 = FALSE ;
   else {
-  mu__boolexpr79 = (!(mu_Spy_known[mu_construct7By64( mu_pat6Set.mu_content[mu_i], mu_pat4Set.mu_content[mu_j] )])) ; 
+  mu__boolexpr79 = (mu_Spy_known[mu_pat4Set.mu_content[mu_j]]) ; 
 }
-	      if (mu__boolexpr79) {
+  if (!(mu__boolexpr79)) mu__boolexpr78 = FALSE ;
+  else {
+  mu__boolexpr78 = (!(mu_Spy_known[mu_construct7By64( mu_pat6Set.mu_content[mu_i], mu_pat4Set.mu_content[mu_j] )])) ; 
+}
+	      if (mu__boolexpr78) {
 		if ( ( TRUE  ) )
 		  return;
 		else
@@ -4621,17 +4588,17 @@ public:
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
+bool mu__boolexpr82;
 bool mu__boolexpr83;
-bool mu__boolexpr84;
-  if (!((mu_i) <= (mu_pat7Set.mu_length))) mu__boolexpr84 = FALSE ;
+  if (!((mu_i) <= (mu_pat7Set.mu_length))) mu__boolexpr83 = FALSE ;
   else {
-  mu__boolexpr84 = (mu_Spy_known[mu_pat7Set.mu_content[mu_i]]) ; 
+  mu__boolexpr83 = (mu_Spy_known[mu_pat7Set.mu_content[mu_i]]) ; 
 }
-  if (!(mu__boolexpr84)) mu__boolexpr83 = FALSE ;
+  if (!(mu__boolexpr83)) mu__boolexpr82 = FALSE ;
   else {
-  mu__boolexpr83 = (!(mu_Spy_known[mu_msgs[mu_pat7Set.mu_content[mu_i]].mu_aencMsg])) ; 
+  mu__boolexpr82 = (!(mu_Spy_known[mu_msgs[mu_pat7Set.mu_content[mu_i]].mu_aencMsg])) ; 
 }
-    return mu__boolexpr83;
+    return mu__boolexpr82;
   }
 
   void NextRule(unsigned & what_rule)
@@ -4643,17 +4610,17 @@ bool mu__boolexpr84;
     while (what_rule < 924 )
       {
 	if ( ( TRUE  ) ) {
+bool mu__boolexpr84;
 bool mu__boolexpr85;
-bool mu__boolexpr86;
-  if (!((mu_i) <= (mu_pat7Set.mu_length))) mu__boolexpr86 = FALSE ;
+  if (!((mu_i) <= (mu_pat7Set.mu_length))) mu__boolexpr85 = FALSE ;
   else {
-  mu__boolexpr86 = (mu_Spy_known[mu_pat7Set.mu_content[mu_i]]) ; 
+  mu__boolexpr85 = (mu_Spy_known[mu_pat7Set.mu_content[mu_i]]) ; 
 }
-  if (!(mu__boolexpr86)) mu__boolexpr85 = FALSE ;
+  if (!(mu__boolexpr85)) mu__boolexpr84 = FALSE ;
   else {
-  mu__boolexpr85 = (!(mu_Spy_known[mu_msgs[mu_pat7Set.mu_content[mu_i]].mu_aencMsg])) ; 
+  mu__boolexpr84 = (!(mu_Spy_known[mu_msgs[mu_pat7Set.mu_content[mu_i]].mu_aencMsg])) ; 
 }
-	      if (mu__boolexpr85) {
+	      if (mu__boolexpr84) {
 		if ( ( TRUE  ) )
 		  return;
 		else
@@ -4715,107 +4682,78 @@ public:
   }
   char * Name(unsigned r)
   {
-    static mu_1_indexType mu_i2;
-    mu_i2.value((r % 21) + 0);
-    r = r / 21;
     static mu_1_indexType mu_i1;
     mu_i1.value((r % 21) + 0);
     r = r / 21;
     static mu_1_indexType mu_i0;
     mu_i0.value((r % 21) + 0);
     r = r / 21;
-    return tsprintf("enconcat 6, i2:%s, i1:%s, i0:%s", mu_i2.Name(), mu_i1.Name(), mu_i0.Name());
+    return tsprintf("enconcat 6, i1:%s, i0:%s", mu_i1.Name(), mu_i0.Name());
   }
   bool Condition(unsigned r)
   {
-    static mu_1_indexType mu_i2;
-    mu_i2.value((r % 21) + 0);
-    r = r / 21;
     static mu_1_indexType mu_i1;
     mu_i1.value((r % 21) + 0);
     r = r / 21;
     static mu_1_indexType mu_i0;
     mu_i0.value((r % 21) + 0);
     r = r / 21;
+bool mu__boolexpr86;
 bool mu__boolexpr87;
 bool mu__boolexpr88;
 bool mu__boolexpr89;
-bool mu__boolexpr90;
-bool mu__boolexpr91;
-bool mu__boolexpr92;
-  if (!((mu_i0) <= (mu_pat1Set.mu_length))) mu__boolexpr92 = FALSE ;
+  if (!((mu_i0) <= (mu_pat1Set.mu_length))) mu__boolexpr89 = FALSE ;
   else {
-  mu__boolexpr92 = (mu_Spy_known[mu_pat1Set.mu_content[mu_i0]]) ; 
-}
-  if (!(mu__boolexpr92)) mu__boolexpr91 = FALSE ;
-  else {
-  mu__boolexpr91 = ((mu_i1) <= (mu_pat1Set.mu_length)) ; 
-}
-  if (!(mu__boolexpr91)) mu__boolexpr90 = FALSE ;
-  else {
-  mu__boolexpr90 = (mu_Spy_known[mu_pat1Set.mu_content[mu_i1]]) ; 
-}
-  if (!(mu__boolexpr90)) mu__boolexpr89 = FALSE ;
-  else {
-  mu__boolexpr89 = ((mu_i2) <= (mu_pat2Set.mu_length)) ; 
+  mu__boolexpr89 = (mu_Spy_known[mu_pat1Set.mu_content[mu_i0]]) ; 
 }
   if (!(mu__boolexpr89)) mu__boolexpr88 = FALSE ;
   else {
-  mu__boolexpr88 = (mu_Spy_known[mu_pat2Set.mu_content[mu_i2]]) ; 
+  mu__boolexpr88 = ((mu_i1) <= (mu_pat1Set.mu_length)) ; 
 }
   if (!(mu__boolexpr88)) mu__boolexpr87 = FALSE ;
   else {
-  mu__boolexpr87 = (!(mu_Spy_known[mu_construct6By112( mu_pat1Set.mu_content[mu_i0], mu_pat1Set.mu_content[mu_i1], mu_pat2Set.mu_content[mu_i2] )])) ; 
+  mu__boolexpr87 = (mu_Spy_known[mu_pat1Set.mu_content[mu_i1]]) ; 
 }
-    return mu__boolexpr87;
+  if (!(mu__boolexpr87)) mu__boolexpr86 = FALSE ;
+  else {
+  mu__boolexpr86 = (!(mu_Spy_known[mu_construct6By11( mu_pat1Set.mu_content[mu_i0], mu_pat1Set.mu_content[mu_i1] )])) ; 
+}
+    return mu__boolexpr86;
   }
 
   void NextRule(unsigned & what_rule)
   {
     unsigned r = what_rule - 924;
-    static mu_1_indexType mu_i2;
-    mu_i2.value((r % 21) + 0);
-    r = r / 21;
     static mu_1_indexType mu_i1;
     mu_i1.value((r % 21) + 0);
     r = r / 21;
     static mu_1_indexType mu_i0;
     mu_i0.value((r % 21) + 0);
     r = r / 21;
-    while (what_rule < 10185 )
+    while (what_rule < 1365 )
       {
 	if ( ( TRUE  ) ) {
+bool mu__boolexpr90;
+bool mu__boolexpr91;
+bool mu__boolexpr92;
 bool mu__boolexpr93;
-bool mu__boolexpr94;
-bool mu__boolexpr95;
-bool mu__boolexpr96;
-bool mu__boolexpr97;
-bool mu__boolexpr98;
-  if (!((mu_i0) <= (mu_pat1Set.mu_length))) mu__boolexpr98 = FALSE ;
+  if (!((mu_i0) <= (mu_pat1Set.mu_length))) mu__boolexpr93 = FALSE ;
   else {
-  mu__boolexpr98 = (mu_Spy_known[mu_pat1Set.mu_content[mu_i0]]) ; 
+  mu__boolexpr93 = (mu_Spy_known[mu_pat1Set.mu_content[mu_i0]]) ; 
 }
-  if (!(mu__boolexpr98)) mu__boolexpr97 = FALSE ;
+  if (!(mu__boolexpr93)) mu__boolexpr92 = FALSE ;
   else {
-  mu__boolexpr97 = ((mu_i1) <= (mu_pat1Set.mu_length)) ; 
+  mu__boolexpr92 = ((mu_i1) <= (mu_pat1Set.mu_length)) ; 
 }
-  if (!(mu__boolexpr97)) mu__boolexpr96 = FALSE ;
+  if (!(mu__boolexpr92)) mu__boolexpr91 = FALSE ;
   else {
-  mu__boolexpr96 = (mu_Spy_known[mu_pat1Set.mu_content[mu_i1]]) ; 
+  mu__boolexpr91 = (mu_Spy_known[mu_pat1Set.mu_content[mu_i1]]) ; 
 }
-  if (!(mu__boolexpr96)) mu__boolexpr95 = FALSE ;
+  if (!(mu__boolexpr91)) mu__boolexpr90 = FALSE ;
   else {
-  mu__boolexpr95 = ((mu_i2) <= (mu_pat2Set.mu_length)) ; 
+  mu__boolexpr90 = (!(mu_Spy_known[mu_construct6By11( mu_pat1Set.mu_content[mu_i0], mu_pat1Set.mu_content[mu_i1] )])) ; 
 }
-  if (!(mu__boolexpr95)) mu__boolexpr94 = FALSE ;
-  else {
-  mu__boolexpr94 = (mu_Spy_known[mu_pat2Set.mu_content[mu_i2]]) ; 
-}
-  if (!(mu__boolexpr94)) mu__boolexpr93 = FALSE ;
-  else {
-  mu__boolexpr93 = (!(mu_Spy_known[mu_construct6By112( mu_pat1Set.mu_content[mu_i0], mu_pat1Set.mu_content[mu_i1], mu_pat2Set.mu_content[mu_i2] )])) ; 
-}
-	      if (mu__boolexpr93) {
+	      if (mu__boolexpr90) {
 		if ( ( TRUE  ) )
 		  return;
 		else
@@ -4827,8 +4765,6 @@ bool mu__boolexpr98;
 	else
 	  what_rule += 1;
     r = what_rule - 924;
-    mu_i2.value((r % 21) + 0);
-    r = r / 21;
     mu_i1.value((r % 21) + 0);
     r = r / 21;
     mu_i0.value((r % 21) + 0);
@@ -4838,9 +4774,6 @@ bool mu__boolexpr98;
 
   void Code(unsigned r)
   {
-    static mu_1_indexType mu_i2;
-    mu_i2.value((r % 21) + 0);
-    r = r / 21;
     static mu_1_indexType mu_i1;
     mu_i1.value((r % 21) + 0);
     r = r / 21;
@@ -4850,7 +4783,7 @@ bool mu__boolexpr98;
 /*** Variable declaration ***/
 mu_1_indexType mu_concatMsgNo("concatMsgNo",0);
 
-mu_concatMsgNo = mu_construct6By112( mu_pat1Set.mu_content[mu_i0], mu_pat1Set.mu_content[mu_i1], mu_pat2Set.mu_content[mu_i2] );
+mu_concatMsgNo = mu_construct6By11( mu_pat1Set.mu_content[mu_i0], mu_pat1Set.mu_content[mu_i1] );
 mu_Spy_known[mu_concatMsgNo] = mu_true;
 if ( !(mu_exist( mu_pat6Set, mu_concatMsgNo )) )
 {
@@ -4883,49 +4816,49 @@ public:
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
-bool mu__boolexpr99;
-bool mu__boolexpr100;
-  if (!((mu_i) <= (mu_pat6Set.mu_length))) mu__boolexpr100 = FALSE ;
+bool mu__boolexpr94;
+bool mu__boolexpr95;
+  if (!((mu_i) <= (mu_pat6Set.mu_length))) mu__boolexpr95 = FALSE ;
   else {
-  mu__boolexpr100 = (mu_Spy_known[mu_pat6Set.mu_content[mu_i]]) ; 
+  mu__boolexpr95 = (mu_Spy_known[mu_pat6Set.mu_content[mu_i]]) ; 
 }
-  if (!(mu__boolexpr100)) mu__boolexpr99 = FALSE ;
+  if (!(mu__boolexpr95)) mu__boolexpr94 = FALSE ;
   else {
-bool mu__boolexpr101;
-  if (!(mu_Spy_known[mu_msgs[mu_pat6Set.mu_content[mu_i]].mu_concatPart[1]])) mu__boolexpr101 = FALSE ;
+bool mu__boolexpr96;
+  if (!(mu_Spy_known[mu_msgs[mu_pat6Set.mu_content[mu_i]].mu_concatPart[1]])) mu__boolexpr96 = FALSE ;
   else {
-  mu__boolexpr101 = (mu_Spy_known[mu_msgs[mu_pat6Set.mu_content[mu_i]].mu_concatPart[2]]) ; 
+  mu__boolexpr96 = (mu_Spy_known[mu_msgs[mu_pat6Set.mu_content[mu_i]].mu_concatPart[2]]) ; 
 }
-  mu__boolexpr99 = (!(mu__boolexpr101)) ; 
+  mu__boolexpr94 = (!(mu__boolexpr96)) ; 
 }
-    return mu__boolexpr99;
+    return mu__boolexpr94;
   }
 
   void NextRule(unsigned & what_rule)
   {
-    unsigned r = what_rule - 10185;
+    unsigned r = what_rule - 1365;
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
-    while (what_rule < 10206 )
+    while (what_rule < 1386 )
       {
 	if ( ( TRUE  ) ) {
-bool mu__boolexpr102;
-bool mu__boolexpr103;
-  if (!((mu_i) <= (mu_pat6Set.mu_length))) mu__boolexpr103 = FALSE ;
+bool mu__boolexpr97;
+bool mu__boolexpr98;
+  if (!((mu_i) <= (mu_pat6Set.mu_length))) mu__boolexpr98 = FALSE ;
   else {
-  mu__boolexpr103 = (mu_Spy_known[mu_pat6Set.mu_content[mu_i]]) ; 
+  mu__boolexpr98 = (mu_Spy_known[mu_pat6Set.mu_content[mu_i]]) ; 
 }
-  if (!(mu__boolexpr103)) mu__boolexpr102 = FALSE ;
+  if (!(mu__boolexpr98)) mu__boolexpr97 = FALSE ;
   else {
-bool mu__boolexpr104;
-  if (!(mu_Spy_known[mu_msgs[mu_pat6Set.mu_content[mu_i]].mu_concatPart[1]])) mu__boolexpr104 = FALSE ;
+bool mu__boolexpr99;
+  if (!(mu_Spy_known[mu_msgs[mu_pat6Set.mu_content[mu_i]].mu_concatPart[1]])) mu__boolexpr99 = FALSE ;
   else {
-  mu__boolexpr104 = (mu_Spy_known[mu_msgs[mu_pat6Set.mu_content[mu_i]].mu_concatPart[2]]) ; 
+  mu__boolexpr99 = (mu_Spy_known[mu_msgs[mu_pat6Set.mu_content[mu_i]].mu_concatPart[2]]) ; 
 }
-  mu__boolexpr102 = (!(mu__boolexpr104)) ; 
+  mu__boolexpr97 = (!(mu__boolexpr99)) ; 
 }
-	      if (mu__boolexpr102) {
+	      if (mu__boolexpr97) {
 		if ( ( TRUE  ) )
 		  return;
 		else
@@ -4936,7 +4869,7 @@ bool mu__boolexpr104;
 	}
 	else
 	  what_rule += 1;
-    r = what_rule - 10185;
+    r = what_rule - 1365;
     mu_i.value((r % 21) + 0);
     r = r / 21;
     }
@@ -5022,62 +4955,62 @@ public:
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
-bool mu__boolexpr105;
-bool mu__boolexpr106;
-bool mu__boolexpr107;
-bool mu__boolexpr108;
-  if (!((mu_i) <= (mu_pat3Set.mu_length))) mu__boolexpr108 = FALSE ;
+bool mu__boolexpr100;
+bool mu__boolexpr101;
+bool mu__boolexpr102;
+bool mu__boolexpr103;
+  if (!((mu_i) <= (mu_pat3Set.mu_length))) mu__boolexpr103 = FALSE ;
   else {
-  mu__boolexpr108 = (mu_Spy_known[mu_pat3Set.mu_content[mu_i]]) ; 
+  mu__boolexpr103 = (mu_Spy_known[mu_pat3Set.mu_content[mu_i]]) ; 
 }
-  if (!(mu__boolexpr108)) mu__boolexpr107 = FALSE ;
+  if (!(mu__boolexpr103)) mu__boolexpr102 = FALSE ;
   else {
-  mu__boolexpr107 = ((mu_j) <= (mu_pat4Set.mu_length)) ; 
+  mu__boolexpr102 = ((mu_j) <= (mu_pat4Set.mu_length)) ; 
 }
-  if (!(mu__boolexpr107)) mu__boolexpr106 = FALSE ;
+  if (!(mu__boolexpr102)) mu__boolexpr101 = FALSE ;
   else {
-  mu__boolexpr106 = (mu_Spy_known[mu_pat4Set.mu_content[mu_j]]) ; 
+  mu__boolexpr101 = (mu_Spy_known[mu_pat4Set.mu_content[mu_j]]) ; 
 }
-  if (!(mu__boolexpr106)) mu__boolexpr105 = FALSE ;
+  if (!(mu__boolexpr101)) mu__boolexpr100 = FALSE ;
   else {
-  mu__boolexpr105 = (!(mu_Spy_known[mu_construct5By34( mu_pat3Set.mu_content[mu_i], mu_pat4Set.mu_content[mu_j] )])) ; 
+  mu__boolexpr100 = (!(mu_Spy_known[mu_construct5By34( mu_pat3Set.mu_content[mu_i], mu_pat4Set.mu_content[mu_j] )])) ; 
 }
-    return mu__boolexpr105;
+    return mu__boolexpr100;
   }
 
   void NextRule(unsigned & what_rule)
   {
-    unsigned r = what_rule - 10206;
+    unsigned r = what_rule - 1386;
     static mu_1_indexType mu_j;
     mu_j.value((r % 21) + 0);
     r = r / 21;
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
-    while (what_rule < 10647 )
+    while (what_rule < 1827 )
       {
 	if ( ( TRUE  ) ) {
-bool mu__boolexpr109;
-bool mu__boolexpr110;
-bool mu__boolexpr111;
-bool mu__boolexpr112;
-  if (!((mu_i) <= (mu_pat3Set.mu_length))) mu__boolexpr112 = FALSE ;
+bool mu__boolexpr104;
+bool mu__boolexpr105;
+bool mu__boolexpr106;
+bool mu__boolexpr107;
+  if (!((mu_i) <= (mu_pat3Set.mu_length))) mu__boolexpr107 = FALSE ;
   else {
-  mu__boolexpr112 = (mu_Spy_known[mu_pat3Set.mu_content[mu_i]]) ; 
+  mu__boolexpr107 = (mu_Spy_known[mu_pat3Set.mu_content[mu_i]]) ; 
 }
-  if (!(mu__boolexpr112)) mu__boolexpr111 = FALSE ;
+  if (!(mu__boolexpr107)) mu__boolexpr106 = FALSE ;
   else {
-  mu__boolexpr111 = ((mu_j) <= (mu_pat4Set.mu_length)) ; 
+  mu__boolexpr106 = ((mu_j) <= (mu_pat4Set.mu_length)) ; 
 }
-  if (!(mu__boolexpr111)) mu__boolexpr110 = FALSE ;
+  if (!(mu__boolexpr106)) mu__boolexpr105 = FALSE ;
   else {
-  mu__boolexpr110 = (mu_Spy_known[mu_pat4Set.mu_content[mu_j]]) ; 
+  mu__boolexpr105 = (mu_Spy_known[mu_pat4Set.mu_content[mu_j]]) ; 
 }
-  if (!(mu__boolexpr110)) mu__boolexpr109 = FALSE ;
+  if (!(mu__boolexpr105)) mu__boolexpr104 = FALSE ;
   else {
-  mu__boolexpr109 = (!(mu_Spy_known[mu_construct5By34( mu_pat3Set.mu_content[mu_i], mu_pat4Set.mu_content[mu_j] )])) ; 
+  mu__boolexpr104 = (!(mu_Spy_known[mu_construct5By34( mu_pat3Set.mu_content[mu_i], mu_pat4Set.mu_content[mu_j] )])) ; 
 }
-	      if (mu__boolexpr109) {
+	      if (mu__boolexpr104) {
 		if ( ( TRUE  ) )
 		  return;
 		else
@@ -5088,7 +5021,7 @@ bool mu__boolexpr112;
 	}
 	else
 	  what_rule += 1;
-    r = what_rule - 10206;
+    r = what_rule - 1386;
     mu_j.value((r % 21) + 0);
     r = r / 21;
     mu_i.value((r % 21) + 0);
@@ -5146,39 +5079,39 @@ public:
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
-bool mu__boolexpr113;
-bool mu__boolexpr114;
-  if (!((mu_i) <= (mu_pat5Set.mu_length))) mu__boolexpr114 = FALSE ;
+bool mu__boolexpr108;
+bool mu__boolexpr109;
+  if (!((mu_i) <= (mu_pat5Set.mu_length))) mu__boolexpr109 = FALSE ;
   else {
-  mu__boolexpr114 = (mu_Spy_known[mu_pat5Set.mu_content[mu_i]]) ; 
+  mu__boolexpr109 = (mu_Spy_known[mu_pat5Set.mu_content[mu_i]]) ; 
 }
-  if (!(mu__boolexpr114)) mu__boolexpr113 = FALSE ;
+  if (!(mu__boolexpr109)) mu__boolexpr108 = FALSE ;
   else {
-  mu__boolexpr113 = (!(mu_Spy_known[mu_msgs[mu_pat5Set.mu_content[mu_i]].mu_aencMsg])) ; 
+  mu__boolexpr108 = (!(mu_Spy_known[mu_msgs[mu_pat5Set.mu_content[mu_i]].mu_aencMsg])) ; 
 }
-    return mu__boolexpr113;
+    return mu__boolexpr108;
   }
 
   void NextRule(unsigned & what_rule)
   {
-    unsigned r = what_rule - 10647;
+    unsigned r = what_rule - 1827;
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
-    while (what_rule < 10668 )
+    while (what_rule < 1848 )
       {
 	if ( ( TRUE  ) ) {
-bool mu__boolexpr115;
-bool mu__boolexpr116;
-  if (!((mu_i) <= (mu_pat5Set.mu_length))) mu__boolexpr116 = FALSE ;
+bool mu__boolexpr110;
+bool mu__boolexpr111;
+  if (!((mu_i) <= (mu_pat5Set.mu_length))) mu__boolexpr111 = FALSE ;
   else {
-  mu__boolexpr116 = (mu_Spy_known[mu_pat5Set.mu_content[mu_i]]) ; 
+  mu__boolexpr111 = (mu_Spy_known[mu_pat5Set.mu_content[mu_i]]) ; 
 }
-  if (!(mu__boolexpr116)) mu__boolexpr115 = FALSE ;
+  if (!(mu__boolexpr111)) mu__boolexpr110 = FALSE ;
   else {
-  mu__boolexpr115 = (!(mu_Spy_known[mu_msgs[mu_pat5Set.mu_content[mu_i]].mu_aencMsg])) ; 
+  mu__boolexpr110 = (!(mu_Spy_known[mu_msgs[mu_pat5Set.mu_content[mu_i]].mu_aencMsg])) ; 
 }
-	      if (mu__boolexpr115) {
+	      if (mu__boolexpr110) {
 		if ( ( TRUE  ) )
 		  return;
 		else
@@ -5189,7 +5122,7 @@ bool mu__boolexpr116;
 	}
 	else
 	  what_rule += 1;
-    r = what_rule - 10647;
+    r = what_rule - 1827;
     mu_i.value((r % 21) + 0);
     r = r / 21;
     }
@@ -5256,62 +5189,62 @@ public:
     static mu_1_indexType mu_i0;
     mu_i0.value((r % 21) + 0);
     r = r / 21;
-bool mu__boolexpr117;
-bool mu__boolexpr118;
-bool mu__boolexpr119;
-bool mu__boolexpr120;
-  if (!((mu_i0) <= (mu_pat1Set.mu_length))) mu__boolexpr120 = FALSE ;
+bool mu__boolexpr112;
+bool mu__boolexpr113;
+bool mu__boolexpr114;
+bool mu__boolexpr115;
+  if (!((mu_i0) <= (mu_pat1Set.mu_length))) mu__boolexpr115 = FALSE ;
   else {
-  mu__boolexpr120 = (mu_Spy_known[mu_pat1Set.mu_content[mu_i0]]) ; 
+  mu__boolexpr115 = (mu_Spy_known[mu_pat1Set.mu_content[mu_i0]]) ; 
 }
-  if (!(mu__boolexpr120)) mu__boolexpr119 = FALSE ;
+  if (!(mu__boolexpr115)) mu__boolexpr114 = FALSE ;
   else {
-  mu__boolexpr119 = ((mu_i1) <= (mu_pat2Set.mu_length)) ; 
+  mu__boolexpr114 = ((mu_i1) <= (mu_pat2Set.mu_length)) ; 
 }
-  if (!(mu__boolexpr119)) mu__boolexpr118 = FALSE ;
+  if (!(mu__boolexpr114)) mu__boolexpr113 = FALSE ;
   else {
-  mu__boolexpr118 = (mu_Spy_known[mu_pat2Set.mu_content[mu_i1]]) ; 
+  mu__boolexpr113 = (mu_Spy_known[mu_pat2Set.mu_content[mu_i1]]) ; 
 }
-  if (!(mu__boolexpr118)) mu__boolexpr117 = FALSE ;
+  if (!(mu__boolexpr113)) mu__boolexpr112 = FALSE ;
   else {
-  mu__boolexpr117 = (!(mu_Spy_known[mu_construct3By12( mu_pat1Set.mu_content[mu_i0], mu_pat2Set.mu_content[mu_i1] )])) ; 
+  mu__boolexpr112 = (!(mu_Spy_known[mu_construct3By12( mu_pat1Set.mu_content[mu_i0], mu_pat2Set.mu_content[mu_i1] )])) ; 
 }
-    return mu__boolexpr117;
+    return mu__boolexpr112;
   }
 
   void NextRule(unsigned & what_rule)
   {
-    unsigned r = what_rule - 10668;
+    unsigned r = what_rule - 1848;
     static mu_1_indexType mu_i1;
     mu_i1.value((r % 21) + 0);
     r = r / 21;
     static mu_1_indexType mu_i0;
     mu_i0.value((r % 21) + 0);
     r = r / 21;
-    while (what_rule < 11109 )
+    while (what_rule < 2289 )
       {
 	if ( ( TRUE  ) ) {
-bool mu__boolexpr121;
-bool mu__boolexpr122;
-bool mu__boolexpr123;
-bool mu__boolexpr124;
-  if (!((mu_i0) <= (mu_pat1Set.mu_length))) mu__boolexpr124 = FALSE ;
+bool mu__boolexpr116;
+bool mu__boolexpr117;
+bool mu__boolexpr118;
+bool mu__boolexpr119;
+  if (!((mu_i0) <= (mu_pat1Set.mu_length))) mu__boolexpr119 = FALSE ;
   else {
-  mu__boolexpr124 = (mu_Spy_known[mu_pat1Set.mu_content[mu_i0]]) ; 
+  mu__boolexpr119 = (mu_Spy_known[mu_pat1Set.mu_content[mu_i0]]) ; 
 }
-  if (!(mu__boolexpr124)) mu__boolexpr123 = FALSE ;
+  if (!(mu__boolexpr119)) mu__boolexpr118 = FALSE ;
   else {
-  mu__boolexpr123 = ((mu_i1) <= (mu_pat2Set.mu_length)) ; 
+  mu__boolexpr118 = ((mu_i1) <= (mu_pat2Set.mu_length)) ; 
 }
-  if (!(mu__boolexpr123)) mu__boolexpr122 = FALSE ;
+  if (!(mu__boolexpr118)) mu__boolexpr117 = FALSE ;
   else {
-  mu__boolexpr122 = (mu_Spy_known[mu_pat2Set.mu_content[mu_i1]]) ; 
+  mu__boolexpr117 = (mu_Spy_known[mu_pat2Set.mu_content[mu_i1]]) ; 
 }
-  if (!(mu__boolexpr122)) mu__boolexpr121 = FALSE ;
+  if (!(mu__boolexpr117)) mu__boolexpr116 = FALSE ;
   else {
-  mu__boolexpr121 = (!(mu_Spy_known[mu_construct3By12( mu_pat1Set.mu_content[mu_i0], mu_pat2Set.mu_content[mu_i1] )])) ; 
+  mu__boolexpr116 = (!(mu_Spy_known[mu_construct3By12( mu_pat1Set.mu_content[mu_i0], mu_pat2Set.mu_content[mu_i1] )])) ; 
 }
-	      if (mu__boolexpr121) {
+	      if (mu__boolexpr116) {
 		if ( ( TRUE  ) )
 		  return;
 		else
@@ -5322,7 +5255,7 @@ bool mu__boolexpr124;
 	}
 	else
 	  what_rule += 1;
-    r = what_rule - 10668;
+    r = what_rule - 1848;
     mu_i1.value((r % 21) + 0);
     r = r / 21;
     mu_i0.value((r % 21) + 0);
@@ -5374,49 +5307,49 @@ public:
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
-bool mu__boolexpr125;
-bool mu__boolexpr126;
-  if (!((mu_i) <= (mu_pat3Set.mu_length))) mu__boolexpr126 = FALSE ;
+bool mu__boolexpr120;
+bool mu__boolexpr121;
+  if (!((mu_i) <= (mu_pat3Set.mu_length))) mu__boolexpr121 = FALSE ;
   else {
-  mu__boolexpr126 = (mu_Spy_known[mu_pat3Set.mu_content[mu_i]]) ; 
+  mu__boolexpr121 = (mu_Spy_known[mu_pat3Set.mu_content[mu_i]]) ; 
 }
-  if (!(mu__boolexpr126)) mu__boolexpr125 = FALSE ;
+  if (!(mu__boolexpr121)) mu__boolexpr120 = FALSE ;
   else {
-bool mu__boolexpr127;
-  if (!(mu_Spy_known[mu_msgs[mu_pat3Set.mu_content[mu_i]].mu_concatPart[1]])) mu__boolexpr127 = FALSE ;
+bool mu__boolexpr122;
+  if (!(mu_Spy_known[mu_msgs[mu_pat3Set.mu_content[mu_i]].mu_concatPart[1]])) mu__boolexpr122 = FALSE ;
   else {
-  mu__boolexpr127 = (mu_Spy_known[mu_msgs[mu_pat3Set.mu_content[mu_i]].mu_concatPart[2]]) ; 
+  mu__boolexpr122 = (mu_Spy_known[mu_msgs[mu_pat3Set.mu_content[mu_i]].mu_concatPart[2]]) ; 
 }
-  mu__boolexpr125 = (!(mu__boolexpr127)) ; 
+  mu__boolexpr120 = (!(mu__boolexpr122)) ; 
 }
-    return mu__boolexpr125;
+    return mu__boolexpr120;
   }
 
   void NextRule(unsigned & what_rule)
   {
-    unsigned r = what_rule - 11109;
+    unsigned r = what_rule - 2289;
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
-    while (what_rule < 11130 )
+    while (what_rule < 2310 )
       {
 	if ( ( TRUE  ) ) {
-bool mu__boolexpr128;
-bool mu__boolexpr129;
-  if (!((mu_i) <= (mu_pat3Set.mu_length))) mu__boolexpr129 = FALSE ;
+bool mu__boolexpr123;
+bool mu__boolexpr124;
+  if (!((mu_i) <= (mu_pat3Set.mu_length))) mu__boolexpr124 = FALSE ;
   else {
-  mu__boolexpr129 = (mu_Spy_known[mu_pat3Set.mu_content[mu_i]]) ; 
+  mu__boolexpr124 = (mu_Spy_known[mu_pat3Set.mu_content[mu_i]]) ; 
 }
-  if (!(mu__boolexpr129)) mu__boolexpr128 = FALSE ;
+  if (!(mu__boolexpr124)) mu__boolexpr123 = FALSE ;
   else {
-bool mu__boolexpr130;
-  if (!(mu_Spy_known[mu_msgs[mu_pat3Set.mu_content[mu_i]].mu_concatPart[1]])) mu__boolexpr130 = FALSE ;
+bool mu__boolexpr125;
+  if (!(mu_Spy_known[mu_msgs[mu_pat3Set.mu_content[mu_i]].mu_concatPart[1]])) mu__boolexpr125 = FALSE ;
   else {
-  mu__boolexpr130 = (mu_Spy_known[mu_msgs[mu_pat3Set.mu_content[mu_i]].mu_concatPart[2]]) ; 
+  mu__boolexpr125 = (mu_Spy_known[mu_msgs[mu_pat3Set.mu_content[mu_i]].mu_concatPart[2]]) ; 
 }
-  mu__boolexpr128 = (!(mu__boolexpr130)) ; 
+  mu__boolexpr123 = (!(mu__boolexpr125)) ; 
 }
-	      if (mu__boolexpr128) {
+	      if (mu__boolexpr123) {
 		if ( ( TRUE  ) )
 		  return;
 		else
@@ -5427,7 +5360,7 @@ bool mu__boolexpr130;
 	}
 	else
 	  what_rule += 1;
-    r = what_rule - 11109;
+    r = what_rule - 2289;
     mu_i.value((r % 21) + 0);
     r = r / 21;
     }
@@ -5513,42 +5446,42 @@ public:
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
-bool mu__boolexpr131;
-bool mu__boolexpr132;
-  if (!((mu_ch[3].mu_empty) == (mu_true))) mu__boolexpr132 = FALSE ;
+bool mu__boolexpr126;
+bool mu__boolexpr127;
+  if (!((mu_ch[3].mu_empty) == (mu_true))) mu__boolexpr127 = FALSE ;
   else {
-  mu__boolexpr132 = ((mu_i) <= (mu_pat8Set.mu_length)) ; 
+  mu__boolexpr127 = ((mu_i) <= (mu_pat8Set.mu_length)) ; 
 }
-  if (!(mu__boolexpr132)) mu__boolexpr131 = FALSE ;
+  if (!(mu__boolexpr127)) mu__boolexpr126 = FALSE ;
   else {
-  mu__boolexpr131 = (mu_Spy_known[mu_pat8Set.mu_content[mu_i]]) ; 
+  mu__boolexpr126 = (mu_Spy_known[mu_pat8Set.mu_content[mu_i]]) ; 
 }
-    return mu__boolexpr131;
+    return mu__boolexpr126;
   }
 
   void NextRule(unsigned & what_rule)
   {
-    unsigned r = what_rule - 11130;
+    unsigned r = what_rule - 2310;
     static mu_1_roleBNums mu_j;
     mu_j.value((r % 1) + 1);
     r = r / 1;
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
-    while (what_rule < 11151 )
+    while (what_rule < 2331 )
       {
 	if ( ( TRUE  ) ) {
-bool mu__boolexpr133;
-bool mu__boolexpr134;
-  if (!((mu_ch[3].mu_empty) == (mu_true))) mu__boolexpr134 = FALSE ;
+bool mu__boolexpr128;
+bool mu__boolexpr129;
+  if (!((mu_ch[3].mu_empty) == (mu_true))) mu__boolexpr129 = FALSE ;
   else {
-  mu__boolexpr134 = ((mu_i) <= (mu_pat8Set.mu_length)) ; 
+  mu__boolexpr129 = ((mu_i) <= (mu_pat8Set.mu_length)) ; 
 }
-  if (!(mu__boolexpr134)) mu__boolexpr133 = FALSE ;
+  if (!(mu__boolexpr129)) mu__boolexpr128 = FALSE ;
   else {
-  mu__boolexpr133 = (mu_Spy_known[mu_pat8Set.mu_content[mu_i]]) ; 
+  mu__boolexpr128 = (mu_Spy_known[mu_pat8Set.mu_content[mu_i]]) ; 
 }
-	      if (mu__boolexpr133) {
+	      if (mu__boolexpr128) {
 		if ( ( TRUE  ) )
 		  return;
 		else
@@ -5559,7 +5492,7 @@ bool mu__boolexpr134;
 	}
 	else
 	  what_rule += 1;
-    r = what_rule - 11130;
+    r = what_rule - 2310;
     mu_j.value((r % 1) + 1);
     r = r / 1;
     mu_i.value((r % 21) + 0);
@@ -5575,12 +5508,12 @@ bool mu__boolexpr134;
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
-bool mu__boolexpr135;
-  if (!(!(mu_emit[mu_pat8Set.mu_content[mu_i]]))) mu__boolexpr135 = FALSE ;
+bool mu__boolexpr130;
+  if (!(!(mu_emit[mu_pat8Set.mu_content[mu_i]]))) mu__boolexpr130 = FALSE ;
   else {
-  mu__boolexpr135 = ((mu_msgs[mu_msgs[mu_pat8Set.mu_content[mu_i]].mu_aencKey].mu_k.mu_ag) == (mu_roleB[mu_j].mu_B)) ; 
+  mu__boolexpr130 = ((mu_msgs[mu_msgs[mu_pat8Set.mu_content[mu_i]].mu_aencKey].mu_k.mu_ag) == (mu_roleB[mu_j].mu_B)) ; 
 }
-if ( mu__boolexpr135 )
+if ( mu__boolexpr130 )
 {
 mu_ch[3].clear();
 mu_ch[3].mu_msg = mu_msgs[mu_pat8Set.mu_content[mu_i]];
@@ -5618,8 +5551,8 @@ public:
 
   void NextRule(unsigned & what_rule)
   {
-    unsigned r = what_rule - 11151;
-    while (what_rule < 11152 )
+    unsigned r = what_rule - 2331;
+    while (what_rule < 2332 )
       {
 	if ( ( TRUE  ) ) {
 	      if ((mu_ch[3].mu_empty) == (mu_false)) {
@@ -5633,7 +5566,7 @@ public:
 	}
 	else
 	  what_rule += 1;
-    r = what_rule - 11151;
+    r = what_rule - 2331;
     }
   }
 
@@ -5693,42 +5626,42 @@ public:
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
-bool mu__boolexpr136;
-bool mu__boolexpr137;
-  if (!((mu_ch[2].mu_empty) == (mu_true))) mu__boolexpr137 = FALSE ;
+bool mu__boolexpr131;
+bool mu__boolexpr132;
+  if (!((mu_ch[2].mu_empty) == (mu_true))) mu__boolexpr132 = FALSE ;
   else {
-  mu__boolexpr137 = ((mu_i) <= (mu_pat7Set.mu_length)) ; 
+  mu__boolexpr132 = ((mu_i) <= (mu_pat7Set.mu_length)) ; 
 }
-  if (!(mu__boolexpr137)) mu__boolexpr136 = FALSE ;
+  if (!(mu__boolexpr132)) mu__boolexpr131 = FALSE ;
   else {
-  mu__boolexpr136 = (mu_Spy_known[mu_pat7Set.mu_content[mu_i]]) ; 
+  mu__boolexpr131 = (mu_Spy_known[mu_pat7Set.mu_content[mu_i]]) ; 
 }
-    return mu__boolexpr136;
+    return mu__boolexpr131;
   }
 
   void NextRule(unsigned & what_rule)
   {
-    unsigned r = what_rule - 11152;
+    unsigned r = what_rule - 2332;
     static mu_1_roleBNums mu_j;
     mu_j.value((r % 1) + 1);
     r = r / 1;
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
-    while (what_rule < 11173 )
+    while (what_rule < 2353 )
       {
 	if ( ( TRUE  ) ) {
-bool mu__boolexpr138;
-bool mu__boolexpr139;
-  if (!((mu_ch[2].mu_empty) == (mu_true))) mu__boolexpr139 = FALSE ;
+bool mu__boolexpr133;
+bool mu__boolexpr134;
+  if (!((mu_ch[2].mu_empty) == (mu_true))) mu__boolexpr134 = FALSE ;
   else {
-  mu__boolexpr139 = ((mu_i) <= (mu_pat7Set.mu_length)) ; 
+  mu__boolexpr134 = ((mu_i) <= (mu_pat7Set.mu_length)) ; 
 }
-  if (!(mu__boolexpr139)) mu__boolexpr138 = FALSE ;
+  if (!(mu__boolexpr134)) mu__boolexpr133 = FALSE ;
   else {
-  mu__boolexpr138 = (mu_Spy_known[mu_pat7Set.mu_content[mu_i]]) ; 
+  mu__boolexpr133 = (mu_Spy_known[mu_pat7Set.mu_content[mu_i]]) ; 
 }
-	      if (mu__boolexpr138) {
+	      if (mu__boolexpr133) {
 		if ( ( TRUE  ) )
 		  return;
 		else
@@ -5739,7 +5672,7 @@ bool mu__boolexpr139;
 	}
 	else
 	  what_rule += 1;
-    r = what_rule - 11152;
+    r = what_rule - 2332;
     mu_j.value((r % 1) + 1);
     r = r / 1;
     mu_i.value((r % 21) + 0);
@@ -5755,12 +5688,12 @@ bool mu__boolexpr139;
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
-bool mu__boolexpr140;
-  if (!(!(mu_emit[mu_pat7Set.mu_content[mu_i]]))) mu__boolexpr140 = FALSE ;
+bool mu__boolexpr135;
+  if (!(!(mu_emit[mu_pat7Set.mu_content[mu_i]]))) mu__boolexpr135 = FALSE ;
   else {
-  mu__boolexpr140 = ((mu_msgs[mu_msgs[mu_pat7Set.mu_content[mu_i]].mu_aencKey].mu_k.mu_ag) == (mu_roleB[mu_j].mu_B)) ; 
+  mu__boolexpr135 = ((mu_msgs[mu_msgs[mu_pat7Set.mu_content[mu_i]].mu_aencKey].mu_k.mu_ag) == (mu_roleB[mu_j].mu_B)) ; 
 }
-if ( mu__boolexpr140 )
+if ( mu__boolexpr135 )
 {
 mu_ch[2].clear();
 mu_ch[2].mu_msg = mu_msgs[mu_pat7Set.mu_content[mu_i]];
@@ -5798,8 +5731,8 @@ public:
 
   void NextRule(unsigned & what_rule)
   {
-    unsigned r = what_rule - 11173;
-    while (what_rule < 11174 )
+    unsigned r = what_rule - 2353;
+    while (what_rule < 2354 )
       {
 	if ( ( TRUE  ) ) {
 	      if ((mu_ch[2].mu_empty) == (mu_false)) {
@@ -5813,7 +5746,7 @@ public:
 	}
 	else
 	  what_rule += 1;
-    r = what_rule - 11173;
+    r = what_rule - 2353;
     }
   }
 
@@ -5873,42 +5806,42 @@ public:
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
-bool mu__boolexpr141;
-bool mu__boolexpr142;
-  if (!((mu_ch[1].mu_empty) == (mu_true))) mu__boolexpr142 = FALSE ;
+bool mu__boolexpr136;
+bool mu__boolexpr137;
+  if (!((mu_ch[1].mu_empty) == (mu_true))) mu__boolexpr137 = FALSE ;
   else {
-  mu__boolexpr142 = ((mu_i) <= (mu_pat5Set.mu_length)) ; 
+  mu__boolexpr137 = ((mu_i) <= (mu_pat5Set.mu_length)) ; 
 }
-  if (!(mu__boolexpr142)) mu__boolexpr141 = FALSE ;
+  if (!(mu__boolexpr137)) mu__boolexpr136 = FALSE ;
   else {
-  mu__boolexpr141 = (mu_Spy_known[mu_pat5Set.mu_content[mu_i]]) ; 
+  mu__boolexpr136 = (mu_Spy_known[mu_pat5Set.mu_content[mu_i]]) ; 
 }
-    return mu__boolexpr141;
+    return mu__boolexpr136;
   }
 
   void NextRule(unsigned & what_rule)
   {
-    unsigned r = what_rule - 11174;
+    unsigned r = what_rule - 2354;
     static mu_1_roleBNums mu_j;
     mu_j.value((r % 1) + 1);
     r = r / 1;
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
-    while (what_rule < 11195 )
+    while (what_rule < 2375 )
       {
 	if ( ( TRUE  ) ) {
-bool mu__boolexpr143;
-bool mu__boolexpr144;
-  if (!((mu_ch[1].mu_empty) == (mu_true))) mu__boolexpr144 = FALSE ;
+bool mu__boolexpr138;
+bool mu__boolexpr139;
+  if (!((mu_ch[1].mu_empty) == (mu_true))) mu__boolexpr139 = FALSE ;
   else {
-  mu__boolexpr144 = ((mu_i) <= (mu_pat5Set.mu_length)) ; 
+  mu__boolexpr139 = ((mu_i) <= (mu_pat5Set.mu_length)) ; 
 }
-  if (!(mu__boolexpr144)) mu__boolexpr143 = FALSE ;
+  if (!(mu__boolexpr139)) mu__boolexpr138 = FALSE ;
   else {
-  mu__boolexpr143 = (mu_Spy_known[mu_pat5Set.mu_content[mu_i]]) ; 
+  mu__boolexpr138 = (mu_Spy_known[mu_pat5Set.mu_content[mu_i]]) ; 
 }
-	      if (mu__boolexpr143) {
+	      if (mu__boolexpr138) {
 		if ( ( TRUE  ) )
 		  return;
 		else
@@ -5919,7 +5852,7 @@ bool mu__boolexpr144;
 	}
 	else
 	  what_rule += 1;
-    r = what_rule - 11174;
+    r = what_rule - 2354;
     mu_j.value((r % 1) + 1);
     r = r / 1;
     mu_i.value((r % 21) + 0);
@@ -5935,12 +5868,12 @@ bool mu__boolexpr144;
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
-bool mu__boolexpr145;
-  if (!(!(mu_emit[mu_pat5Set.mu_content[mu_i]]))) mu__boolexpr145 = FALSE ;
+bool mu__boolexpr140;
+  if (!(!(mu_emit[mu_pat5Set.mu_content[mu_i]]))) mu__boolexpr140 = FALSE ;
   else {
-  mu__boolexpr145 = ((mu_msgs[mu_msgs[mu_pat5Set.mu_content[mu_i]].mu_aencKey].mu_k.mu_ag) == (mu_roleB[mu_j].mu_B)) ; 
+  mu__boolexpr140 = ((mu_msgs[mu_msgs[mu_pat5Set.mu_content[mu_i]].mu_aencKey].mu_k.mu_ag) == (mu_roleB[mu_j].mu_B)) ; 
 }
-if ( mu__boolexpr145 )
+if ( mu__boolexpr140 )
 {
 mu_ch[1].clear();
 mu_ch[1].mu_msg = mu_msgs[mu_pat5Set.mu_content[mu_i]];
@@ -5978,8 +5911,8 @@ public:
 
   void NextRule(unsigned & what_rule)
   {
-    unsigned r = what_rule - 11195;
-    while (what_rule < 11196 )
+    unsigned r = what_rule - 2375;
+    while (what_rule < 2376 )
       {
 	if ( ( TRUE  ) ) {
 	      if ((mu_ch[1].mu_empty) == (mu_false)) {
@@ -5993,7 +5926,7 @@ public:
 	}
 	else
 	  what_rule += 1;
-    r = what_rule - 11195;
+    r = what_rule - 2375;
     }
   }
 
@@ -6053,42 +5986,42 @@ public:
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
-bool mu__boolexpr146;
-bool mu__boolexpr147;
-  if (!((mu_ch[3].mu_empty) == (mu_true))) mu__boolexpr147 = FALSE ;
+bool mu__boolexpr141;
+bool mu__boolexpr142;
+  if (!((mu_ch[3].mu_empty) == (mu_true))) mu__boolexpr142 = FALSE ;
   else {
-  mu__boolexpr147 = ((mu_i) <= (mu_pat8Set.mu_length)) ; 
+  mu__boolexpr142 = ((mu_i) <= (mu_pat8Set.mu_length)) ; 
 }
-  if (!(mu__boolexpr147)) mu__boolexpr146 = FALSE ;
+  if (!(mu__boolexpr142)) mu__boolexpr141 = FALSE ;
   else {
-  mu__boolexpr146 = (mu_Spy_known[mu_pat8Set.mu_content[mu_i]]) ; 
+  mu__boolexpr141 = (mu_Spy_known[mu_pat8Set.mu_content[mu_i]]) ; 
 }
-    return mu__boolexpr146;
+    return mu__boolexpr141;
   }
 
   void NextRule(unsigned & what_rule)
   {
-    unsigned r = what_rule - 11196;
+    unsigned r = what_rule - 2376;
     static mu_1_roleANums mu_j;
     mu_j.value((r % 1) + 1);
     r = r / 1;
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
-    while (what_rule < 11217 )
+    while (what_rule < 2397 )
       {
 	if ( ( TRUE  ) ) {
-bool mu__boolexpr148;
-bool mu__boolexpr149;
-  if (!((mu_ch[3].mu_empty) == (mu_true))) mu__boolexpr149 = FALSE ;
+bool mu__boolexpr143;
+bool mu__boolexpr144;
+  if (!((mu_ch[3].mu_empty) == (mu_true))) mu__boolexpr144 = FALSE ;
   else {
-  mu__boolexpr149 = ((mu_i) <= (mu_pat8Set.mu_length)) ; 
+  mu__boolexpr144 = ((mu_i) <= (mu_pat8Set.mu_length)) ; 
 }
-  if (!(mu__boolexpr149)) mu__boolexpr148 = FALSE ;
+  if (!(mu__boolexpr144)) mu__boolexpr143 = FALSE ;
   else {
-  mu__boolexpr148 = (mu_Spy_known[mu_pat8Set.mu_content[mu_i]]) ; 
+  mu__boolexpr143 = (mu_Spy_known[mu_pat8Set.mu_content[mu_i]]) ; 
 }
-	      if (mu__boolexpr148) {
+	      if (mu__boolexpr143) {
 		if ( ( TRUE  ) )
 		  return;
 		else
@@ -6099,7 +6032,7 @@ bool mu__boolexpr149;
 	}
 	else
 	  what_rule += 1;
-    r = what_rule - 11196;
+    r = what_rule - 2376;
     mu_j.value((r % 1) + 1);
     r = r / 1;
     mu_i.value((r % 21) + 0);
@@ -6115,12 +6048,12 @@ bool mu__boolexpr149;
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
-bool mu__boolexpr150;
-  if (!(!(mu_emit[mu_pat8Set.mu_content[mu_i]]))) mu__boolexpr150 = FALSE ;
+bool mu__boolexpr145;
+  if (!(!(mu_emit[mu_pat8Set.mu_content[mu_i]]))) mu__boolexpr145 = FALSE ;
   else {
-  mu__boolexpr150 = ((mu_msgs[mu_msgs[mu_pat8Set.mu_content[mu_i]].mu_aencKey].mu_k.mu_ag) == (mu_roleA[mu_j].mu_A)) ; 
+  mu__boolexpr145 = ((mu_msgs[mu_msgs[mu_pat8Set.mu_content[mu_i]].mu_aencKey].mu_k.mu_ag) == (mu_roleA[mu_j].mu_A)) ; 
 }
-if ( mu__boolexpr150 )
+if ( mu__boolexpr145 )
 {
 mu_ch[3].clear();
 mu_ch[3].mu_msg = mu_msgs[mu_pat8Set.mu_content[mu_i]];
@@ -6158,8 +6091,8 @@ public:
 
   void NextRule(unsigned & what_rule)
   {
-    unsigned r = what_rule - 11217;
-    while (what_rule < 11218 )
+    unsigned r = what_rule - 2397;
+    while (what_rule < 2398 )
       {
 	if ( ( TRUE  ) ) {
 	      if ((mu_ch[3].mu_empty) == (mu_false)) {
@@ -6173,7 +6106,7 @@ public:
 	}
 	else
 	  what_rule += 1;
-    r = what_rule - 11217;
+    r = what_rule - 2397;
     }
   }
 
@@ -6233,42 +6166,42 @@ public:
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
-bool mu__boolexpr151;
-bool mu__boolexpr152;
-  if (!((mu_ch[2].mu_empty) == (mu_true))) mu__boolexpr152 = FALSE ;
+bool mu__boolexpr146;
+bool mu__boolexpr147;
+  if (!((mu_ch[2].mu_empty) == (mu_true))) mu__boolexpr147 = FALSE ;
   else {
-  mu__boolexpr152 = ((mu_i) <= (mu_pat7Set.mu_length)) ; 
+  mu__boolexpr147 = ((mu_i) <= (mu_pat7Set.mu_length)) ; 
 }
-  if (!(mu__boolexpr152)) mu__boolexpr151 = FALSE ;
+  if (!(mu__boolexpr147)) mu__boolexpr146 = FALSE ;
   else {
-  mu__boolexpr151 = (mu_Spy_known[mu_pat7Set.mu_content[mu_i]]) ; 
+  mu__boolexpr146 = (mu_Spy_known[mu_pat7Set.mu_content[mu_i]]) ; 
 }
-    return mu__boolexpr151;
+    return mu__boolexpr146;
   }
 
   void NextRule(unsigned & what_rule)
   {
-    unsigned r = what_rule - 11218;
+    unsigned r = what_rule - 2398;
     static mu_1_roleANums mu_j;
     mu_j.value((r % 1) + 1);
     r = r / 1;
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
-    while (what_rule < 11239 )
+    while (what_rule < 2419 )
       {
 	if ( ( TRUE  ) ) {
-bool mu__boolexpr153;
-bool mu__boolexpr154;
-  if (!((mu_ch[2].mu_empty) == (mu_true))) mu__boolexpr154 = FALSE ;
+bool mu__boolexpr148;
+bool mu__boolexpr149;
+  if (!((mu_ch[2].mu_empty) == (mu_true))) mu__boolexpr149 = FALSE ;
   else {
-  mu__boolexpr154 = ((mu_i) <= (mu_pat7Set.mu_length)) ; 
+  mu__boolexpr149 = ((mu_i) <= (mu_pat7Set.mu_length)) ; 
 }
-  if (!(mu__boolexpr154)) mu__boolexpr153 = FALSE ;
+  if (!(mu__boolexpr149)) mu__boolexpr148 = FALSE ;
   else {
-  mu__boolexpr153 = (mu_Spy_known[mu_pat7Set.mu_content[mu_i]]) ; 
+  mu__boolexpr148 = (mu_Spy_known[mu_pat7Set.mu_content[mu_i]]) ; 
 }
-	      if (mu__boolexpr153) {
+	      if (mu__boolexpr148) {
 		if ( ( TRUE  ) )
 		  return;
 		else
@@ -6279,7 +6212,7 @@ bool mu__boolexpr154;
 	}
 	else
 	  what_rule += 1;
-    r = what_rule - 11218;
+    r = what_rule - 2398;
     mu_j.value((r % 1) + 1);
     r = r / 1;
     mu_i.value((r % 21) + 0);
@@ -6295,12 +6228,12 @@ bool mu__boolexpr154;
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
-bool mu__boolexpr155;
-  if (!(!(mu_emit[mu_pat7Set.mu_content[mu_i]]))) mu__boolexpr155 = FALSE ;
+bool mu__boolexpr150;
+  if (!(!(mu_emit[mu_pat7Set.mu_content[mu_i]]))) mu__boolexpr150 = FALSE ;
   else {
-  mu__boolexpr155 = ((mu_msgs[mu_msgs[mu_pat7Set.mu_content[mu_i]].mu_aencKey].mu_k.mu_ag) == (mu_roleA[mu_j].mu_A)) ; 
+  mu__boolexpr150 = ((mu_msgs[mu_msgs[mu_pat7Set.mu_content[mu_i]].mu_aencKey].mu_k.mu_ag) == (mu_roleA[mu_j].mu_A)) ; 
 }
-if ( mu__boolexpr155 )
+if ( mu__boolexpr150 )
 {
 mu_ch[2].clear();
 mu_ch[2].mu_msg = mu_msgs[mu_pat7Set.mu_content[mu_i]];
@@ -6338,8 +6271,8 @@ public:
 
   void NextRule(unsigned & what_rule)
   {
-    unsigned r = what_rule - 11239;
-    while (what_rule < 11240 )
+    unsigned r = what_rule - 2419;
+    while (what_rule < 2420 )
       {
 	if ( ( TRUE  ) ) {
 	      if ((mu_ch[2].mu_empty) == (mu_false)) {
@@ -6353,7 +6286,7 @@ public:
 	}
 	else
 	  what_rule += 1;
-    r = what_rule - 11239;
+    r = what_rule - 2419;
     }
   }
 
@@ -6413,42 +6346,42 @@ public:
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
-bool mu__boolexpr156;
-bool mu__boolexpr157;
-  if (!((mu_ch[1].mu_empty) == (mu_true))) mu__boolexpr157 = FALSE ;
+bool mu__boolexpr151;
+bool mu__boolexpr152;
+  if (!((mu_ch[1].mu_empty) == (mu_true))) mu__boolexpr152 = FALSE ;
   else {
-  mu__boolexpr157 = ((mu_i) <= (mu_pat5Set.mu_length)) ; 
+  mu__boolexpr152 = ((mu_i) <= (mu_pat5Set.mu_length)) ; 
 }
-  if (!(mu__boolexpr157)) mu__boolexpr156 = FALSE ;
+  if (!(mu__boolexpr152)) mu__boolexpr151 = FALSE ;
   else {
-  mu__boolexpr156 = (mu_Spy_known[mu_pat5Set.mu_content[mu_i]]) ; 
+  mu__boolexpr151 = (mu_Spy_known[mu_pat5Set.mu_content[mu_i]]) ; 
 }
-    return mu__boolexpr156;
+    return mu__boolexpr151;
   }
 
   void NextRule(unsigned & what_rule)
   {
-    unsigned r = what_rule - 11240;
+    unsigned r = what_rule - 2420;
     static mu_1_roleANums mu_j;
     mu_j.value((r % 1) + 1);
     r = r / 1;
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
-    while (what_rule < 11261 )
+    while (what_rule < 2441 )
       {
 	if ( ( TRUE  ) ) {
-bool mu__boolexpr158;
-bool mu__boolexpr159;
-  if (!((mu_ch[1].mu_empty) == (mu_true))) mu__boolexpr159 = FALSE ;
+bool mu__boolexpr153;
+bool mu__boolexpr154;
+  if (!((mu_ch[1].mu_empty) == (mu_true))) mu__boolexpr154 = FALSE ;
   else {
-  mu__boolexpr159 = ((mu_i) <= (mu_pat5Set.mu_length)) ; 
+  mu__boolexpr154 = ((mu_i) <= (mu_pat5Set.mu_length)) ; 
 }
-  if (!(mu__boolexpr159)) mu__boolexpr158 = FALSE ;
+  if (!(mu__boolexpr154)) mu__boolexpr153 = FALSE ;
   else {
-  mu__boolexpr158 = (mu_Spy_known[mu_pat5Set.mu_content[mu_i]]) ; 
+  mu__boolexpr153 = (mu_Spy_known[mu_pat5Set.mu_content[mu_i]]) ; 
 }
-	      if (mu__boolexpr158) {
+	      if (mu__boolexpr153) {
 		if ( ( TRUE  ) )
 		  return;
 		else
@@ -6459,7 +6392,7 @@ bool mu__boolexpr159;
 	}
 	else
 	  what_rule += 1;
-    r = what_rule - 11240;
+    r = what_rule - 2420;
     mu_j.value((r % 1) + 1);
     r = r / 1;
     mu_i.value((r % 21) + 0);
@@ -6475,12 +6408,12 @@ bool mu__boolexpr159;
     static mu_1_indexType mu_i;
     mu_i.value((r % 21) + 0);
     r = r / 21;
-bool mu__boolexpr160;
-  if (!(!(mu_emit[mu_pat5Set.mu_content[mu_i]]))) mu__boolexpr160 = FALSE ;
+bool mu__boolexpr155;
+  if (!(!(mu_emit[mu_pat5Set.mu_content[mu_i]]))) mu__boolexpr155 = FALSE ;
   else {
-  mu__boolexpr160 = ((mu_msgs[mu_msgs[mu_pat5Set.mu_content[mu_i]].mu_aencKey].mu_k.mu_ag) == (mu_roleA[mu_j].mu_A)) ; 
+  mu__boolexpr155 = ((mu_msgs[mu_msgs[mu_pat5Set.mu_content[mu_i]].mu_aencKey].mu_k.mu_ag) == (mu_roleA[mu_j].mu_A)) ; 
 }
-if ( mu__boolexpr160 )
+if ( mu__boolexpr155 )
 {
 mu_ch[1].clear();
 mu_ch[1].mu_msg = mu_msgs[mu_pat5Set.mu_content[mu_i]];
@@ -6518,8 +6451,8 @@ public:
 
   void NextRule(unsigned & what_rule)
   {
-    unsigned r = what_rule - 11261;
-    while (what_rule < 11262 )
+    unsigned r = what_rule - 2441;
+    while (what_rule < 2442 )
       {
 	if ( ( TRUE  ) ) {
 	      if ((mu_ch[1].mu_empty) == (mu_false)) {
@@ -6533,7 +6466,7 @@ public:
 	}
 	else
 	  what_rule += 1;
-    r = what_rule - 11261;
+    r = what_rule - 2441;
     }
   }
 
@@ -6587,29 +6520,29 @@ public:
     static mu_1_roleBNums mu_i;
     mu_i.value((r % 1) + 1);
     r = r / 1;
-bool mu__boolexpr161;
-  if (!((mu_roleB[mu_i].mu_st) == (mu_B3))) mu__boolexpr161 = FALSE ;
+bool mu__boolexpr156;
+  if (!((mu_roleB[mu_i].mu_st) == (mu_B3))) mu__boolexpr156 = FALSE ;
   else {
-  mu__boolexpr161 = ((mu_ch[3].mu_empty) == (mu_false)) ; 
+  mu__boolexpr156 = ((mu_ch[3].mu_empty) == (mu_false)) ; 
 }
-    return mu__boolexpr161;
+    return mu__boolexpr156;
   }
 
   void NextRule(unsigned & what_rule)
   {
-    unsigned r = what_rule - 11262;
+    unsigned r = what_rule - 2442;
     static mu_1_roleBNums mu_i;
     mu_i.value((r % 1) + 1);
     r = r / 1;
-    while (what_rule < 11263 )
+    while (what_rule < 2443 )
       {
 	if ( ( TRUE  ) ) {
-bool mu__boolexpr162;
-  if (!((mu_roleB[mu_i].mu_st) == (mu_B3))) mu__boolexpr162 = FALSE ;
+bool mu__boolexpr157;
+  if (!((mu_roleB[mu_i].mu_st) == (mu_B3))) mu__boolexpr157 = FALSE ;
   else {
-  mu__boolexpr162 = ((mu_ch[3].mu_empty) == (mu_false)) ; 
+  mu__boolexpr157 = ((mu_ch[3].mu_empty) == (mu_false)) ; 
 }
-	      if (mu__boolexpr162) {
+	      if (mu__boolexpr157) {
 		if ( ( TRUE  ) )
 		  return;
 		else
@@ -6620,7 +6553,7 @@ bool mu__boolexpr162;
 	}
 	else
 	  what_rule += 1;
-    r = what_rule - 11262;
+    r = what_rule - 2442;
     mu_i.value((r % 1) + 1);
     r = r / 1;
     }
@@ -6646,12 +6579,12 @@ mu_isPat8 ( mu_msg, mu_flag_pat8 );
 if ( mu_flag_pat8 )
 {
 mu_destruct8 ( mu_msg, mu_roleB[mu_i].mu_locNb, mu_roleB[mu_i].mu_locB );
-bool mu__boolexpr163;
-  if (!(mu_matchNonce( mu_roleB[mu_i].mu_locNb, mu_roleB[mu_i].mu_Nb ))) mu__boolexpr163 = FALSE ;
+bool mu__boolexpr158;
+  if (!(mu_matchNonce( mu_roleB[mu_i].mu_locNb, mu_roleB[mu_i].mu_Nb ))) mu__boolexpr158 = FALSE ;
   else {
-  mu__boolexpr163 = (mu_matchAgent( mu_roleB[mu_i].mu_locB, mu_roleB[mu_i].mu_B )) ; 
+  mu__boolexpr158 = (mu_matchAgent( mu_roleB[mu_i].mu_locB, mu_roleB[mu_i].mu_B )) ; 
 }
-if ( mu__boolexpr163 )
+if ( mu__boolexpr158 )
 {
 mu_ch[3].mu_empty = mu_true;
 mu_roleB[mu_i].mu_st = mu_B1;
@@ -6688,29 +6621,29 @@ public:
     static mu_1_roleBNums mu_i;
     mu_i.value((r % 1) + 1);
     r = r / 1;
-bool mu__boolexpr164;
-  if (!((mu_roleB[mu_i].mu_st) == (mu_B2))) mu__boolexpr164 = FALSE ;
+bool mu__boolexpr159;
+  if (!((mu_roleB[mu_i].mu_st) == (mu_B2))) mu__boolexpr159 = FALSE ;
   else {
-  mu__boolexpr164 = ((mu_ch[2].mu_empty) == (mu_true)) ; 
+  mu__boolexpr159 = ((mu_ch[2].mu_empty) == (mu_true)) ; 
 }
-    return mu__boolexpr164;
+    return mu__boolexpr159;
   }
 
   void NextRule(unsigned & what_rule)
   {
-    unsigned r = what_rule - 11263;
+    unsigned r = what_rule - 2443;
     static mu_1_roleBNums mu_i;
     mu_i.value((r % 1) + 1);
     r = r / 1;
-    while (what_rule < 11264 )
+    while (what_rule < 2444 )
       {
 	if ( ( TRUE  ) ) {
-bool mu__boolexpr165;
-  if (!((mu_roleB[mu_i].mu_st) == (mu_B2))) mu__boolexpr165 = FALSE ;
+bool mu__boolexpr160;
+  if (!((mu_roleB[mu_i].mu_st) == (mu_B2))) mu__boolexpr160 = FALSE ;
   else {
-  mu__boolexpr165 = ((mu_ch[2].mu_empty) == (mu_true)) ; 
+  mu__boolexpr160 = ((mu_ch[2].mu_empty) == (mu_true)) ; 
 }
-	      if (mu__boolexpr165) {
+	      if (mu__boolexpr160) {
 		if ( ( TRUE  ) )
 		  return;
 		else
@@ -6721,7 +6654,7 @@ bool mu__boolexpr165;
 	}
 	else
 	  what_rule += 1;
-    r = what_rule - 11263;
+    r = what_rule - 2443;
     mu_i.value((r % 1) + 1);
     r = r / 1;
     }
@@ -6739,7 +6672,7 @@ mu_1_Message mu_msg("msg",0);
 mu_1_indexType mu_msgNo("msgNo",208);
 
 mu_msg.clear();
-mu_cons7 ( mu_roleB[mu_i].mu_locNa, mu_roleB[mu_i].mu_Nb, mu_roleB[mu_i].mu_B, mu_roleB[mu_i].mu_locA, mu_msg, mu_msgNo );
+mu_cons7 ( mu_roleB[mu_i].mu_locNa, mu_roleB[mu_i].mu_Nb, mu_roleB[mu_i].mu_locA, mu_msg, mu_msgNo );
 mu_ch[2].mu_empty = mu_false;
 mu_ch[2].mu_msg = mu_msg;
 mu_ch[2].mu_sender = mu_roleB[mu_i].mu_B;
@@ -6775,29 +6708,29 @@ public:
     static mu_1_roleBNums mu_i;
     mu_i.value((r % 1) + 1);
     r = r / 1;
-bool mu__boolexpr166;
-  if (!((mu_roleB[mu_i].mu_st) == (mu_B1))) mu__boolexpr166 = FALSE ;
+bool mu__boolexpr161;
+  if (!((mu_roleB[mu_i].mu_st) == (mu_B1))) mu__boolexpr161 = FALSE ;
   else {
-  mu__boolexpr166 = ((mu_ch[1].mu_empty) == (mu_false)) ; 
+  mu__boolexpr161 = ((mu_ch[1].mu_empty) == (mu_false)) ; 
 }
-    return mu__boolexpr166;
+    return mu__boolexpr161;
   }
 
   void NextRule(unsigned & what_rule)
   {
-    unsigned r = what_rule - 11264;
+    unsigned r = what_rule - 2444;
     static mu_1_roleBNums mu_i;
     mu_i.value((r % 1) + 1);
     r = r / 1;
-    while (what_rule < 11265 )
+    while (what_rule < 2445 )
       {
 	if ( ( TRUE  ) ) {
-bool mu__boolexpr167;
-  if (!((mu_roleB[mu_i].mu_st) == (mu_B1))) mu__boolexpr167 = FALSE ;
+bool mu__boolexpr162;
+  if (!((mu_roleB[mu_i].mu_st) == (mu_B1))) mu__boolexpr162 = FALSE ;
   else {
-  mu__boolexpr167 = ((mu_ch[1].mu_empty) == (mu_false)) ; 
+  mu__boolexpr162 = ((mu_ch[1].mu_empty) == (mu_false)) ; 
 }
-	      if (mu__boolexpr167) {
+	      if (mu__boolexpr162) {
 		if ( ( TRUE  ) )
 		  return;
 		else
@@ -6808,7 +6741,7 @@ bool mu__boolexpr167;
 	}
 	else
 	  what_rule += 1;
-    r = what_rule - 11264;
+    r = what_rule - 2444;
     mu_i.value((r % 1) + 1);
     r = r / 1;
     }
@@ -6834,17 +6767,17 @@ mu_isPat5 ( mu_msg, mu_flag_pat5 );
 if ( mu_flag_pat5 )
 {
 mu_destruct5 ( mu_msg, mu_roleB[mu_i].mu_locNa, mu_roleB[mu_i].mu_locA, mu_roleB[mu_i].mu_locB );
-bool mu__boolexpr168;
-bool mu__boolexpr169;
-  if (!(mu_matchNonce( mu_roleB[mu_i].mu_locNa, mu_roleB[mu_i].mu_Na ))) mu__boolexpr169 = FALSE ;
+bool mu__boolexpr163;
+bool mu__boolexpr164;
+  if (!(mu_matchNonce( mu_roleB[mu_i].mu_locNa, mu_roleB[mu_i].mu_Na ))) mu__boolexpr164 = FALSE ;
   else {
-  mu__boolexpr169 = (mu_matchAgent( mu_roleB[mu_i].mu_locA, mu_roleB[mu_i].mu_A )) ; 
+  mu__boolexpr164 = (mu_matchAgent( mu_roleB[mu_i].mu_locA, mu_roleB[mu_i].mu_A )) ; 
 }
-  if (!(mu__boolexpr169)) mu__boolexpr168 = FALSE ;
+  if (!(mu__boolexpr164)) mu__boolexpr163 = FALSE ;
   else {
-  mu__boolexpr168 = (mu_matchAgent( mu_roleB[mu_i].mu_locB, mu_roleB[mu_i].mu_B )) ; 
+  mu__boolexpr163 = (mu_matchAgent( mu_roleB[mu_i].mu_locB, mu_roleB[mu_i].mu_B )) ; 
 }
-if ( mu__boolexpr168 )
+if ( mu__boolexpr163 )
 {
 mu_ch[1].mu_empty = mu_true;
 mu_roleB[mu_i].mu_st = mu_B2;
@@ -6880,29 +6813,29 @@ public:
     static mu_1_roleANums mu_i;
     mu_i.value((r % 1) + 1);
     r = r / 1;
-bool mu__boolexpr170;
-  if (!((mu_roleA[mu_i].mu_st) == (mu_A3))) mu__boolexpr170 = FALSE ;
+bool mu__boolexpr165;
+  if (!((mu_roleA[mu_i].mu_st) == (mu_A3))) mu__boolexpr165 = FALSE ;
   else {
-  mu__boolexpr170 = ((mu_ch[3].mu_empty) == (mu_true)) ; 
+  mu__boolexpr165 = ((mu_ch[3].mu_empty) == (mu_true)) ; 
 }
-    return mu__boolexpr170;
+    return mu__boolexpr165;
   }
 
   void NextRule(unsigned & what_rule)
   {
-    unsigned r = what_rule - 11265;
+    unsigned r = what_rule - 2445;
     static mu_1_roleANums mu_i;
     mu_i.value((r % 1) + 1);
     r = r / 1;
-    while (what_rule < 11266 )
+    while (what_rule < 2446 )
       {
 	if ( ( TRUE  ) ) {
-bool mu__boolexpr171;
-  if (!((mu_roleA[mu_i].mu_st) == (mu_A3))) mu__boolexpr171 = FALSE ;
+bool mu__boolexpr166;
+  if (!((mu_roleA[mu_i].mu_st) == (mu_A3))) mu__boolexpr166 = FALSE ;
   else {
-  mu__boolexpr171 = ((mu_ch[3].mu_empty) == (mu_true)) ; 
+  mu__boolexpr166 = ((mu_ch[3].mu_empty) == (mu_true)) ; 
 }
-	      if (mu__boolexpr171) {
+	      if (mu__boolexpr166) {
 		if ( ( TRUE  ) )
 		  return;
 		else
@@ -6913,7 +6846,7 @@ bool mu__boolexpr171;
 	}
 	else
 	  what_rule += 1;
-    r = what_rule - 11265;
+    r = what_rule - 2445;
     mu_i.value((r % 1) + 1);
     r = r / 1;
     }
@@ -6968,29 +6901,29 @@ public:
     static mu_1_roleANums mu_i;
     mu_i.value((r % 1) + 1);
     r = r / 1;
-bool mu__boolexpr172;
-  if (!((mu_roleA[mu_i].mu_st) == (mu_A2))) mu__boolexpr172 = FALSE ;
+bool mu__boolexpr167;
+  if (!((mu_roleA[mu_i].mu_st) == (mu_A2))) mu__boolexpr167 = FALSE ;
   else {
-  mu__boolexpr172 = ((mu_ch[2].mu_empty) == (mu_false)) ; 
+  mu__boolexpr167 = ((mu_ch[2].mu_empty) == (mu_false)) ; 
 }
-    return mu__boolexpr172;
+    return mu__boolexpr167;
   }
 
   void NextRule(unsigned & what_rule)
   {
-    unsigned r = what_rule - 11266;
+    unsigned r = what_rule - 2446;
     static mu_1_roleANums mu_i;
     mu_i.value((r % 1) + 1);
     r = r / 1;
-    while (what_rule < 11267 )
+    while (what_rule < 2447 )
       {
 	if ( ( TRUE  ) ) {
-bool mu__boolexpr173;
-  if (!((mu_roleA[mu_i].mu_st) == (mu_A2))) mu__boolexpr173 = FALSE ;
+bool mu__boolexpr168;
+  if (!((mu_roleA[mu_i].mu_st) == (mu_A2))) mu__boolexpr168 = FALSE ;
   else {
-  mu__boolexpr173 = ((mu_ch[2].mu_empty) == (mu_false)) ; 
+  mu__boolexpr168 = ((mu_ch[2].mu_empty) == (mu_false)) ; 
 }
-	      if (mu__boolexpr173) {
+	      if (mu__boolexpr168) {
 		if ( ( TRUE  ) )
 		  return;
 		else
@@ -7001,7 +6934,7 @@ bool mu__boolexpr173;
 	}
 	else
 	  what_rule += 1;
-    r = what_rule - 11266;
+    r = what_rule - 2446;
     mu_i.value((r % 1) + 1);
     r = r / 1;
     }
@@ -7026,23 +6959,18 @@ mu_msg = mu_ch[2].mu_msg;
 mu_isPat7 ( mu_msg, mu_flag_pat7 );
 if ( mu_flag_pat7 )
 {
-mu_destruct7 ( mu_msg, mu_roleA[mu_i].mu_locNa, mu_roleA[mu_i].mu_locNb, mu_roleA[mu_i].mu_locB, mu_roleA[mu_i].mu_locA );
-bool mu__boolexpr174;
-bool mu__boolexpr175;
-bool mu__boolexpr176;
-  if (!(mu_matchNonce( mu_roleA[mu_i].mu_locNa, mu_roleA[mu_i].mu_Na ))) mu__boolexpr176 = FALSE ;
+mu_destruct7 ( mu_msg, mu_roleA[mu_i].mu_locNa, mu_roleA[mu_i].mu_locNb, mu_roleA[mu_i].mu_locA );
+bool mu__boolexpr169;
+bool mu__boolexpr170;
+  if (!(mu_matchNonce( mu_roleA[mu_i].mu_locNa, mu_roleA[mu_i].mu_Na ))) mu__boolexpr170 = FALSE ;
   else {
-  mu__boolexpr176 = (mu_matchNonce( mu_roleA[mu_i].mu_locNb, mu_roleA[mu_i].mu_Nb )) ; 
+  mu__boolexpr170 = (mu_matchNonce( mu_roleA[mu_i].mu_locNb, mu_roleA[mu_i].mu_Nb )) ; 
 }
-  if (!(mu__boolexpr176)) mu__boolexpr175 = FALSE ;
+  if (!(mu__boolexpr170)) mu__boolexpr169 = FALSE ;
   else {
-  mu__boolexpr175 = (mu_matchAgent( mu_roleA[mu_i].mu_locB, mu_roleA[mu_i].mu_B )) ; 
+  mu__boolexpr169 = (mu_matchAgent( mu_roleA[mu_i].mu_locA, mu_roleA[mu_i].mu_A )) ; 
 }
-  if (!(mu__boolexpr175)) mu__boolexpr174 = FALSE ;
-  else {
-  mu__boolexpr174 = (mu_matchAgent( mu_roleA[mu_i].mu_locA, mu_roleA[mu_i].mu_A )) ; 
-}
-if ( mu__boolexpr174 )
+if ( mu__boolexpr169 )
 {
 mu_ch[2].mu_empty = mu_true;
 mu_roleA[mu_i].mu_st = mu_A3;
@@ -7078,29 +7006,29 @@ public:
     static mu_1_roleANums mu_i;
     mu_i.value((r % 1) + 1);
     r = r / 1;
-bool mu__boolexpr177;
-  if (!((mu_roleA[mu_i].mu_st) == (mu_A1))) mu__boolexpr177 = FALSE ;
+bool mu__boolexpr171;
+  if (!((mu_roleA[mu_i].mu_st) == (mu_A1))) mu__boolexpr171 = FALSE ;
   else {
-  mu__boolexpr177 = ((mu_ch[1].mu_empty) == (mu_true)) ; 
+  mu__boolexpr171 = ((mu_ch[1].mu_empty) == (mu_true)) ; 
 }
-    return mu__boolexpr177;
+    return mu__boolexpr171;
   }
 
   void NextRule(unsigned & what_rule)
   {
-    unsigned r = what_rule - 11267;
+    unsigned r = what_rule - 2447;
     static mu_1_roleANums mu_i;
     mu_i.value((r % 1) + 1);
     r = r / 1;
-    while (what_rule < 11268 )
+    while (what_rule < 2448 )
       {
 	if ( ( TRUE  ) ) {
-bool mu__boolexpr178;
-  if (!((mu_roleA[mu_i].mu_st) == (mu_A1))) mu__boolexpr178 = FALSE ;
+bool mu__boolexpr172;
+  if (!((mu_roleA[mu_i].mu_st) == (mu_A1))) mu__boolexpr172 = FALSE ;
   else {
-  mu__boolexpr178 = ((mu_ch[1].mu_empty) == (mu_true)) ; 
+  mu__boolexpr172 = ((mu_ch[1].mu_empty) == (mu_true)) ; 
 }
-	      if (mu__boolexpr178) {
+	      if (mu__boolexpr172) {
 		if ( ( TRUE  ) )
 		  return;
 		else
@@ -7111,7 +7039,7 @@ bool mu__boolexpr178;
 	}
 	else
 	  what_rule += 1;
-    r = what_rule - 11267;
+    r = what_rule - 2447;
     mu_i.value((r % 1) + 1);
     r = r / 1;
     }
@@ -7191,78 +7119,78 @@ void SetNextEnabledRule(unsigned & what_rule)
   if (what_rule>=903 && what_rule<924)
     { R3.NextRule(what_rule);
       if (what_rule<924) return; }
-  if (what_rule>=924 && what_rule<10185)
+  if (what_rule>=924 && what_rule<1365)
     { R4.NextRule(what_rule);
-      if (what_rule<10185) return; }
-  if (what_rule>=10185 && what_rule<10206)
+      if (what_rule<1365) return; }
+  if (what_rule>=1365 && what_rule<1386)
     { R5.NextRule(what_rule);
-      if (what_rule<10206) return; }
-  if (what_rule>=10206 && what_rule<10647)
+      if (what_rule<1386) return; }
+  if (what_rule>=1386 && what_rule<1827)
     { R6.NextRule(what_rule);
-      if (what_rule<10647) return; }
-  if (what_rule>=10647 && what_rule<10668)
+      if (what_rule<1827) return; }
+  if (what_rule>=1827 && what_rule<1848)
     { R7.NextRule(what_rule);
-      if (what_rule<10668) return; }
-  if (what_rule>=10668 && what_rule<11109)
+      if (what_rule<1848) return; }
+  if (what_rule>=1848 && what_rule<2289)
     { R8.NextRule(what_rule);
-      if (what_rule<11109) return; }
-  if (what_rule>=11109 && what_rule<11130)
+      if (what_rule<2289) return; }
+  if (what_rule>=2289 && what_rule<2310)
     { R9.NextRule(what_rule);
-      if (what_rule<11130) return; }
-  if (what_rule>=11130 && what_rule<11151)
+      if (what_rule<2310) return; }
+  if (what_rule>=2310 && what_rule<2331)
     { R10.NextRule(what_rule);
-      if (what_rule<11151) return; }
-  if (what_rule>=11151 && what_rule<11152)
+      if (what_rule<2331) return; }
+  if (what_rule>=2331 && what_rule<2332)
     { R11.NextRule(what_rule);
-      if (what_rule<11152) return; }
-  if (what_rule>=11152 && what_rule<11173)
+      if (what_rule<2332) return; }
+  if (what_rule>=2332 && what_rule<2353)
     { R12.NextRule(what_rule);
-      if (what_rule<11173) return; }
-  if (what_rule>=11173 && what_rule<11174)
+      if (what_rule<2353) return; }
+  if (what_rule>=2353 && what_rule<2354)
     { R13.NextRule(what_rule);
-      if (what_rule<11174) return; }
-  if (what_rule>=11174 && what_rule<11195)
+      if (what_rule<2354) return; }
+  if (what_rule>=2354 && what_rule<2375)
     { R14.NextRule(what_rule);
-      if (what_rule<11195) return; }
-  if (what_rule>=11195 && what_rule<11196)
+      if (what_rule<2375) return; }
+  if (what_rule>=2375 && what_rule<2376)
     { R15.NextRule(what_rule);
-      if (what_rule<11196) return; }
-  if (what_rule>=11196 && what_rule<11217)
+      if (what_rule<2376) return; }
+  if (what_rule>=2376 && what_rule<2397)
     { R16.NextRule(what_rule);
-      if (what_rule<11217) return; }
-  if (what_rule>=11217 && what_rule<11218)
+      if (what_rule<2397) return; }
+  if (what_rule>=2397 && what_rule<2398)
     { R17.NextRule(what_rule);
-      if (what_rule<11218) return; }
-  if (what_rule>=11218 && what_rule<11239)
+      if (what_rule<2398) return; }
+  if (what_rule>=2398 && what_rule<2419)
     { R18.NextRule(what_rule);
-      if (what_rule<11239) return; }
-  if (what_rule>=11239 && what_rule<11240)
+      if (what_rule<2419) return; }
+  if (what_rule>=2419 && what_rule<2420)
     { R19.NextRule(what_rule);
-      if (what_rule<11240) return; }
-  if (what_rule>=11240 && what_rule<11261)
+      if (what_rule<2420) return; }
+  if (what_rule>=2420 && what_rule<2441)
     { R20.NextRule(what_rule);
-      if (what_rule<11261) return; }
-  if (what_rule>=11261 && what_rule<11262)
+      if (what_rule<2441) return; }
+  if (what_rule>=2441 && what_rule<2442)
     { R21.NextRule(what_rule);
-      if (what_rule<11262) return; }
-  if (what_rule>=11262 && what_rule<11263)
+      if (what_rule<2442) return; }
+  if (what_rule>=2442 && what_rule<2443)
     { R22.NextRule(what_rule);
-      if (what_rule<11263) return; }
-  if (what_rule>=11263 && what_rule<11264)
+      if (what_rule<2443) return; }
+  if (what_rule>=2443 && what_rule<2444)
     { R23.NextRule(what_rule);
-      if (what_rule<11264) return; }
-  if (what_rule>=11264 && what_rule<11265)
+      if (what_rule<2444) return; }
+  if (what_rule>=2444 && what_rule<2445)
     { R24.NextRule(what_rule);
-      if (what_rule<11265) return; }
-  if (what_rule>=11265 && what_rule<11266)
+      if (what_rule<2445) return; }
+  if (what_rule>=2445 && what_rule<2446)
     { R25.NextRule(what_rule);
-      if (what_rule<11266) return; }
-  if (what_rule>=11266 && what_rule<11267)
+      if (what_rule<2446) return; }
+  if (what_rule>=2446 && what_rule<2447)
     { R26.NextRule(what_rule);
-      if (what_rule<11267) return; }
-  if (what_rule>=11267 && what_rule<11268)
+      if (what_rule<2447) return; }
+  if (what_rule>=2447 && what_rule<2448)
     { R27.NextRule(what_rule);
-      if (what_rule<11268) return; }
+      if (what_rule<2448) return; }
 }
 bool Condition(unsigned r)
 {
@@ -7271,30 +7199,30 @@ bool Condition(unsigned r)
   if (r>=441 && r<=461) return R1.Condition(r-441);
   if (r>=462 && r<=902) return R2.Condition(r-462);
   if (r>=903 && r<=923) return R3.Condition(r-903);
-  if (r>=924 && r<=10184) return R4.Condition(r-924);
-  if (r>=10185 && r<=10205) return R5.Condition(r-10185);
-  if (r>=10206 && r<=10646) return R6.Condition(r-10206);
-  if (r>=10647 && r<=10667) return R7.Condition(r-10647);
-  if (r>=10668 && r<=11108) return R8.Condition(r-10668);
-  if (r>=11109 && r<=11129) return R9.Condition(r-11109);
-  if (r>=11130 && r<=11150) return R10.Condition(r-11130);
-  if (r>=11151 && r<=11151) return R11.Condition(r-11151);
-  if (r>=11152 && r<=11172) return R12.Condition(r-11152);
-  if (r>=11173 && r<=11173) return R13.Condition(r-11173);
-  if (r>=11174 && r<=11194) return R14.Condition(r-11174);
-  if (r>=11195 && r<=11195) return R15.Condition(r-11195);
-  if (r>=11196 && r<=11216) return R16.Condition(r-11196);
-  if (r>=11217 && r<=11217) return R17.Condition(r-11217);
-  if (r>=11218 && r<=11238) return R18.Condition(r-11218);
-  if (r>=11239 && r<=11239) return R19.Condition(r-11239);
-  if (r>=11240 && r<=11260) return R20.Condition(r-11240);
-  if (r>=11261 && r<=11261) return R21.Condition(r-11261);
-  if (r>=11262 && r<=11262) return R22.Condition(r-11262);
-  if (r>=11263 && r<=11263) return R23.Condition(r-11263);
-  if (r>=11264 && r<=11264) return R24.Condition(r-11264);
-  if (r>=11265 && r<=11265) return R25.Condition(r-11265);
-  if (r>=11266 && r<=11266) return R26.Condition(r-11266);
-  if (r>=11267 && r<=11267) return R27.Condition(r-11267);
+  if (r>=924 && r<=1364) return R4.Condition(r-924);
+  if (r>=1365 && r<=1385) return R5.Condition(r-1365);
+  if (r>=1386 && r<=1826) return R6.Condition(r-1386);
+  if (r>=1827 && r<=1847) return R7.Condition(r-1827);
+  if (r>=1848 && r<=2288) return R8.Condition(r-1848);
+  if (r>=2289 && r<=2309) return R9.Condition(r-2289);
+  if (r>=2310 && r<=2330) return R10.Condition(r-2310);
+  if (r>=2331 && r<=2331) return R11.Condition(r-2331);
+  if (r>=2332 && r<=2352) return R12.Condition(r-2332);
+  if (r>=2353 && r<=2353) return R13.Condition(r-2353);
+  if (r>=2354 && r<=2374) return R14.Condition(r-2354);
+  if (r>=2375 && r<=2375) return R15.Condition(r-2375);
+  if (r>=2376 && r<=2396) return R16.Condition(r-2376);
+  if (r>=2397 && r<=2397) return R17.Condition(r-2397);
+  if (r>=2398 && r<=2418) return R18.Condition(r-2398);
+  if (r>=2419 && r<=2419) return R19.Condition(r-2419);
+  if (r>=2420 && r<=2440) return R20.Condition(r-2420);
+  if (r>=2441 && r<=2441) return R21.Condition(r-2441);
+  if (r>=2442 && r<=2442) return R22.Condition(r-2442);
+  if (r>=2443 && r<=2443) return R23.Condition(r-2443);
+  if (r>=2444 && r<=2444) return R24.Condition(r-2444);
+  if (r>=2445 && r<=2445) return R25.Condition(r-2445);
+  if (r>=2446 && r<=2446) return R26.Condition(r-2446);
+  if (r>=2447 && r<=2447) return R27.Condition(r-2447);
 Error.Notrace("Internal: NextStateGenerator -- checking condition for nonexisting rule.");
 return 0;}
 void Code(unsigned r)
@@ -7303,30 +7231,30 @@ void Code(unsigned r)
   if (r>=441 && r<=461) { R1.Code(r-441); return; } 
   if (r>=462 && r<=902) { R2.Code(r-462); return; } 
   if (r>=903 && r<=923) { R3.Code(r-903); return; } 
-  if (r>=924 && r<=10184) { R4.Code(r-924); return; } 
-  if (r>=10185 && r<=10205) { R5.Code(r-10185); return; } 
-  if (r>=10206 && r<=10646) { R6.Code(r-10206); return; } 
-  if (r>=10647 && r<=10667) { R7.Code(r-10647); return; } 
-  if (r>=10668 && r<=11108) { R8.Code(r-10668); return; } 
-  if (r>=11109 && r<=11129) { R9.Code(r-11109); return; } 
-  if (r>=11130 && r<=11150) { R10.Code(r-11130); return; } 
-  if (r>=11151 && r<=11151) { R11.Code(r-11151); return; } 
-  if (r>=11152 && r<=11172) { R12.Code(r-11152); return; } 
-  if (r>=11173 && r<=11173) { R13.Code(r-11173); return; } 
-  if (r>=11174 && r<=11194) { R14.Code(r-11174); return; } 
-  if (r>=11195 && r<=11195) { R15.Code(r-11195); return; } 
-  if (r>=11196 && r<=11216) { R16.Code(r-11196); return; } 
-  if (r>=11217 && r<=11217) { R17.Code(r-11217); return; } 
-  if (r>=11218 && r<=11238) { R18.Code(r-11218); return; } 
-  if (r>=11239 && r<=11239) { R19.Code(r-11239); return; } 
-  if (r>=11240 && r<=11260) { R20.Code(r-11240); return; } 
-  if (r>=11261 && r<=11261) { R21.Code(r-11261); return; } 
-  if (r>=11262 && r<=11262) { R22.Code(r-11262); return; } 
-  if (r>=11263 && r<=11263) { R23.Code(r-11263); return; } 
-  if (r>=11264 && r<=11264) { R24.Code(r-11264); return; } 
-  if (r>=11265 && r<=11265) { R25.Code(r-11265); return; } 
-  if (r>=11266 && r<=11266) { R26.Code(r-11266); return; } 
-  if (r>=11267 && r<=11267) { R27.Code(r-11267); return; } 
+  if (r>=924 && r<=1364) { R4.Code(r-924); return; } 
+  if (r>=1365 && r<=1385) { R5.Code(r-1365); return; } 
+  if (r>=1386 && r<=1826) { R6.Code(r-1386); return; } 
+  if (r>=1827 && r<=1847) { R7.Code(r-1827); return; } 
+  if (r>=1848 && r<=2288) { R8.Code(r-1848); return; } 
+  if (r>=2289 && r<=2309) { R9.Code(r-2289); return; } 
+  if (r>=2310 && r<=2330) { R10.Code(r-2310); return; } 
+  if (r>=2331 && r<=2331) { R11.Code(r-2331); return; } 
+  if (r>=2332 && r<=2352) { R12.Code(r-2332); return; } 
+  if (r>=2353 && r<=2353) { R13.Code(r-2353); return; } 
+  if (r>=2354 && r<=2374) { R14.Code(r-2354); return; } 
+  if (r>=2375 && r<=2375) { R15.Code(r-2375); return; } 
+  if (r>=2376 && r<=2396) { R16.Code(r-2376); return; } 
+  if (r>=2397 && r<=2397) { R17.Code(r-2397); return; } 
+  if (r>=2398 && r<=2418) { R18.Code(r-2398); return; } 
+  if (r>=2419 && r<=2419) { R19.Code(r-2419); return; } 
+  if (r>=2420 && r<=2440) { R20.Code(r-2420); return; } 
+  if (r>=2441 && r<=2441) { R21.Code(r-2441); return; } 
+  if (r>=2442 && r<=2442) { R22.Code(r-2442); return; } 
+  if (r>=2443 && r<=2443) { R23.Code(r-2443); return; } 
+  if (r>=2444 && r<=2444) { R24.Code(r-2444); return; } 
+  if (r>=2445 && r<=2445) { R25.Code(r-2445); return; } 
+  if (r>=2446 && r<=2446) { R26.Code(r-2446); return; } 
+  if (r>=2447 && r<=2447) { R27.Code(r-2447); return; } 
 }
 int Priority(unsigned short r)
 {
@@ -7334,30 +7262,30 @@ int Priority(unsigned short r)
   if (r>=441 && r<=461) { return R1.Priority(); } 
   if (r>=462 && r<=902) { return R2.Priority(); } 
   if (r>=903 && r<=923) { return R3.Priority(); } 
-  if (r>=924 && r<=10184) { return R4.Priority(); } 
-  if (r>=10185 && r<=10205) { return R5.Priority(); } 
-  if (r>=10206 && r<=10646) { return R6.Priority(); } 
-  if (r>=10647 && r<=10667) { return R7.Priority(); } 
-  if (r>=10668 && r<=11108) { return R8.Priority(); } 
-  if (r>=11109 && r<=11129) { return R9.Priority(); } 
-  if (r>=11130 && r<=11150) { return R10.Priority(); } 
-  if (r>=11151 && r<=11151) { return R11.Priority(); } 
-  if (r>=11152 && r<=11172) { return R12.Priority(); } 
-  if (r>=11173 && r<=11173) { return R13.Priority(); } 
-  if (r>=11174 && r<=11194) { return R14.Priority(); } 
-  if (r>=11195 && r<=11195) { return R15.Priority(); } 
-  if (r>=11196 && r<=11216) { return R16.Priority(); } 
-  if (r>=11217 && r<=11217) { return R17.Priority(); } 
-  if (r>=11218 && r<=11238) { return R18.Priority(); } 
-  if (r>=11239 && r<=11239) { return R19.Priority(); } 
-  if (r>=11240 && r<=11260) { return R20.Priority(); } 
-  if (r>=11261 && r<=11261) { return R21.Priority(); } 
-  if (r>=11262 && r<=11262) { return R22.Priority(); } 
-  if (r>=11263 && r<=11263) { return R23.Priority(); } 
-  if (r>=11264 && r<=11264) { return R24.Priority(); } 
-  if (r>=11265 && r<=11265) { return R25.Priority(); } 
-  if (r>=11266 && r<=11266) { return R26.Priority(); } 
-  if (r>=11267 && r<=11267) { return R27.Priority(); } 
+  if (r>=924 && r<=1364) { return R4.Priority(); } 
+  if (r>=1365 && r<=1385) { return R5.Priority(); } 
+  if (r>=1386 && r<=1826) { return R6.Priority(); } 
+  if (r>=1827 && r<=1847) { return R7.Priority(); } 
+  if (r>=1848 && r<=2288) { return R8.Priority(); } 
+  if (r>=2289 && r<=2309) { return R9.Priority(); } 
+  if (r>=2310 && r<=2330) { return R10.Priority(); } 
+  if (r>=2331 && r<=2331) { return R11.Priority(); } 
+  if (r>=2332 && r<=2352) { return R12.Priority(); } 
+  if (r>=2353 && r<=2353) { return R13.Priority(); } 
+  if (r>=2354 && r<=2374) { return R14.Priority(); } 
+  if (r>=2375 && r<=2375) { return R15.Priority(); } 
+  if (r>=2376 && r<=2396) { return R16.Priority(); } 
+  if (r>=2397 && r<=2397) { return R17.Priority(); } 
+  if (r>=2398 && r<=2418) { return R18.Priority(); } 
+  if (r>=2419 && r<=2419) { return R19.Priority(); } 
+  if (r>=2420 && r<=2440) { return R20.Priority(); } 
+  if (r>=2441 && r<=2441) { return R21.Priority(); } 
+  if (r>=2442 && r<=2442) { return R22.Priority(); } 
+  if (r>=2443 && r<=2443) { return R23.Priority(); } 
+  if (r>=2444 && r<=2444) { return R24.Priority(); } 
+  if (r>=2445 && r<=2445) { return R25.Priority(); } 
+  if (r>=2446 && r<=2446) { return R26.Priority(); } 
+  if (r>=2447 && r<=2447) { return R27.Priority(); } 
 return 0;}
 char * Name(unsigned r)
 {
@@ -7365,39 +7293,39 @@ char * Name(unsigned r)
   if (r>=441 && r<=461) return R1.Name(r-441);
   if (r>=462 && r<=902) return R2.Name(r-462);
   if (r>=903 && r<=923) return R3.Name(r-903);
-  if (r>=924 && r<=10184) return R4.Name(r-924);
-  if (r>=10185 && r<=10205) return R5.Name(r-10185);
-  if (r>=10206 && r<=10646) return R6.Name(r-10206);
-  if (r>=10647 && r<=10667) return R7.Name(r-10647);
-  if (r>=10668 && r<=11108) return R8.Name(r-10668);
-  if (r>=11109 && r<=11129) return R9.Name(r-11109);
-  if (r>=11130 && r<=11150) return R10.Name(r-11130);
-  if (r>=11151 && r<=11151) return R11.Name(r-11151);
-  if (r>=11152 && r<=11172) return R12.Name(r-11152);
-  if (r>=11173 && r<=11173) return R13.Name(r-11173);
-  if (r>=11174 && r<=11194) return R14.Name(r-11174);
-  if (r>=11195 && r<=11195) return R15.Name(r-11195);
-  if (r>=11196 && r<=11216) return R16.Name(r-11196);
-  if (r>=11217 && r<=11217) return R17.Name(r-11217);
-  if (r>=11218 && r<=11238) return R18.Name(r-11218);
-  if (r>=11239 && r<=11239) return R19.Name(r-11239);
-  if (r>=11240 && r<=11260) return R20.Name(r-11240);
-  if (r>=11261 && r<=11261) return R21.Name(r-11261);
-  if (r>=11262 && r<=11262) return R22.Name(r-11262);
-  if (r>=11263 && r<=11263) return R23.Name(r-11263);
-  if (r>=11264 && r<=11264) return R24.Name(r-11264);
-  if (r>=11265 && r<=11265) return R25.Name(r-11265);
-  if (r>=11266 && r<=11266) return R26.Name(r-11266);
-  if (r>=11267 && r<=11267) return R27.Name(r-11267);
+  if (r>=924 && r<=1364) return R4.Name(r-924);
+  if (r>=1365 && r<=1385) return R5.Name(r-1365);
+  if (r>=1386 && r<=1826) return R6.Name(r-1386);
+  if (r>=1827 && r<=1847) return R7.Name(r-1827);
+  if (r>=1848 && r<=2288) return R8.Name(r-1848);
+  if (r>=2289 && r<=2309) return R9.Name(r-2289);
+  if (r>=2310 && r<=2330) return R10.Name(r-2310);
+  if (r>=2331 && r<=2331) return R11.Name(r-2331);
+  if (r>=2332 && r<=2352) return R12.Name(r-2332);
+  if (r>=2353 && r<=2353) return R13.Name(r-2353);
+  if (r>=2354 && r<=2374) return R14.Name(r-2354);
+  if (r>=2375 && r<=2375) return R15.Name(r-2375);
+  if (r>=2376 && r<=2396) return R16.Name(r-2376);
+  if (r>=2397 && r<=2397) return R17.Name(r-2397);
+  if (r>=2398 && r<=2418) return R18.Name(r-2398);
+  if (r>=2419 && r<=2419) return R19.Name(r-2419);
+  if (r>=2420 && r<=2440) return R20.Name(r-2420);
+  if (r>=2441 && r<=2441) return R21.Name(r-2441);
+  if (r>=2442 && r<=2442) return R22.Name(r-2442);
+  if (r>=2443 && r<=2443) return R23.Name(r-2443);
+  if (r>=2444 && r<=2444) return R24.Name(r-2444);
+  if (r>=2445 && r<=2445) return R25.Name(r-2445);
+  if (r>=2446 && r<=2446) return R26.Name(r-2446);
+  if (r>=2447 && r<=2447) return R27.Name(r-2447);
   return NULL;
 }
 };
-const unsigned numrules = 11268;
+const unsigned numrules = 2448;
 
 /********************
   parameter
  ********************/
-#define RULES_IN_WORLD 11268
+#define RULES_IN_WORLD 2448
 
 
 /********************
@@ -7414,7 +7342,7 @@ public:
   void Code(unsigned short r)
   {
 mu_roleA[1].mu_A = mu_Alice;
-mu_roleA[1].mu_B = mu_Bob;
+mu_roleA[1].mu_B = mu_Intruder;
 mu_roleA[1].mu_Na = mu_Na;
 mu_roleA[1].mu_st = mu_A1;
 mu_roleA[1].mu_commit = mu_false;
@@ -7522,72 +7450,72 @@ unsigned short StartStateManager::numstartstates = 1;
 /********************
   Invariant records
  ********************/
-int mu__invariant_179() // Invariant "auth1"
+int mu__invariant_173() // Invariant "auth1"
 {
-bool mu__quant180; 
-mu__quant180 = TRUE;
+bool mu__quant174; 
+mu__quant174 = TRUE;
 {
 for(int mu_i = 1; mu_i <= 1; mu_i++) {
-bool mu__boolexpr181;
-  if (!((mu_roleA[mu_i].mu_commit) == (mu_true))) mu__boolexpr181 = TRUE ;
+bool mu__boolexpr175;
+  if (!((mu_roleA[mu_i].mu_commit) == (mu_true))) mu__boolexpr175 = TRUE ;
   else {
-bool mu__quant182; 
-mu__quant182 = FALSE;
+bool mu__quant176; 
+mu__quant176 = FALSE;
 {
 for(int mu_j = 1; mu_j <= 1; mu_j++) {
 if ( ((mu_roleB[mu_i].mu_Na) == (mu_roleA[mu_j].mu_Na)) )
-  { mu__quant182 = TRUE; break; }
+  { mu__quant176 = TRUE; break; }
 };
 };
-  mu__boolexpr181 = (mu__quant182) ; 
+  mu__boolexpr175 = (mu__quant176) ; 
 }
-if ( !(mu__boolexpr181) )
-  { mu__quant180 = FALSE; break; }
+if ( !(mu__boolexpr175) )
+  { mu__quant174 = FALSE; break; }
 };
 };
-return mu__quant180;
+return mu__quant174;
 };
 
-bool mu__condition_183() // Condition for Rule "auth1"
+bool mu__condition_177() // Condition for Rule "auth1"
 {
-  return mu__invariant_179( );
+  return mu__invariant_173( );
 }
 
 /**** end rule declaration ****/
 
-int mu__invariant_184() // Invariant "sec1"
+int mu__invariant_178() // Invariant "sec1"
 {
-bool mu__quant185; 
-mu__quant185 = TRUE;
+bool mu__quant179; 
+mu__quant179 = TRUE;
 {
 for(int mu_i = 0; mu_i <= 20; mu_i++) {
-bool mu__boolexpr186;
-bool mu__boolexpr187;
-  if (!((mu_msgs[mu_i].mu_msgType) == (mu_nonce))) mu__boolexpr187 = FALSE ;
+bool mu__boolexpr180;
+bool mu__boolexpr181;
+  if (!((mu_msgs[mu_i].mu_msgType) == (mu_nonce))) mu__boolexpr181 = FALSE ;
   else {
-  mu__boolexpr187 = ((mu_msgs[mu_i].mu_noncePart) == (mu_Nb)) ; 
+  mu__boolexpr181 = ((mu_msgs[mu_i].mu_noncePart) == (mu_Nb)) ; 
 }
-  if (!(mu__boolexpr187)) mu__boolexpr186 = TRUE ;
+  if (!(mu__boolexpr181)) mu__boolexpr180 = TRUE ;
   else {
-  mu__boolexpr186 = ((mu_Spy_known[mu_i]) == (mu_false)) ; 
+  mu__boolexpr180 = ((mu_Spy_known[mu_i]) == (mu_false)) ; 
 }
-if ( !(mu__boolexpr186) )
-  { mu__quant185 = FALSE; break; }
+if ( !(mu__boolexpr180) )
+  { mu__quant179 = FALSE; break; }
 };
 };
-return mu__quant185;
+return mu__quant179;
 };
 
-bool mu__condition_188() // Condition for Rule "sec1"
+bool mu__condition_182() // Condition for Rule "sec1"
 {
-  return mu__invariant_184( );
+  return mu__invariant_178( );
 }
 
 /**** end rule declaration ****/
 
 const rulerec invariants[] = {
-{"sec1", &mu__condition_188, NULL, },
-{"auth1", &mu__condition_183, NULL, },
+{"sec1", &mu__condition_182, NULL, },
+{"auth1", &mu__condition_177, NULL, },
 };
 const unsigned short numinvariants = 2;
 
