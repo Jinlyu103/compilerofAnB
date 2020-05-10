@@ -2,7 +2,7 @@ const
   roleANum:1;
   roleBNum:1;
   totalFact:20;
-  msgLength:5;
+  msgLength:15;
   chanNum:30;
 type
   indexType:0..totalFact;
@@ -721,6 +721,7 @@ function matchAgent(Var locAg: AgentType; Var Ag: AgentType):boolean;  ---if ag 
     endif;
     return flag;
   end;
+
 function matchNonce(Var locNa: NonceType; Var Na: NonceType):boolean;  ---if Na equals to locNa which was derived from recieving msg, or anyNonce, then true
   var flag : boolean;
   begin
@@ -735,6 +736,33 @@ function matchNonce(Var locNa: NonceType; Var Na: NonceType):boolean;  ---if Na 
     endif;
     return flag;
   end;
+
+function match(var m1,m2:Message):boolean;
+  var concatFlag: boolean;
+      i: indexType;
+  begin 
+    if m1.msgType = agent & m2.msgType = agent then
+	    return (m1.ag != anyAgent & m2.ag != anyAgent & matchAgent(m1.ag, m2.ag)); ---ag and noncePart should be initiallized as anyAgent or anyNonce 
+    elsif m1.msgType = nonce & m2.msgType = nonce then
+	    return (m1.noncePart != anyNonce & m2.noncePart != anyNonce & matchNonce(m1.noncePart, m2.noncePart));
+    elsif m1.msgType = key & m2.msgType = key then
+	    return (m1.k.encType = m2.k.encType) & (matchAgent(m1.k.ag, m2.k.ag));
+    elsif m1.msgType = aenc & m2.msgType = aenc then
+	    return match(msgs[m1.aencMsg], msgs[m2.aencMsg]) & match(msgs[m1.aencKey], msgs[m2.aencKey]);
+    elsif m1.msgType = senc & m2.msgType = senc then
+	    return match(msgs[m1.sencMsg], msgs[m2.sencMsg]) & match(msgs[m1.sencKey], msgs[m2.sencKey]);
+    elsif (m1.msgType=concat & m2.msgType=concat) & (m1.length = m2.length)  then
+      concatFlag := true;
+      i := m1.length;
+      while (i > 0 & concatFlag)do
+        concatFlag := concatFlag & match(msgs[m1.concatPart[i]], msgs[m2.concatPart[i]]);
+      end;
+	    return concatFlag;
+    else
+	    return false;
+    endif;	
+  end;
+
 ruleset i:roleANums do
 rule " roleA1 "
 roleA[i].st = A1 & ch[1].empty = true 
