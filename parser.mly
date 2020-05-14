@@ -102,8 +102,8 @@ actions:
   | ACTIONS; actlist= action;  { actlist };
 
 action:
-  | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE ; r1=IDENT; SENDTO ; r2=IDENT;LEFT_BRACK;NONCE;LEFT_BRACK;n=IDENT;RIGHT_BRACK; RIGHT_BRACK;COLON;m=message {`Act1 (seq,r1,r2,n,m) }
-  | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE ; r1=IDENT; SENDTO ; r2=IDENT;LEFT_BRACK;RIGHT_BRACK;COLON;m=message {`Act2 (seq,r1,r2,m) } (* no new nonce generated*)
+  | LEFT_MIDBRACE; seq=INT; RIGHT_MIDBRACE ; r1=IDENT; SENDTO ; r2=IDENT;LEFT_BRACK;NONCE;LEFT_BRACK;n=IDENT;RIGHT_BRACK; RIGHT_BRACK;COLON;m=message {`Act1 (seq,r1,r2,n,m) }
+  | LEFT_MIDBRACE; seq=INT; RIGHT_MIDBRACE ; r1=IDENT; SENDTO ; r2=IDENT;LEFT_BRACK;RIGHT_BRACK;COLON;m=message {`Act2 (seq,r1,r2,m) } (* no new nonce generated*)
   | LEFT_BRACE;acts = action_list; RIGHT_BRACE { `Actlist acts};
 
 action_list:

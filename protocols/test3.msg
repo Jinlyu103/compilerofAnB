@@ -4,9 +4,9 @@ Knowledges:{
     B : <B.nonce(Nb)>
 }
 Actions:{
-[seq1] A->B (nonce(Na)) : aenc{<nonce(Na).A>}pk(B);
-[seq2] B->A (nonce(Nb)) : aenc{<nonce(Na).nonce(Nb).B>}pk(A);
-[seq3] A->B () : aenc{nonce(Nb)}pk(B)
+[1] A->B (nonce(Na)) : aenc{<nonce(Na).A>}pk(B);
+[2] B->A (nonce(Nb)) : aenc{<nonce(Na).nonce(Nb).B>}pk(A);
+[3] A->B () : aenc{nonce(Nb)}pk(B)
 }
 Environment:{
 [agent1] A [1] : <Alice.Bob.nonce(Na)>;

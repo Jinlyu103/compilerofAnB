@@ -4,7 +4,7 @@ Knowledges:{
     B : <A>
 }
 Actions:{
-[seq1] A->B () : <A.aenc{<B.nonce(Xa).aenc{nonce(Ya)}pk(B)>}sk(A)>
+[1] A->B () : <A.aenc{<B.nonce(Xa).aenc{nonce(Ya)}pk(B)>}sk(A)>
 }
 Environment:{
 [agent1] A [1] : <Alice.Bob.nonce(X1).nonce(Y1)>;

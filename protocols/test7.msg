@@ -4,9 +4,9 @@ Knowledges:{
     B : <B.nonce(Nb).nonce(Xb).nonce(Yb)>
 }
 Actions:{
-[seq1] A->B (nonce(Xa)) : <A.aenc{<nonce(Na).B.nonce(Xa).aenc{nonce(Ya)}pk(B)>}sk(A)>;
-[seq2] B->A (nonce(xb)) : <B.aenc{<nonce(Nb).A.nonce(Na).nonce(Xb).aenc{nonce(Yb)}pk(A)>}sk(B)>;
-[seq3] A->B () : <A.aenc{nonce(Nb)}sk(A)>
+[1] A->B (nonce(Xa)) : <A.aenc{<nonce(Na).B.nonce(Xa).aenc{nonce(Ya)}pk(B)>}sk(A)>;
+[2] B->A (nonce(xb)) : <B.aenc{<nonce(Nb).A.nonce(Na).nonce(Xb).aenc{nonce(Yb)}pk(A)>}sk(B)>;
+[3] A->B () : <A.aenc{nonce(Nb)}sk(A)>
 }
 Environment:{
 [agent1] A [1] : <Alice.Bob.nonce(Na).nonce(Xa1).nonce(Ya1)>;

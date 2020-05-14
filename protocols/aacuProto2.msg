@@ -5,21 +5,21 @@ Knowledges:{
 	Server : <Host.Gateway.Server.nonce(Na3).nonce(Na4)>
 }
 Actions:{
-[seq1] Gateway -> Host (nonce(Na1)) : <nonce(Na1).Gateway>;
-[seq2] Host -> Gateway  (nonce(Na2)) :   <Host.nonce(Na2).aenc{<Host.nonce(Na2)>}sk(Host)>;
-[seq3] Gateway -> Server  () : <Host.nonce(Na2).aenc{<Host.nonce(Na2)>}sk(Host)>;
+[1] Gateway -> Host (nonce(Na1)) : <nonce(Na1).Gateway>;
+[2] Host -> Gateway  (nonce(Na2)) :   <Host.nonce(Na2).aenc{<Host.nonce(Na2)>}sk(Host)>;
+[3] Gateway -> Server  () : <Host.nonce(Na2).aenc{<Host.nonce(Na2)>}sk(Host)>;
 
-[seq4] Server -> Gateway  (nonce(Na3)) : <Server.nonce(Na3).aenc{<Server.nonce(Na3)>}sk(Server)>;
-[seq5] Gateway-> Host ():      <Server.nonce(Na3).aenc{<Server.nonce(Na3)>}sk(Server)>;
+[4] Server -> Gateway  (nonce(Na3)) : <Server.nonce(Na3).aenc{<Server.nonce(Na3)>}sk(Server)>;
+[5] Gateway-> Host ():      <Server.nonce(Na3).aenc{<Server.nonce(Na3)>}sk(Server)>;
 
-[seq6] Host -> Gateway  (): <Host.nonce(Na3).aenc{<Host.nonce(Na3)>}sk(Host)>;
-[seq7] Gateway -> Server(): <Host.nonce(Na3).aenc{<Host.nonce(Na3)>}sk(Host)>;
+[6] Host -> Gateway  (): <Host.nonce(Na3).aenc{<Host.nonce(Na3)>}sk(Host)>;
+[7] Gateway -> Server(): <Host.nonce(Na3).aenc{<Host.nonce(Na3)>}sk(Host)>;
 
-[seq8] Server -> Gateway (nonce(Na4)) : <Server.nonce(Na4).aenc{<Server.nonce(Na4)>}sk(Server)>;
-[seq9] Gateway-> Host () :    <Server.nonce(Na4).aenc{<Server.nonce(Na4)>}sk(Server)>
+[8] Server -> Gateway (nonce(Na4)) : <Server.nonce(Na4).aenc{<Server.nonce(Na4)>}sk(Server)>;
+[9] Gateway-> Host () :    <Server.nonce(Na4).aenc{<Server.nonce(Na4)>}sk(Server)>
 }
 Environment:{
-[agent1] Host [1] : <HostID.Intruder.nonce(Na2)>;
+[agent1] Host [1] : <HostID.GatewayIP.nonce(Na2)>;
 [agent2] Gateway [1] : <HostID.ServerIP.GatewayIP.nonce(Na1)>;
 [agent3] Server [1] : <HostID.GatewayIP.ServerIP.nonce(Na3).nonce(Na4)>
 }
