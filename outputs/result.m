@@ -484,6 +484,8 @@ procedure destruct7(msg:Message; Var Host:AgentType; Var Na2:NonceType; Var Host
 
   procedure get_msgNo(msg:Message; Var num:indexType);
     var index:indexType;
+        j:indexType;
+        flag:boolean;
     begin
       index:=0;
       for i: indexType do
@@ -495,6 +497,18 @@ procedure destruct7(msg:Message; Var Host:AgentType; Var Na2:NonceType; Var Host
           | (msg.msgType=senc & (msgs[i].sencMsg=msg.sencMsg & msgs[i].sencKey=msg.sencKey))
           ) then 
             index:=i;
+          elsif (msg.msgType=concat & msg.length = msgs[i].length) then
+            j := msg.length;
+            flag := true;
+            while j > 0 do
+              if (msg.concatPart[j] != msgs[i].concatPart[j]) then
+                flag := false;
+              endif;
+              j := j - 1;
+            end;
+            if (flag) then
+              index := i;
+            endif;
           endif;
         endif;
       endfor;
@@ -758,7 +772,6 @@ begin
    clear msg;
    msg := ch[1].msg;
    isPat3(msg, flag_pat3);
-   put flag_pat3;
    if(flag_pat3) then
      destruct3(msg,roleHost[i].locNa1,roleHost[i].locGateway);
      if(matchNonce(roleHost[i].locNa1, roleHost[i].Na1) & matchAgent(roleHost[i].locGateway, roleHost[i].Gateway))then
@@ -806,7 +819,6 @@ begin
    clear msg;
    msg := ch[5].msg;
    isPat7(msg, flag_pat7);
-   put flag_pat7;
    if(flag_pat7) then
      destruct7(msg,roleHost[i].locServer,roleHost[i].locNa3,roleHost[i].locServer);
      if(matchAgent(roleHost[i].locServer, roleHost[i].Server) & matchNonce(roleHost[i].locNa3, roleHost[i].Na3) & matchAgent(roleHost[i].locServer, roleHost[i].Server))then
@@ -854,7 +866,6 @@ begin
    clear msg;
    msg := ch[9].msg;
    isPat7(msg, flag_pat7);
-   put flag_pat7;
    if(flag_pat7) then
      destruct7(msg,roleHost[i].locServer,roleHost[i].locNa4,roleHost[i].locServer);
      if(matchAgent(roleHost[i].locServer, roleHost[i].Server) & matchNonce(roleHost[i].locNa4, roleHost[i].Na4) & matchAgent(roleHost[i].locServer, roleHost[i].Server))then
@@ -906,7 +917,6 @@ begin
    clear msg;
    msg := ch[2].msg;
    isPat7(msg, flag_pat7);
-   put flag_pat7;
    if(flag_pat7) then
      destruct7(msg,roleGateway[i].locHost,roleGateway[i].locNa2,roleGateway[i].locHost);
      if(matchAgent(roleGateway[i].locHost, roleGateway[i].Host) & matchNonce(roleGateway[i].locNa2, roleGateway[i].Na2) & matchAgent(roleGateway[i].locHost, roleGateway[i].Host))then
@@ -954,7 +964,6 @@ begin
    clear msg;
    msg := ch[4].msg;
    isPat7(msg, flag_pat7);
-   put flag_pat7;
    if(flag_pat7) then
      destruct7(msg,roleGateway[i].locServer,roleGateway[i].locNa3,roleGateway[i].locServer);
      if(matchAgent(roleGateway[i].locServer, roleGateway[i].Server) & matchNonce(roleGateway[i].locNa3, roleGateway[i].Na3) & matchAgent(roleGateway[i].locServer, roleGateway[i].Server))then
@@ -1002,7 +1011,6 @@ begin
    clear msg;
    msg := ch[6].msg;
    isPat7(msg, flag_pat7);
-   put flag_pat7;
    if(flag_pat7) then
      destruct7(msg,roleGateway[i].locHost,roleGateway[i].locNa3,roleGateway[i].locHost);
      if(matchAgent(roleGateway[i].locHost, roleGateway[i].Host) & matchNonce(roleGateway[i].locNa3, roleGateway[i].Na3) & matchAgent(roleGateway[i].locHost, roleGateway[i].Host))then
@@ -1050,7 +1058,6 @@ begin
    clear msg;
    msg := ch[8].msg;
    isPat7(msg, flag_pat7);
-   put flag_pat7;
    if(flag_pat7) then
      destruct7(msg,roleGateway[i].locServer,roleGateway[i].locNa4,roleGateway[i].locServer);
      if(matchAgent(roleGateway[i].locServer, roleGateway[i].Server) & matchNonce(roleGateway[i].locNa4, roleGateway[i].Na4) & matchAgent(roleGateway[i].locServer, roleGateway[i].Server))then
@@ -1102,7 +1109,6 @@ begin
    clear msg;
    msg := ch[3].msg;
    isPat7(msg, flag_pat7);
-   put flag_pat7;
    if(flag_pat7) then
      destruct7(msg,roleServer[i].locHost,roleServer[i].locNa2,roleServer[i].locHost);
      if(matchAgent(roleServer[i].locHost, roleServer[i].Host) & matchNonce(roleServer[i].locNa2, roleServer[i].Na2) & matchAgent(roleServer[i].locHost, roleServer[i].Host))then
@@ -1150,7 +1156,6 @@ begin
    clear msg;
    msg := ch[7].msg;
    isPat7(msg, flag_pat7);
-   put flag_pat7;
    if(flag_pat7) then
      destruct7(msg,roleServer[i].locHost,roleServer[i].locNa3,roleServer[i].locHost);
      if(matchAgent(roleServer[i].locHost, roleServer[i].Host) & matchNonce(roleServer[i].locNa3, roleServer[i].Na3) & matchAgent(roleServer[i].locHost, roleServer[i].Host))then
@@ -1203,7 +1208,6 @@ rule "intruderGetMsgFromCh[1]"
     msg := ch[1].msg;
     get_msgNo(msg, msgNo);
     isPat3(msg,flag_pat3);
-    ---put flag_pat3;
     if (flag_pat3) then
       if(!exist(pat3Set,msgNo)) then
         pat3Set.length:=pat3Set.length+1;
@@ -1226,7 +1230,6 @@ rule "intruderGetMsgFromCh[2]"
     msg := ch[2].msg;
     get_msgNo(msg, msgNo);
     isPat7(msg,flag_pat7);
-    ---put flag_pat7;
     if (flag_pat7) then
       if(!exist(pat7Set,msgNo)) then
         pat7Set.length:=pat7Set.length+1;
@@ -1249,7 +1252,6 @@ rule "intruderGetMsgFromCh[3]"
     msg := ch[3].msg;
     get_msgNo(msg, msgNo);
     isPat7(msg,flag_pat7);
-    ---put flag_pat7;
     if (flag_pat7) then
       if(!exist(pat7Set,msgNo)) then
         pat7Set.length:=pat7Set.length+1;
@@ -1272,7 +1274,6 @@ rule "intruderGetMsgFromCh[4]"
     msg := ch[4].msg;
     get_msgNo(msg, msgNo);
     isPat7(msg,flag_pat7);
-    ---put flag_pat7;
     if (flag_pat7) then
       if(!exist(pat7Set,msgNo)) then
         pat7Set.length:=pat7Set.length+1;
@@ -1295,7 +1296,6 @@ rule "intruderGetMsgFromCh[5]"
     msg := ch[5].msg;
     get_msgNo(msg, msgNo);
     isPat7(msg,flag_pat7);
-    ---put flag_pat7;
     if (flag_pat7) then
       if(!exist(pat7Set,msgNo)) then
         pat7Set.length:=pat7Set.length+1;
@@ -1318,7 +1318,6 @@ rule "intruderGetMsgFromCh[6]"
     msg := ch[6].msg;
     get_msgNo(msg, msgNo);
     isPat7(msg,flag_pat7);
-    ---put flag_pat7;
     if (flag_pat7) then
       if(!exist(pat7Set,msgNo)) then
         pat7Set.length:=pat7Set.length+1;
@@ -1341,7 +1340,6 @@ rule "intruderGetMsgFromCh[7]"
     msg := ch[7].msg;
     get_msgNo(msg, msgNo);
     isPat7(msg,flag_pat7);
-    ---put flag_pat7;
     if (flag_pat7) then
       if(!exist(pat7Set,msgNo)) then
         pat7Set.length:=pat7Set.length+1;
@@ -1364,7 +1362,6 @@ rule "intruderGetMsgFromCh[8]"
     msg := ch[8].msg;
     get_msgNo(msg, msgNo);
     isPat7(msg,flag_pat7);
-    ---put flag_pat7;
     if (flag_pat7) then
       if(!exist(pat7Set,msgNo)) then
         pat7Set.length:=pat7Set.length+1;
@@ -1387,7 +1384,6 @@ rule "intruderGetMsgFromCh[9]"
     msg := ch[9].msg;
     get_msgNo(msg, msgNo);
     isPat7(msg,flag_pat7);
-    ---put flag_pat7;
     if (flag_pat7) then
       if(!exist(pat7Set,msgNo)) then
         pat7Set.length:=pat7Set.length+1;

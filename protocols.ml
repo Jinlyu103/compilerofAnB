@@ -160,7 +160,7 @@ let rec genRecvAct rolename seq i m atoms length msgofRolename patlist =
   sprintf "var flag_pat%d:boolean;\n    msg:Message;\n    msgNo:indexType;\nbegin\n" patNum ^ 
   sprintf "   clear msg;\n   msg := ch[%d].msg;\n   isPat%d(msg, flag_pat%d);\n" seq patNum patNum  ^ 
   (* sprintf "   clear msg;\n   msg := ch.msg;\n   isPat%d(msg, flag_pat%d);\n"  patNum patNum  ^  *)
-  sprintf "   put flag_pat%d;\n" patNum ^
+  (* sprintf "   put flag_pat%d;\n" patNum ^ *)
   sprintf "   if(flag_pat%d) then\n" patNum ^
   sprintf "     destruct%d(msg,%s);\n" patNum (recvAtoms2Str atoms rolename) ^
   sprintf "     if(%s)then\n" (atoms2Str atoms rolename msgofRolename) ^
@@ -496,12 +496,14 @@ let genCodeOfIntruderGetMsg (seq,r,m) patList =
   (* sprintf "  ch.empty = false\n  ==>\n" ^ *)
   sprintf "  var flag_pat%d:boolean;\n      msgNo:indexType;\n      msg:Message;\n" j^
   sprintf "  begin\n" ^
+  (* sprintf "    put \"Intruder getMsgFromch[%d]\";\n" seq^  *)
   sprintf "    msg := ch[%d].msg;\n" seq ^ 
-  (* sprintf "    msg := ch.msg;\n" ^  *)
   sprintf "    get_msgNo(msg, msgNo);\n"^ 
+  (* sprintf "    put msgNo;\n"^  *)
   sprintf "    isPat%d(msg,flag_pat%d);\n" j j^ 
-  sprintf "    ---put flag_pat%d;\n" j ^
+  (* sprintf "    put flag_pat%d;\n" j ^ *)
   sprintf "    if (flag_pat%d) then\n" j^
+  (* sprintf "      put exist(pat%dSet,msgNo);\n" j^ *)
   sprintf "      if(!exist(pat%dSet,msgNo)) then\n" j^
   sprintf "        pat%dSet.length:=pat%dSet.length+1;\n" j j^
   sprintf "        pat%dSet.content[pat%dSet.length]:=msgNo;\n" j j^
@@ -971,6 +973,8 @@ let genGet_msgNoCode () =
   sprintf "
   procedure get_msgNo(msg:Message; Var num:indexType);
     var index:indexType;
+        j:indexType;
+        flag:boolean;
     begin
       index:=0;
       for i: indexType do
@@ -982,6 +986,18 @@ let genGet_msgNoCode () =
           | (msg.msgType=senc & (msgs[i].sencMsg=msg.sencMsg & msgs[i].sencKey=msg.sencKey))
           ) then 
             index:=i;
+          elsif (msg.msgType=concat & msg.length = msgs[i].length) then
+            j := msg.length;
+            flag := true;
+            while j > 0 do
+              if (msg.concatPart[j] != msgs[i].concatPart[j]) then
+                flag := false;
+              endif;
+              j := j - 1;
+            end;
+            if (flag) then
+              index := i;
+            endif;
           endif;
         endif;
       endfor;
