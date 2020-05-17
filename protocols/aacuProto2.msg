@@ -24,6 +24,7 @@ Environment:{
 [agent3] Server [1] : <HostID.GatewayIP.ServerIP.nonce(Na3).nonce(Na4)>
 }
 Goals:{
+[sec1] nonce(Na1);
 [auth1] Host non-injectively agrees with Gateway on nonce(Na1);
 [auth2] Host non-injectively agrees with Gateway on nonce(Na2);
 [auth3] Host non-injectively agrees with Server on nonce(Na3)

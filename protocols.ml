@@ -852,20 +852,23 @@ let genIsPatCode m i patList =
     flag := flag1;\n  end;\n\n" i1 i2
   end;
   |`Concat msgs ->begin
-                  let type2str = match List.nth atoms 1 with
-                              |Some (`Var n) -> "nonce"
-                              |Some (`Str r) -> "agent"
-                              |_ -> ""
+                  let flagOfParts = String.concat ~sep:"," (List.mapi ~f:(fun i m -> sprintf "flagPart%d" (i+1) ) msgs) in
+                  let initFalgParts = String.concat (List.mapi ~f:(fun i m -> sprintf "     flagPart%d := false;\n" (i+1)) msgs) in
+                  let isPatOfParts = String.concat (List.mapi ~f:(fun i m -> let patNum = getPatNum m patList in
+                                                                             sprintf "        isPat%d(msgs[msg.concatPart[%d]],flagPart%d);\n" patNum (i+1) (i+1)) msgs)
                   in
-                  str1 ^ sprintf "  var flag1 : boolean;\n  begin
-    flag1 := false;
-    if (msg.msgType = concat) then 
-      if (msgs[msg.concatPart[1]].msgType=nonce & msgs[msg.concatPart[2]].msgType=%s) then 
-        flag1 := true;
-      endif;
-    endif;
-    flag := flag1;
-  end;\n\n" type2str
+                  let andFlagParts = String.concat ~sep:" & " (List.mapi ~f:(fun i m -> sprintf "flagPart%d" (i+1) ) msgs) in
+                  str1 ^
+                  sprintf "  var flag1, %s: boolean;\n  begin\n" flagOfParts ^
+                  sprintf "     flag1 := false;\n%s" initFalgParts^
+                  sprintf "     if(msg.msgType = concat) then\n" ^
+                  sprintf "%s" isPatOfParts ^
+                  sprintf "       if (%s) then \n" andFlagParts ^
+                  sprintf "         flag1 := true;\n" ^
+                  sprintf "       endif;\n" ^
+                  sprintf "     endif;\n" ^
+                  sprintf "     flag := flag1;\n" ^
+                  sprintf "  end;\n"
   end;
   |`Str s ->begin
             str1 ^ sprintf "  var flag1 : boolean;\n  begin
@@ -1362,15 +1365,14 @@ let print_startstate r num m knws =
   let msgOfKnws = getMsgOfRoles knws in
   let nlist = getNonces msgOfKnws in
   let rlist = getRolesFromKnws knws [] in
+  (* List.iter ~f:(fun r-> printf "%s\n" r) rlist; *)
   String.concat (List.map ~f:(fun m1 -> if isSamePat m m1 then
                                           let atoms = getAtoms m1 in
                                           let str1 = match (m,m1) with
                                           |(`Concat msgs,`Concat msgs1) -> let strs = (List.map2_exn ~f:(fun m' m1' -> 
                                                                             match (m',m1') with
                                                                             |(`Var n,`Var n1) -> sprintf "role%s[%d].%s := %s;\n" r num n1 n
-                                                                            (* "role"^r^"["^(string_of_int num)^"]."^n1^" := "^n^";\n" *)
                                                                             |(`Str role,`Str role1) -> sprintf "role%s[%d].%s := %s;\n" r num role1 role
-                                                                            (* "role"^r^"["^(string_of_int num)^"]."^ role1^" := "^role^";\n"  *)
                                                                             |_ -> "error: mismatching!\n") msgs msgs1) 
                                                                           in
                                                                           (String.concat (List.map ~f:(fun s -> sprintf "  %s" s) strs)) ^ 
@@ -1545,7 +1547,7 @@ let printMurphiConsTypeVars actions k env=
   sprintf "const\n" ^
   String.concat ~sep:"\n" (List.map ~f:(fun r -> sprintf "  role%sNum:1;" r) rlist) ^
   "
-  totalFact:20;
+  totalFact:30;
   msgLength:15;
   chanNum:10;\n" ^
 
@@ -1567,8 +1569,6 @@ let printMurphiConsTypeVars actions k env=
     encType: EncryptType; 
     ag: AgentType; 
   end;\n\n  %s;\n" (agentSStatus rlist lensOfactStr)
-  (*AStatus : enum {A1,A2,A3}; ---the roles status should be derived from actions and the principals
-  BStatus : enum {B1,B2,B3};*)
   ^"
   MsgType : enum {null,agent,nonce,key,aenc,senc,concat,hash};
   Message: record
