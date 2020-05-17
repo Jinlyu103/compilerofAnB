@@ -10075,43 +10075,12 @@ bool mu__condition_268() // Condition for Rule "auth1"
 
 /**** end rule declaration ****/
 
-int mu__invariant_269() // Invariant "sec1"
-{
-bool mu__quant270; 
-mu__quant270 = TRUE;
-{
-for(int mu_i = 0; mu_i <= 20; mu_i++) {
-bool mu__boolexpr271;
-bool mu__boolexpr272;
-  if (!((mu_msgs[mu_i].mu_msgType) == (mu_nonce))) mu__boolexpr272 = FALSE ;
-  else {
-  mu__boolexpr272 = ((mu_msgs[mu_i].mu_noncePart) == (mu_Na1)) ; 
-}
-  if (!(mu__boolexpr272)) mu__boolexpr271 = TRUE ;
-  else {
-  mu__boolexpr271 = ((mu_Spy_known[mu_i]) == (mu_false)) ; 
-}
-if ( !(mu__boolexpr271) )
-  { mu__quant270 = FALSE; break; }
-};
-};
-return mu__quant270;
-};
-
-bool mu__condition_273() // Condition for Rule "sec1"
-{
-  return mu__invariant_269( );
-}
-
-/**** end rule declaration ****/
-
 const rulerec invariants[] = {
-{"sec1", &mu__condition_273, NULL, },
 {"auth1", &mu__condition_268, NULL, },
 {"auth2", &mu__condition_263, NULL, },
 {"auth3", &mu__condition_258, NULL, },
 };
-const unsigned short numinvariants = 4;
+const unsigned short numinvariants = 3;
 
 /********************
   Normal/Canonicalization for scalarset

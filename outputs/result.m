@@ -1937,13 +1937,6 @@ startstate
 
 end;
 
-invariant "sec1"
-  forall i:indexType do
-    (msgs[i].msgType=nonce & msgs[i].noncePart = Na1)
-    ->
-    Spy_known[i] = false
-end;
-
 invariant "auth1"
   forall i: roleGatewayNums do
     roleGateway[i].commit = true 
