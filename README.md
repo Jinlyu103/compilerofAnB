@@ -11,4 +11,4 @@ Then a C++ file will be generated with name result.cpp.
 Then an executing file with name a.out will be generated.  
  $ ./a.out
 Finally you will see the verification results on the terminal.  
-   
+test   
