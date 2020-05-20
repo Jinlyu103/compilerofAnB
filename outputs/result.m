@@ -130,6 +130,15 @@ var
   pat15Set: msgSet;
   pat16Set: msgSet;
 
+  gatewayCh1Pat : indexType; ---according to the actions
+  serverCh2Pat  : indexType;
+  gatewayCh3Pat : indexType;
+  hostCh4Pat    : indexType;
+  gatewayCh5Pat : indexType;
+  serverCh6Pat  : indexType;
+  gatewayCh7Pat : indexType;
+  hostCh8Pat    : indexType;
+
   
   Spy_known: Array[indexType] of boolean;
   ---systemEvent   : array[eventNums] of Event;
@@ -1600,6 +1609,7 @@ var msg:Message;
 begin
    clear msg;
    cons5(roleHost[i].Host,roleHost[i].Gateway,roleHost[i].Host,msg,msgNo);
+   gatewayCh1Pat := msgNo; ---?1
    ch[1].empty := false;
    ch[1].msg := msg;
    ch[1].sender := roleHost[i].Host;
@@ -1647,6 +1657,7 @@ var msg:Message;
 begin
    clear msg;
    cons12(roleHost[i].Host,roleHost[i].locr,roleHost[i].Host,msg,msgNo);
+   gatewayCh5Pat := msgNo; ---?1
    ch[5].empty := false;
    ch[5].msg := msg;
    ch[5].sender := roleHost[i].Host;
@@ -1724,6 +1735,7 @@ var msg:Message;
 begin
    clear msg;
    cons5(roleGateway[i].Host,roleGateway[i].Gateway,roleGateway[i].Host,msg,msgNo);
+   serverCh2Pat := msgNo; ---?
    ch[2].empty := false;
    ch[2].msg := msg;
    ch[2].sender := roleGateway[i].Gateway;
@@ -1771,6 +1783,7 @@ var msg:Message;
 begin
    clear msg;
    cons9(roleGateway[i].Host,roleGateway[i].locr,roleGateway[i].Server,roleGateway[i].Server,msg,msgNo);
+   hostCh4Pat := msgNo; ---?1
    ch[4].empty := false;
    ch[4].msg := msg;
    ch[4].sender := roleGateway[i].Gateway;
@@ -1818,6 +1831,7 @@ var msg:Message;
 begin
    clear msg;
    cons12(roleGateway[i].Host,roleGateway[i].locr,roleGateway[i].Host,msg,msgNo);
+   serverCh6Pat := msgNo; ---?1
    ch[6].empty := false;
    ch[6].msg := msg;
    ch[6].sender := roleGateway[i].Gateway;
@@ -1865,6 +1879,7 @@ var msg:Message;
 begin
    clear msg;
    cons16(roleGateway[i].Host,roleGateway[i].locHostIP,roleGateway[i].Gateway,roleGateway[i].lochostipsk,roleGateway[i].Host,roleGateway[i].Server,roleGateway[i].Server,msg,msgNo);
+   hostCh8Pat := msgNo; ---?1
    ch[8].empty := false;
    ch[8].msg := msg;
    ch[8].sender := roleGateway[i].Gateway;
@@ -1916,6 +1931,7 @@ var msg:Message;
 begin
    clear msg;
    cons9(roleServer[i].Host,roleServer[i].r,roleServer[i].Server,roleServer[i].Server,msg,msgNo);
+   gatewayCh3Pat := msgNo; ---?1
    ch[3].empty := false;
    ch[3].msg := msg;
    ch[3].sender := roleServer[i].Server;
@@ -1963,6 +1979,7 @@ var msg:Message;
 begin
    clear msg;
    cons16(roleServer[i].Host,roleServer[i].HostIP,roleServer[i].Gateway,roleServer[i].hostipsk,roleServer[i].Host,roleServer[i].Server,roleServer[i].Server,msg,msgNo);
+   gatewayCh7Pat := msgNo; ---?1
    ch[7].empty := false;
    ch[7].msg := msg;
    ch[7].sender := roleServer[i].Server;
@@ -2160,7 +2177,7 @@ rule "intruderGetMsgFromCh[8]"
 ruleset i: msgLen do
   ruleset j: roleGatewayNums do
     rule "intruderEmitMsgIntoCh[1]"
-      ch[1].empty=true & i <= pat5Set.length & pat5Set.content[i] != 0 & Spy_known[pat5Set.content[i]]
+      ch[1].empty=true & i <= pat5Set.length & pat5Set.content[i] != 0 & Spy_known[pat5Set.content[i]] & match(msgs[pat5Set.content[i]], msgs[gatewayCh1Pat]) ---?2
       ==>
       begin
         if (!emit[pat5Set.content[i]]) then  --- & msgs[msgs[pat5Set.content[i]].aencKey].k.ag=roleGateway[j].Gateway
@@ -2186,7 +2203,7 @@ endruleset;
 ruleset i: msgLen do
   ruleset j: roleServerNums do
     rule "intruderEmitMsgIntoCh[2]"
-      ch[2].empty=true & i <= pat5Set.length & pat5Set.content[i] != 0 & Spy_known[pat5Set.content[i]]
+      ch[2].empty=true & i <= pat5Set.length & pat5Set.content[i] != 0 & Spy_known[pat5Set.content[i]] & match(msgs[pat5Set.content[i]], msgs[serverCh2Pat]) ---?2
       ==>
       begin
         if (!emit[pat5Set.content[i]]) then  --- & msgs[msgs[pat5Set.content[i]].aencKey].k.ag=roleServer[j].Server
@@ -2212,7 +2229,7 @@ endruleset;
 ruleset i: msgLen do
   ruleset j: roleGatewayNums do
     rule "intruderEmitMsgIntoCh[3]"
-      ch[3].empty=true & i <= pat9Set.length & pat9Set.content[i] != 0 & Spy_known[pat9Set.content[i]]
+      ch[3].empty=true & i <= pat9Set.length & pat9Set.content[i] != 0 & Spy_known[pat9Set.content[i]] & match(msgs[pat9Set.content[i]], msgs[gatewayCh3Pat]) ---?2
       ==>
       begin
         if (!emit[pat9Set.content[i]]) then  --- & msgs[msgs[pat9Set.content[i]].aencKey].k.ag=roleGateway[j].Gateway
@@ -2238,7 +2255,7 @@ endruleset;
 ruleset i: msgLen do
   ruleset j: roleHostNums do
     rule "intruderEmitMsgIntoCh[4]"
-      ch[4].empty=true & i <= pat9Set.length & pat9Set.content[i] != 0 & Spy_known[pat9Set.content[i]]
+      ch[4].empty=true & i <= pat9Set.length & pat9Set.content[i] != 0 & Spy_known[pat9Set.content[i]] & match(msgs[pat9Set.content[i]], msgs[hostCh4Pat]) ---?2
       ==>
       begin
         if (!emit[pat9Set.content[i]]) then  --- & msgs[msgs[pat9Set.content[i]].aencKey].k.ag=roleHost[j].Host
@@ -2264,7 +2281,7 @@ endruleset;
 ruleset i: msgLen do
   ruleset j: roleGatewayNums do
     rule "intruderEmitMsgIntoCh[5]"
-      ch[5].empty=true & i <= pat12Set.length & pat12Set.content[i] != 0 & Spy_known[pat12Set.content[i]]
+      ch[5].empty=true & i <= pat12Set.length & pat12Set.content[i] != 0 & Spy_known[pat12Set.content[i]] & match(msgs[pat12Set.content[i]], msgs[gatewayCh5Pat]) ---?2
       ==>
       begin
         if (!emit[pat12Set.content[i]]) then  --- & msgs[msgs[pat12Set.content[i]].aencKey].k.ag=roleGateway[j].Gateway
@@ -2290,7 +2307,7 @@ endruleset;
 ruleset i: msgLen do
   ruleset j: roleServerNums do
     rule "intruderEmitMsgIntoCh[6]"
-      ch[6].empty=true & i <= pat12Set.length & pat12Set.content[i] != 0 & Spy_known[pat12Set.content[i]]
+      ch[6].empty=true & i <= pat12Set.length & pat12Set.content[i] != 0 & Spy_known[pat12Set.content[i]] & match(msgs[pat12Set.content[i]], msgs[serverCh6Pat]) ---?2
       ==>
       begin
         if (!emit[pat12Set.content[i]]) then  --- & msgs[msgs[pat12Set.content[i]].aencKey].k.ag=roleServer[j].Server
@@ -2316,7 +2333,7 @@ endruleset;
 ruleset i: msgLen do
   ruleset j: roleGatewayNums do
     rule "intruderEmitMsgIntoCh[7]"
-      ch[7].empty=true & i <= pat16Set.length & pat16Set.content[i] != 0 & Spy_known[pat16Set.content[i]]
+      ch[7].empty=true & i <= pat16Set.length & pat16Set.content[i] != 0 & Spy_known[pat16Set.content[i]] & match(msgs[pat16Set.content[i]], msgs[gatewayCh7Pat]) ---?2
       ==>
       begin
         if (!emit[pat16Set.content[i]]) then  --- & msgs[msgs[pat16Set.content[i]].aencKey].k.ag=roleGateway[j].Gateway
@@ -2342,7 +2359,7 @@ endruleset;
 ruleset i: msgLen do
   ruleset j: roleHostNums do
     rule "intruderEmitMsgIntoCh[8]"
-      ch[8].empty=true & i <= pat16Set.length & pat16Set.content[i] != 0 & Spy_known[pat16Set.content[i]]
+      ch[8].empty=true & i <= pat16Set.length & pat16Set.content[i] != 0 & Spy_known[pat16Set.content[i]] & match(msgs[pat16Set.content[i]], msgs[hostCh8Pat]) ---?2
       ==>
       begin
         if (!emit[pat16Set.content[i]]) then  --- & msgs[msgs[pat16Set.content[i]].aencKey].k.ag=roleHost[j].Host
@@ -2403,7 +2420,7 @@ ruleset i0: msgLen do
     rule "enconcat 2"	---pat2
       i0<=pat1Set.length & Spy_known[pat1Set.content[i0]] &
       i1<=pat1Set.length & Spy_known[pat1Set.content[i1]] &
-      !Spy_known[construct2By11(pat1Set.content[i0],pat1Set.content[i1])]
+      !Spy_known[construct2By11(pat1Set.content[i0],pat1Set.content[i1])] 
       ==>
       var concatMsgNo:indexType;
       begin
@@ -3180,6 +3197,14 @@ startstate
     Spy_known[msg_end] := true;
   endfor;
 
+  gatewayCh1Pat := 0; --- indexType; ---according to the actions
+  serverCh2Pat  := 0; --- indexType;
+  gatewayCh3Pat := 0; --- indexType;
+  hostCh4Pat    := 0; --- indexType;
+  gatewayCh5Pat := 0; --- indexType;
+  serverCh6Pat  := 0; --- indexType;
+  gatewayCh7Pat := 0; --- indexType;
+  hostCh8Pat    := 0; --- indexType;
 end;
 
 invariant "sec1"
