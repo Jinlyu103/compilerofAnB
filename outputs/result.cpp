@@ -9,7 +9,15 @@
  ********************/
 #define MURPHI_VERSION "Caching Murphi Release 5.4.9.1"
 #define MURPHI_DATE "Aug  7 2019"
+<<<<<<< HEAD
 #define PROTOCOL_NAME "result"
+=======
+<<<<<<< HEAD
+#define PROTOCOL_NAME "result"
+=======
+#define PROTOCOL_NAME "outputs/result"
+>>>>>>> 2123be9aae8c49b0cda7eb457fc24bf29f221ff6
+>>>>>>> dd3ae535cf2fdee7c1988180a7293254bfa4a006
 #define BITS_IN_WORLD 8648
 #define ALIGN
 
@@ -6180,7 +6188,7 @@ mu_ch[9].mu_sender = mu_Intruder;
 mu_ch[9].mu_receiver = mu_roleHost[mu_j].mu_Host;
 mu_ch[9].mu_empty = mu_false;
 mu_emit[mu_pat7Set.mu_content[mu_i]] = mu_true;
-cout << "intruderEmitMsgIntoCh[9] \n";
+cout << "seq9. ";
 mu_ch[9].mu_sender.print();
 cout << "   ";
 mu_ch[9].mu_receiver.print();
@@ -6297,7 +6305,7 @@ mu_ch[8].mu_sender = mu_Intruder;
 mu_ch[8].mu_receiver = mu_roleGateway[mu_j].mu_Gateway;
 mu_ch[8].mu_empty = mu_false;
 mu_emit[mu_pat7Set.mu_content[mu_i]] = mu_true;
-cout << "intruderEmitMsgIntoCh[8] \n";
+cout << "seq8. ";
 mu_ch[8].mu_sender.print();
 cout << "   ";
 mu_ch[8].mu_receiver.print();
@@ -6414,7 +6422,7 @@ mu_ch[7].mu_sender = mu_Intruder;
 mu_ch[7].mu_receiver = mu_roleServer[mu_j].mu_Server;
 mu_ch[7].mu_empty = mu_false;
 mu_emit[mu_pat7Set.mu_content[mu_i]] = mu_true;
-cout << "intruderEmitMsgIntoCh[7] \n";
+cout << "seq7. ";
 mu_ch[7].mu_sender.print();
 cout << "   ";
 mu_ch[7].mu_receiver.print();
@@ -6531,7 +6539,7 @@ mu_ch[6].mu_sender = mu_Intruder;
 mu_ch[6].mu_receiver = mu_roleGateway[mu_j].mu_Gateway;
 mu_ch[6].mu_empty = mu_false;
 mu_emit[mu_pat7Set.mu_content[mu_i]] = mu_true;
-cout << "intruderEmitMsgIntoCh[6] \n";
+cout << "seq6. ";
 mu_ch[6].mu_sender.print();
 cout << "   ";
 mu_ch[6].mu_receiver.print();
@@ -6648,7 +6656,7 @@ mu_ch[5].mu_sender = mu_Intruder;
 mu_ch[5].mu_receiver = mu_roleHost[mu_j].mu_Host;
 mu_ch[5].mu_empty = mu_false;
 mu_emit[mu_pat7Set.mu_content[mu_i]] = mu_true;
-cout << "intruderEmitMsgIntoCh[5] \n";
+cout << "seq5. ";
 mu_ch[5].mu_sender.print();
 cout << "   ";
 mu_ch[5].mu_receiver.print();
@@ -6765,7 +6773,7 @@ mu_ch[4].mu_sender = mu_Intruder;
 mu_ch[4].mu_receiver = mu_roleGateway[mu_j].mu_Gateway;
 mu_ch[4].mu_empty = mu_false;
 mu_emit[mu_pat7Set.mu_content[mu_i]] = mu_true;
-cout << "intruderEmitMsgIntoCh[4] \n";
+cout << "seq4. ";
 mu_ch[4].mu_sender.print();
 cout << "   ";
 mu_ch[4].mu_receiver.print();
@@ -6882,7 +6890,7 @@ mu_ch[3].mu_sender = mu_Intruder;
 mu_ch[3].mu_receiver = mu_roleServer[mu_j].mu_Server;
 mu_ch[3].mu_empty = mu_false;
 mu_emit[mu_pat7Set.mu_content[mu_i]] = mu_true;
-cout << "intruderEmitMsgIntoCh[3] \n";
+cout << "seq3. ";
 mu_ch[3].mu_sender.print();
 cout << "   ";
 mu_ch[3].mu_receiver.print();
@@ -6999,7 +7007,7 @@ mu_ch[2].mu_sender = mu_Intruder;
 mu_ch[2].mu_receiver = mu_roleGateway[mu_j].mu_Gateway;
 mu_ch[2].mu_empty = mu_false;
 mu_emit[mu_pat7Set.mu_content[mu_i]] = mu_true;
-cout << "intruderEmitMsgIntoCh[2] \n";
+cout << "seq2. ";
 mu_ch[2].mu_sender.print();
 cout << "   ";
 mu_ch[2].mu_receiver.print();
@@ -7116,7 +7124,7 @@ mu_ch[1].mu_sender = mu_Intruder;
 mu_ch[1].mu_receiver = mu_roleHost[mu_j].mu_Host;
 mu_ch[1].mu_empty = mu_false;
 mu_emit[mu_pat3Set.mu_content[mu_i]] = mu_true;
-cout << "intruderEmitMsgIntoCh[1] \n";
+cout << "seq1. ";
 mu_ch[1].mu_sender.print();
 cout << "   ";
 mu_ch[1].mu_receiver.print();

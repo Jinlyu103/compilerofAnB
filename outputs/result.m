@@ -133,7 +133,6 @@ var
   ---eve_end       : eventNums;
   emit: Array[indexType] of boolean;
 
-
 ---pat1: Na1 
 procedure lookAddPat1(Na1:NonceType; Var msg:Message; Var num : indexType);
   Var index : indexType;
@@ -1421,7 +1420,7 @@ ruleset i: msgLen do
           ch[1].receiver:=roleHost[j].Host;
           ch[1].empty:=false;
           emit[pat3Set.content[i]] := true;
-          put "intruderEmitMsgIntoCh[1] \n";
+          put "seq1. ";
           put ch[1].sender;
           put "   ";
           put ch[1].receiver;
@@ -1447,7 +1446,7 @@ ruleset i: msgLen do
           ch[2].receiver:=roleGateway[j].Gateway;
           ch[2].empty:=false;
           emit[pat7Set.content[i]] := true;
-          put "intruderEmitMsgIntoCh[2] \n";
+          put "seq2. ";
           put ch[2].sender;
           put "   ";
           put ch[2].receiver;
@@ -1473,7 +1472,7 @@ ruleset i: msgLen do
           ch[3].receiver:=roleServer[j].Server;
           ch[3].empty:=false;
           emit[pat7Set.content[i]] := true;
-          put "intruderEmitMsgIntoCh[3] \n";
+          put "seq3. ";
           put ch[3].sender;
           put "   ";
           put ch[3].receiver;
@@ -1499,7 +1498,7 @@ ruleset i: msgLen do
           ch[4].receiver:=roleGateway[j].Gateway;
           ch[4].empty:=false;
           emit[pat7Set.content[i]] := true;
-          put "intruderEmitMsgIntoCh[4] \n";
+          put "seq4. ";
           put ch[4].sender;
           put "   ";
           put ch[4].receiver;
@@ -1525,7 +1524,7 @@ ruleset i: msgLen do
           ch[5].receiver:=roleHost[j].Host;
           ch[5].empty:=false;
           emit[pat7Set.content[i]] := true;
-          put "intruderEmitMsgIntoCh[5] \n";
+          put "seq5. ";
           put ch[5].sender;
           put "   ";
           put ch[5].receiver;
@@ -1551,7 +1550,7 @@ ruleset i: msgLen do
           ch[6].receiver:=roleGateway[j].Gateway;
           ch[6].empty:=false;
           emit[pat7Set.content[i]] := true;
-          put "intruderEmitMsgIntoCh[6] \n";
+          put "seq6. ";
           put ch[6].sender;
           put "   ";
           put ch[6].receiver;
@@ -1577,7 +1576,7 @@ ruleset i: msgLen do
           ch[7].receiver:=roleServer[j].Server;
           ch[7].empty:=false;
           emit[pat7Set.content[i]] := true;
-          put "intruderEmitMsgIntoCh[7] \n";
+          put "seq7. ";
           put ch[7].sender;
           put "   ";
           put ch[7].receiver;
@@ -1603,7 +1602,7 @@ ruleset i: msgLen do
           ch[8].receiver:=roleGateway[j].Gateway;
           ch[8].empty:=false;
           emit[pat7Set.content[i]] := true;
-          put "intruderEmitMsgIntoCh[8] \n";
+          put "seq8. ";
           put ch[8].sender;
           put "   ";
           put ch[8].receiver;
@@ -1629,7 +1628,7 @@ ruleset i: msgLen do
           ch[9].receiver:=roleHost[j].Host;
           ch[9].empty:=false;
           emit[pat7Set.content[i]] := true;
-          put "intruderEmitMsgIntoCh[9] \n";
+          put "seq9. ";
           put ch[9].sender;
           put "   ";
           put ch[9].receiver;
