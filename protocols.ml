@@ -827,7 +827,7 @@ let genSynthCode m i patList =
       num:=index;
       msg:=msgs[index];
   end;\n\n" n n;
-  |_ -> ""
+  |_ -> "" 
 ;;
 
 let genIsPatCode m i patList =
