@@ -103,10 +103,7 @@ let rec genSendAct rolename seq i m atoms length msgofRolename patlist =
   let patNum = getPatNum m patlist in
   sprintf "var msg:Message;\n    msgNo:indexType;\nbegin\n" ^
   sprintf "   clear msg;\n   cons%d(%s,msg,msgNo);\n" patNum (sendAtoms2Str rolename i atoms msgofRolename) ^
-<<<<<<< HEAD
-=======
   (* sprintf "   ---%sCh%dPat := msgNo;\n" r2 seq ^ *)
->>>>>>> 2123be9aae8c49b0cda7eb457fc24bf29f221ff6
   sprintf "   ch[%d].empty := false;\n" seq ^ 
   sprintf "   ch[%d].msg := msg;\n" seq ^
   sprintf "   ch[%d].sender := role%s[i].%s;\n" seq rolename rolename ^ 
@@ -523,11 +520,7 @@ let genCodeOfIntruderEmitMsg (seq,r,m) patList=
   let str1 = sprintf "\n---rule of intruder to emit msg into ch[%d].\n" seq ^ sprintf "ruleset i: msgLen do\n"
   in
   let str2 = sprintf "  ruleset j: role%sNums do\n" r in
-<<<<<<< HEAD
   let str3 = sprintf "    rule \"intruderEmitMsgIntoCh[%d]\"\n" seq ^ sprintf "      ch[%d].empty=true & i <= pat%dSet.length & pat%dSet.content[i] != 0 & Spy_known[pat%dSet.content[i]]\n      ==>\n" seq j j j^ 
-=======
-  let str3 = sprintf "    rule \"intruderEmitMsgIntoCh[%d]\"\n" seq ^ sprintf "      ch[%d].empty=true & i <= pat%dSet.length & pat%dSet.content[i] != 0 & Spy_known[pat%dSet.content[i]]\n      ==>\n" seq j j j^ (*  --- & match(msgs[pat%dSet.content[i]], msgs[%sCh%dPat]) *)
->>>>>>> 2123be9aae8c49b0cda7eb457fc24bf29f221ff6
              sprintf "      begin\n        if (!emit[pat%dSet.content[i]]) then  --- & msgs[msgs[pat%dSet.content[i]].aencKey].k.ag=role%s[j].%s\n" j j r r^ 
              sprintf "          clear ch[%d];\n" seq ^sprintf "          ch[%d].msg:=msgs[pat%dSet.content[i]];\n" seq j^
              sprintf "          ch[%d].sender:=Intruder;\n" seq
