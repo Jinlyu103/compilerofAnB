@@ -2,7 +2,7 @@ const
   roleHostNum:1;
   roleGatewayNum:1;
   roleServerNum:1;
-  totalFact:30;
+  totalFact:20;
   msgLength:15;
   chanNum:10;
 type
@@ -132,7 +132,6 @@ var
   ---systemEvent   : array[eventNums] of Event;
   ---eve_end       : eventNums;
   emit: Array[indexType] of boolean;
-
 
 ---pat1: Na1 
 procedure lookAddPat1(Na1:NonceType; Var msg:Message; Var num : indexType);
@@ -757,9 +756,9 @@ function match(var m1,m2:Message):boolean;
     elsif m1.msgType = key & m2.msgType = key then
 	    return (m1.k.encType = m2.k.encType) & (matchAgent(m1.k.ag, m2.k.ag));
     elsif m1.msgType = aenc & m2.msgType = aenc then
-	    return match(msgs[m1.aencMsg], msgs[m2.aencMsg]) & match(msgs[m1.aencKey], msgs[m2.aencKey]);--- & match(msgs[m1.aencKey], msgs[m2.aencKey]);
+	    return match(msgs[m1.aencMsg], msgs[m2.aencMsg]) & match(msgs[m1.aencKey], msgs[m2.aencKey]);
     elsif m1.msgType = senc & m2.msgType = senc then
-	    return match(msgs[m1.sencMsg], msgs[m2.sencMsg]) & match(msgs[m1.sencKey], msgs[m2.sencKey]); --- & match(msgs[m1.sencKey], msgs[m2.sencKey]);
+	    return match(msgs[m1.sencMsg], msgs[m2.sencMsg]) & match(msgs[m1.sencKey], msgs[m2.sencKey]);
     elsif (m1.msgType=concat & m2.msgType=concat) & (m1.length = m2.length)  then
       concatFlag := true;
       i := m1.length;
@@ -808,7 +807,6 @@ var msg:Message;
 begin
    clear msg;
    cons7(roleHost[i].Host,roleHost[i].Na2,roleHost[i].Host,msg,msgNo);
-   ---GatewayCh2Pat := msgNo;
    ch[2].empty := false;
    ch[2].msg := msg;
    ch[2].sender := roleHost[i].Host;
@@ -856,7 +854,6 @@ var msg:Message;
 begin
    clear msg;
    cons7(roleHost[i].Host,roleHost[i].locNa3,roleHost[i].Host,msg,msgNo);
-   ---GatewayCh6Pat := msgNo;
    ch[6].empty := false;
    ch[6].msg := msg;
    ch[6].sender := roleHost[i].Host;
@@ -908,7 +905,6 @@ var msg:Message;
 begin
    clear msg;
    cons3(roleGateway[i].Na1,roleGateway[i].Gateway,msg,msgNo);
-   ---HostCh1Pat := msgNo;
    ch[1].empty := false;
    ch[1].msg := msg;
    ch[1].sender := roleGateway[i].Gateway;
@@ -956,7 +952,6 @@ var msg:Message;
 begin
    clear msg;
    cons7(roleGateway[i].Host,roleGateway[i].locNa2,roleGateway[i].Host,msg,msgNo);
-   ---ServerCh3Pat := msgNo;
    ch[3].empty := false;
    ch[3].msg := msg;
    ch[3].sender := roleGateway[i].Gateway;
@@ -1004,7 +999,6 @@ var msg:Message;
 begin
    clear msg;
    cons7(roleGateway[i].Server,roleGateway[i].locNa3,roleGateway[i].Server,msg,msgNo);
-   ---HostCh5Pat := msgNo;
    ch[5].empty := false;
    ch[5].msg := msg;
    ch[5].sender := roleGateway[i].Gateway;
@@ -1052,7 +1046,6 @@ var msg:Message;
 begin
    clear msg;
    cons7(roleGateway[i].Host,roleGateway[i].locNa3,roleGateway[i].Host,msg,msgNo);
-   ---ServerCh7Pat := msgNo;
    ch[7].empty := false;
    ch[7].msg := msg;
    ch[7].sender := roleGateway[i].Gateway;
@@ -1100,7 +1093,6 @@ var msg:Message;
 begin
    clear msg;
    cons7(roleGateway[i].Server,roleGateway[i].locNa4,roleGateway[i].Server,msg,msgNo);
-   ---HostCh9Pat := msgNo;
    ch[9].empty := false;
    ch[9].msg := msg;
    ch[9].sender := roleGateway[i].Gateway;
@@ -1152,7 +1144,6 @@ var msg:Message;
 begin
    clear msg;
    cons7(roleServer[i].Server,roleServer[i].Na3,roleServer[i].Server,msg,msgNo);
-   ---GatewayCh4Pat := msgNo;
    ch[4].empty := false;
    ch[4].msg := msg;
    ch[4].sender := roleServer[i].Server;
@@ -1200,7 +1191,6 @@ var msg:Message;
 begin
    clear msg;
    cons7(roleServer[i].Server,roleServer[i].Na4,roleServer[i].Server,msg,msgNo);
-   ---GatewayCh8Pat := msgNo;
    ch[8].empty := false;
    ch[8].msg := msg;
    ch[8].sender := roleServer[i].Server;
@@ -1420,7 +1410,7 @@ rule "intruderGetMsgFromCh[9]"
 ruleset i: msgLen do
   ruleset j: roleHostNums do
     rule "intruderEmitMsgIntoCh[1]"
-      ch[1].empty=true & i <= pat3Set.length & pat3Set.content[i] != 0 & Spy_known[pat3Set.content[i]] ---& match(msgs[pat3Set.content[i]], msgs[HostCh1Pat]) 
+      ch[1].empty=true & i <= pat3Set.length & pat3Set.content[i] != 0 & Spy_known[pat3Set.content[i]]
       ==>
       begin
         if (!emit[pat3Set.content[i]]) then  --- & msgs[msgs[pat3Set.content[i]].aencKey].k.ag=roleHost[j].Host
@@ -1430,7 +1420,7 @@ ruleset i: msgLen do
           ch[1].receiver:=roleHost[j].Host;
           ch[1].empty:=false;
           emit[pat3Set.content[i]] := true;
-          put "intruderEmitMsgIntoCh[1] \n";
+          put "seq1. ";
           put ch[1].sender;
           put "   ";
           put ch[1].receiver;
@@ -1446,7 +1436,7 @@ endruleset;
 ruleset i: msgLen do
   ruleset j: roleGatewayNums do
     rule "intruderEmitMsgIntoCh[2]"
-      ch[2].empty=true & i <= pat7Set.length & pat7Set.content[i] != 0 & Spy_known[pat7Set.content[i]] ---& match(msgs[pat7Set.content[i]], msgs[GatewayCh2Pat]) 
+      ch[2].empty=true & i <= pat7Set.length & pat7Set.content[i] != 0 & Spy_known[pat7Set.content[i]]
       ==>
       begin
         if (!emit[pat7Set.content[i]]) then  --- & msgs[msgs[pat7Set.content[i]].aencKey].k.ag=roleGateway[j].Gateway
@@ -1456,7 +1446,7 @@ ruleset i: msgLen do
           ch[2].receiver:=roleGateway[j].Gateway;
           ch[2].empty:=false;
           emit[pat7Set.content[i]] := true;
-          put "intruderEmitMsgIntoCh[2] \n";
+          put "seq2. ";
           put ch[2].sender;
           put "   ";
           put ch[2].receiver;
@@ -1472,7 +1462,7 @@ endruleset;
 ruleset i: msgLen do
   ruleset j: roleServerNums do
     rule "intruderEmitMsgIntoCh[3]"
-      ch[3].empty=true & i <= pat7Set.length & pat7Set.content[i] != 0 & Spy_known[pat7Set.content[i]] ---& match(msgs[pat7Set.content[i]], msgs[ServerCh3Pat]) 
+      ch[3].empty=true & i <= pat7Set.length & pat7Set.content[i] != 0 & Spy_known[pat7Set.content[i]]
       ==>
       begin
         if (!emit[pat7Set.content[i]]) then  --- & msgs[msgs[pat7Set.content[i]].aencKey].k.ag=roleServer[j].Server
@@ -1482,7 +1472,7 @@ ruleset i: msgLen do
           ch[3].receiver:=roleServer[j].Server;
           ch[3].empty:=false;
           emit[pat7Set.content[i]] := true;
-          put "intruderEmitMsgIntoCh[3] \n";
+          put "seq3. ";
           put ch[3].sender;
           put "   ";
           put ch[3].receiver;
@@ -1498,7 +1488,7 @@ endruleset;
 ruleset i: msgLen do
   ruleset j: roleGatewayNums do
     rule "intruderEmitMsgIntoCh[4]"
-      ch[4].empty=true & i <= pat7Set.length & pat7Set.content[i] != 0 & Spy_known[pat7Set.content[i]] ---& match(msgs[pat7Set.content[i]], msgs[GatewayCh4Pat]) 
+      ch[4].empty=true & i <= pat7Set.length & pat7Set.content[i] != 0 & Spy_known[pat7Set.content[i]]
       ==>
       begin
         if (!emit[pat7Set.content[i]]) then  --- & msgs[msgs[pat7Set.content[i]].aencKey].k.ag=roleGateway[j].Gateway
@@ -1508,7 +1498,7 @@ ruleset i: msgLen do
           ch[4].receiver:=roleGateway[j].Gateway;
           ch[4].empty:=false;
           emit[pat7Set.content[i]] := true;
-          put "intruderEmitMsgIntoCh[4] \n";
+          put "seq4. ";
           put ch[4].sender;
           put "   ";
           put ch[4].receiver;
@@ -1524,7 +1514,7 @@ endruleset;
 ruleset i: msgLen do
   ruleset j: roleHostNums do
     rule "intruderEmitMsgIntoCh[5]"
-      ch[5].empty=true & i <= pat7Set.length & pat7Set.content[i] != 0 & Spy_known[pat7Set.content[i]] ---& match(msgs[pat7Set.content[i]], msgs[HostCh5Pat]) 
+      ch[5].empty=true & i <= pat7Set.length & pat7Set.content[i] != 0 & Spy_known[pat7Set.content[i]]
       ==>
       begin
         if (!emit[pat7Set.content[i]]) then  --- & msgs[msgs[pat7Set.content[i]].aencKey].k.ag=roleHost[j].Host
@@ -1534,7 +1524,7 @@ ruleset i: msgLen do
           ch[5].receiver:=roleHost[j].Host;
           ch[5].empty:=false;
           emit[pat7Set.content[i]] := true;
-          put "intruderEmitMsgIntoCh[5] \n";
+          put "seq5. ";
           put ch[5].sender;
           put "   ";
           put ch[5].receiver;
@@ -1550,7 +1540,7 @@ endruleset;
 ruleset i: msgLen do
   ruleset j: roleGatewayNums do
     rule "intruderEmitMsgIntoCh[6]"
-      ch[6].empty=true & i <= pat7Set.length & pat7Set.content[i] != 0 & Spy_known[pat7Set.content[i]] ---& match(msgs[pat7Set.content[i]], msgs[GatewayCh6Pat]) 
+      ch[6].empty=true & i <= pat7Set.length & pat7Set.content[i] != 0 & Spy_known[pat7Set.content[i]]
       ==>
       begin
         if (!emit[pat7Set.content[i]]) then  --- & msgs[msgs[pat7Set.content[i]].aencKey].k.ag=roleGateway[j].Gateway
@@ -1560,7 +1550,7 @@ ruleset i: msgLen do
           ch[6].receiver:=roleGateway[j].Gateway;
           ch[6].empty:=false;
           emit[pat7Set.content[i]] := true;
-          put "intruderEmitMsgIntoCh[6] \n";
+          put "seq6. ";
           put ch[6].sender;
           put "   ";
           put ch[6].receiver;
@@ -1576,7 +1566,7 @@ endruleset;
 ruleset i: msgLen do
   ruleset j: roleServerNums do
     rule "intruderEmitMsgIntoCh[7]"
-      ch[7].empty=true & i <= pat7Set.length & pat7Set.content[i] != 0 & Spy_known[pat7Set.content[i]] ---& match(msgs[pat7Set.content[i]], msgs[ServerCh7Pat]) 
+      ch[7].empty=true & i <= pat7Set.length & pat7Set.content[i] != 0 & Spy_known[pat7Set.content[i]]
       ==>
       begin
         if (!emit[pat7Set.content[i]]) then  --- & msgs[msgs[pat7Set.content[i]].aencKey].k.ag=roleServer[j].Server
@@ -1586,7 +1576,7 @@ ruleset i: msgLen do
           ch[7].receiver:=roleServer[j].Server;
           ch[7].empty:=false;
           emit[pat7Set.content[i]] := true;
-          put "intruderEmitMsgIntoCh[7] \n";
+          put "seq7. ";
           put ch[7].sender;
           put "   ";
           put ch[7].receiver;
@@ -1602,7 +1592,7 @@ endruleset;
 ruleset i: msgLen do
   ruleset j: roleGatewayNums do
     rule "intruderEmitMsgIntoCh[8]"
-      ch[8].empty=true & i <= pat7Set.length & pat7Set.content[i] != 0 & Spy_known[pat7Set.content[i]] ---& match(msgs[pat7Set.content[i]], msgs[GatewayCh8Pat]) 
+      ch[8].empty=true & i <= pat7Set.length & pat7Set.content[i] != 0 & Spy_known[pat7Set.content[i]]
       ==>
       begin
         if (!emit[pat7Set.content[i]]) then  --- & msgs[msgs[pat7Set.content[i]].aencKey].k.ag=roleGateway[j].Gateway
@@ -1612,7 +1602,7 @@ ruleset i: msgLen do
           ch[8].receiver:=roleGateway[j].Gateway;
           ch[8].empty:=false;
           emit[pat7Set.content[i]] := true;
-          put "intruderEmitMsgIntoCh[8] \n";
+          put "seq8. ";
           put ch[8].sender;
           put "   ";
           put ch[8].receiver;
@@ -1628,7 +1618,7 @@ endruleset;
 ruleset i: msgLen do
   ruleset j: roleHostNums do
     rule "intruderEmitMsgIntoCh[9]"
-      ch[9].empty=true & i <= pat7Set.length & pat7Set.content[i] != 0 & Spy_known[pat7Set.content[i]] ---& match(msgs[pat7Set.content[i]], msgs[HostCh9Pat]) 
+      ch[9].empty=true & i <= pat7Set.length & pat7Set.content[i] != 0 & Spy_known[pat7Set.content[i]]
       ==>
       begin
         if (!emit[pat7Set.content[i]]) then  --- & msgs[msgs[pat7Set.content[i]].aencKey].k.ag=roleHost[j].Host
@@ -1638,7 +1628,7 @@ ruleset i: msgLen do
           ch[9].receiver:=roleHost[j].Host;
           ch[9].empty:=false;
           emit[pat7Set.content[i]] := true;
-          put "intruderEmitMsgIntoCh[9] \n";
+          put "seq9. ";
           put ch[9].sender;
           put "   ";
           put ch[9].receiver;
