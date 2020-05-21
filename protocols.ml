@@ -881,7 +881,7 @@ let genIsPatCode m i patList =
                   sprintf "       if (%s) then \n" andFlagParts ^
                   sprintf "         flag1 := true;\n" ^
                   sprintf "       endif;\n" ^
-                  sprintf "     endif;\n" ^
+                  sprintf "     endif;\n" ^  
                   sprintf "     flag := flag1;\n" ^
                   sprintf "  end;\n"
   end;

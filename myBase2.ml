@@ -3,7 +3,7 @@ open MyBase1;;
 (* part 2 functions definition *)
 let compileAct1 (seq,r1,r2,n,m) roleName =
   if roleName = r1 then Some (Plus, seq, m)
-  else if roleName = r2 then Some (Minus,seq, m)
+  else if roleName = r2 then Some (Minus,seq, m) 
   else None
 ;;
 
