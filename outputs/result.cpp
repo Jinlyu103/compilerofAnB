@@ -1,5 +1,5 @@
 /******************************
-  Program "result.m" compiled by "Caching Murphi Release 5.4.9.1"
+  Program "outputs/result.m" compiled by "Caching Murphi Release 5.4.9.1"
 
   Murphi Last Compiled date: "Aug  7 2019"
  ******************************/
@@ -9,7 +9,11 @@
  ********************/
 #define MURPHI_VERSION "Caching Murphi Release 5.4.9.1"
 #define MURPHI_DATE "Aug  7 2019"
+<<<<<<< HEAD
 #define PROTOCOL_NAME "result"
+=======
+#define PROTOCOL_NAME "outputs/result"
+>>>>>>> 2123be9aae8c49b0cda7eb457fc24bf29f221ff6
 #define BITS_IN_WORLD 8648
 #define ALIGN
 
