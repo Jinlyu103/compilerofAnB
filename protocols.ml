@@ -103,7 +103,7 @@ let rec genSendAct rolename r2 seq i m atoms length msgofRolename patlist =
   let patNum = getPatNum m patlist in
   sprintf "var msg:Message;\n    msgNo:indexType;\nbegin\n" ^
   sprintf "   clear msg;\n   cons%d(%s,msg,msgNo);\n" patNum (sendAtoms2Str rolename i atoms msgofRolename) ^
-  sprintf "   ---%sCh%dPat := msgNo;\n" r2 seq ^
+  (* sprintf "   ---%sCh%dPat := msgNo;\n" r2 seq ^ *)
   sprintf "   ch[%d].empty := false;\n" seq ^ 
   sprintf "   ch[%d].msg := msg;\n" seq ^
   sprintf "   ch[%d].sender := role%s[i].%s;\n" seq rolename rolename ^ 
@@ -520,7 +520,7 @@ let genCodeOfIntruderEmitMsg (seq,r,m) patList=
   let str1 = sprintf "\n---rule of intruder to emit msg into ch[%d].\n" seq ^ sprintf "ruleset i: msgLen do\n"
   in
   let str2 = sprintf "  ruleset j: role%sNums do\n" r in
-  let str3 = sprintf "    rule \"intruderEmitMsgIntoCh[%d]\"\n" seq ^ sprintf "      ch[%d].empty=true & i <= pat%dSet.length & pat%dSet.content[i] != 0 & Spy_known[pat%dSet.content[i]] ---& match(msgs[pat%dSet.content[i]], msgs[%sCh%dPat]) \n      ==>\n" seq j j j j r seq^ 
+  let str3 = sprintf "    rule \"intruderEmitMsgIntoCh[%d]\"\n" seq ^ sprintf "      ch[%d].empty=true & i <= pat%dSet.length & pat%dSet.content[i] != 0 & Spy_known[pat%dSet.content[i]]\n      ==>\n" seq j j j^ (*  --- & match(msgs[pat%dSet.content[i]], msgs[%sCh%dPat]) *)
              sprintf "      begin\n        if (!emit[pat%dSet.content[i]]) then  --- & msgs[msgs[pat%dSet.content[i]].aencKey].k.ag=role%s[j].%s\n" j j r r^ 
              sprintf "          clear ch[%d];\n" seq ^sprintf "          ch[%d].msg:=msgs[pat%dSet.content[i]];\n" seq j^
              sprintf "          ch[%d].sender:=Intruder;\n" seq
@@ -853,6 +853,20 @@ let genIsPatCode m i patList =
     flag := flag1;\n  end;\n\n" i1 i2
   end;
   |`Concat msgs ->begin
+                  (* let type2str = match List.nth atoms 1 with
+                              |Some (`Var n) -> "nonce"
+                              |Some (`Str r) -> "agent"
+                              |_ -> ""
+                  in
+                  str1 ^ sprintf "  var flag1 : boolean;\n  begin
+    flag1 := false;
+    if (msg.msgType = concat) then 
+      if (msgs[msg.concatPart[1]].msgType=nonce & msgs[msg.concatPart[2]].msgType=%s) then 
+        flag1 := true;
+      endif;
+    endif;
+    flag := flag1;
+  end;\n\n" type2str *)
                   let flagOfParts = String.concat ~sep:"," (List.mapi ~f:(fun i m -> sprintf "flagPart%d" (i+1) ) msgs) in
                   let initFalgParts = String.concat (List.mapi ~f:(fun i m -> sprintf "     flagPart%d := false;\n" (i+1)) msgs) in
                   let isPatOfParts = String.concat (List.mapi ~f:(fun i m -> let patNum = getPatNum m patList in
@@ -1251,9 +1265,9 @@ let genMatchMsg () =
     elsif m1.msgType = key & m2.msgType = key then
 	    return (m1.k.encType = m2.k.encType) & (matchAgent(m1.k.ag, m2.k.ag));
     elsif m1.msgType = aenc & m2.msgType = aenc then
-	    return match(msgs[m1.aencMsg], msgs[m2.aencMsg]) & match(msgs[m1.aencKey], msgs[m2.aencKey]);--- & match(msgs[m1.aencKey], msgs[m2.aencKey]);
+	    return match(msgs[m1.aencMsg], msgs[m2.aencMsg]) & match(msgs[m1.aencKey], msgs[m2.aencKey]);
     elsif m1.msgType = senc & m2.msgType = senc then
-	    return match(msgs[m1.sencMsg], msgs[m2.sencMsg]) & match(msgs[m1.sencKey], msgs[m2.sencKey]); --- & match(msgs[m1.sencKey], msgs[m2.sencKey]);
+	    return match(msgs[m1.sencMsg], msgs[m2.sencMsg]) & match(msgs[m1.sencKey], msgs[m2.sencKey]);
     elsif (m1.msgType=concat & m2.msgType=concat) & (m1.length = m2.length)  then
       concatFlag := true;
       i := m1.length;
@@ -1565,7 +1579,7 @@ let printMurphiConsTypeVars actions k env=
   sprintf "const\n" ^
   String.concat ~sep:"\n" (List.map ~f:(fun r -> sprintf "  role%sNum:1;" r) rlist) ^
   "
-  totalFact:30;
+  totalFact:20;
   msgLength:15;
   chanNum:10;\n" ^
 
