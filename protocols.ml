@@ -827,7 +827,7 @@ let genSynthCode m i patList =
       endif;
       num:=index;
       msg:=msgs[index];
-  end;\n\n" n n;
+  end;\n\n" n n; 
   |_ -> "" 
 ;;
 
