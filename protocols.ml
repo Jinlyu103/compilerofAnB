@@ -520,7 +520,7 @@ let genCodeOfIntruderEmitMsg (seq,r,m) patList=
   let str1 = sprintf "\n---rule of intruder to emit msg into ch[%d].\n" seq ^ sprintf "ruleset i: msgLen do\n"
   in
   let str2 = sprintf "  ruleset j: role%sNums do\n" r in
-  let str3 = sprintf "    rule \"intruderEmitMsgIntoCh[%d]\"\n" seq ^ sprintf "      ch[%d].empty=true & i <= pat%dSet.length & pat%dSet.content[i] != 0 & Spy_known[pat%dSet.content[i]]\n      ==>\n" seq j j j^ 
+  let str3 = sprintf "    rule \"intruderEmitMsgIntoCh[%d]\"\n" seq ^ sprintf "      ch[%d].empty=true & i <= pat%dSet.length & pat%dSet.content[i] != 0 & Spy_known[pat%dSet.content[i]] & matchPat(msgs[pat%dSet.content[i]], sPat%dSet)\n      ==>\n" seq j j j j j^ 
              sprintf "      begin\n        if (!emit[pat%dSet.content[i]]) then  --- & msgs[msgs[pat%dSet.content[i]].aencKey].k.ag=role%s[j].%s\n" j j r r^ 
              sprintf "          clear ch[%d];\n" seq ^sprintf "          ch[%d].msg:=msgs[pat%dSet.content[i]];\n" seq j^
              sprintf "          ch[%d].sender:=Intruder;\n" seq
@@ -680,7 +680,7 @@ let genSynthCode m i patList =
                   sprintf "     endif;\n"^
                   sprintf "   endfor;\n"^
                   sprintf "   if(index=0) then\n"^
-                  sprintf "     msg_end := msg_end + 1 ;\n     index := msg_end;\n     msgs[index].msgType := aenc;\n     msgs[index].aencMsg:=i1; \n     msgs[index].aencKey:=i2; \n     msgs[index].length := 1;\n"^
+                  sprintf "     msg_end := msg_end + 1 ;\n     index := msg_end;\n     msgs[index].msgType := aenc;\n     msgs[index].aencMsg := i1; \n     msgs[index].aencKey := i2; \n     msgs[index].length := 1;\n"^
                   sprintf "   endif;\n"^
                   sprintf "   num:=index;\n   msg:=msgs[index];\n  end;\n\n"; 
                   end;
@@ -861,9 +861,9 @@ let genConstrustSpatN m i patList =
                   sprintf "      endif;\n"^
                   sprintf "      i := i+1;\n"^
                   (* sprintf "    endfor;\n"^ *)
-                  sprintf "    end;\n" ^
+                  sprintf "    endwhile;\n" ^
                   sprintf "    if(index=0) then\n"^
-                  sprintf "      msg_end := msg_end + 1 ;\n      index := msg_end;\n      msgs[index].msgType := aenc;\n      msgs[index].aencMsg:=i1; \n      msgs[index].aencKey:=i2; \n      msgs[index].length := 1;\n"^
+                  sprintf "      msg_end := msg_end + 1 ;\n      index := msg_end;\n      msgs[index].msgType := aenc;\n      msgs[index].aencMsg := i1; \n      msgs[index].aencKey := i2; \n      msgs[index].length := 1;\n"^
                   sprintf "    endif;\n"^
                   sprintf "    sPat%dSet.length := sPat%dSet.length + 1;\n" patNum patNum ^
                   sprintf "    sPat%dSet.content[sPat%dSet.length] := index;\n" patNum patNum^
@@ -890,7 +890,7 @@ let genConstrustSpatN m i patList =
                   sprintf "        endif;\n" ^
                   sprintf "      endif;\n" ^
                   sprintf "      i := i+1;\n" ^
-                  sprintf "    end;\n" ^
+                  sprintf "    endwhile;\n" ^
                   sprintf "    if(index=0) then\n"^
                   sprintf "      msg_end := msg_end + 1 ;\n      index := msg_end;\n      msgs[index].msgType := aenc;\n%s      msgs[index].length := %d;\n" conPartStr (List.length msgs)^
                   sprintf "    endif;\n"^
@@ -900,7 +900,7 @@ let genConstrustSpatN m i patList =
                   sprintf "  end;\n\n";
                   end
   |`Str s ->str1 ^ 
-            sprintf " Var i, index : indexType;\n  begin\n"^
+            sprintf "  Var i, index : indexType;\n  begin\n"^
             sprintf "   index:=0;\n" ^
             sprintf "   i := 1;\n" ^
             sprintf "   while(i<= msg_end) do\n" ^
@@ -910,7 +910,7 @@ let genConstrustSpatN m i patList =
             sprintf "        endif;\n" ^
             sprintf "      endif;\n" ^
             sprintf "      i := i+1;\n" ^
-            sprintf "    end;\n" ^
+            sprintf "    endwhile;\n" ^
             sprintf "    if(index=0) then\n"^
             sprintf "      msg_end := msg_end + 1 ;\n      index := msg_end;\n      msgs[index].msgType := agent;\n      msgs[index].ag := %s;\n      msgs[index].length := 1;\n" s ^
             sprintf "    endif;\n"^
@@ -919,7 +919,7 @@ let genConstrustSpatN m i patList =
             sprintf "    num := index;\n" ^
             sprintf "  end;\n\n";
   |`Pk role ->str1 ^ 
-              sprintf " Var i, index : indexType;\n  begin\n"^
+              sprintf "  Var i, index : indexType;\n  begin\n"^
               sprintf "   index:=0;\n" ^
               sprintf "   i := 1;\n" ^
               sprintf "   while(i<= msg_end) do\n" ^
@@ -929,7 +929,7 @@ let genConstrustSpatN m i patList =
               sprintf "        endif;\n" ^
               sprintf "      endif;\n" ^
               sprintf "      i := i+1;\n" ^
-              sprintf "    end;\n" ^
+              sprintf "    endwhile;\n" ^
               sprintf "    if(index=0) then\n"^
               sprintf "      msg_end := msg_end + 1 ;\n      index := msg_end;\n      msgs[index].msgType := key;\n      msgs[index].k.encType := PK;\n      msgs[index].k.ag := %sPk;\n      msgs[index].length := 1;\n" role ^
               sprintf "    endif;\n"^
@@ -938,7 +938,7 @@ let genConstrustSpatN m i patList =
               sprintf "    num := index;\n" ^
               sprintf "  end;\n\n";
   |`Sk role ->str1 ^ 
-              sprintf " Var i, index : indexType;\n  begin\n"^
+              sprintf "  Var i, index : indexType;\n  begin\n"^
               sprintf "   index:=0;\n" ^
               sprintf "   i := 1;\n" ^
               sprintf "   while(i<= msg_end) do\n" ^
@@ -948,7 +948,7 @@ let genConstrustSpatN m i patList =
               sprintf "        endif;\n" ^
               sprintf "      endif;\n" ^
               sprintf "      i := i+1;\n" ^
-              sprintf "    end;\n" ^
+              sprintf "    endwhile;\n" ^
               sprintf "    if(index=0) then\n"^
               sprintf "      msg_end := msg_end + 1 ;\n      index := msg_end;\n      msgs[index].msgType := key;\n      msgs[index].k.encType := SK;\n      msgs[index].k.ag := %sSk;\n      msgs[index].length := 1;\n" role ^
               sprintf "    endif;\n"^
@@ -957,7 +957,7 @@ let genConstrustSpatN m i patList =
               sprintf "    num := index;\n" ^
               sprintf "  end;\n\n";
   |`Var n ->str1 ^ 
-            sprintf " Var i, index : indexType;\n  begin\n"^
+            sprintf "  Var i, index : indexType;\n  begin\n"^
             sprintf "   index:=0;\n" ^
             sprintf "   i := 1;\n" ^
             sprintf "   while(i<= msg_end) do\n" ^
@@ -967,7 +967,7 @@ let genConstrustSpatN m i patList =
             sprintf "        endif;\n" ^
             sprintf "      endif;\n" ^
             sprintf "      i := i+1;\n" ^
-            sprintf "    end;\n" ^
+            sprintf "    endwhile;\n" ^
             sprintf "    if(index=0) then\n"^
             sprintf "      msg_end := msg_end + 1 ;\n      index := msg_end;\n      msgs[index].msgType := nonce;\n      msgs[index].noncePart := %s;\n      msgs[index].length := 1;\n" n ^
             sprintf "    endif;\n"^
@@ -1400,15 +1400,18 @@ let genMatchNonce () =
 ;;
 
 (* Generating function match(msg1,msg2) code *)
-let genMatchMsg () =
+let rec genMatchMsg ()=
+  genMatch() ^ genMatchPat() 
+
+and genMatch () =
   sprintf "function match(var m1,m2:Message):boolean;
   var concatFlag: boolean;
       i: indexType;
   begin 
     if m1.msgType = agent & m2.msgType = agent then
-	    return (m1.ag != anyAgent & m2.ag != anyAgent & matchAgent(m1.ag, m2.ag)); ---ag and noncePart should be initiallized as anyAgent or anyNonce 
+	    return matchAgent(m1.ag, m2.ag); ---ag and noncePart should be initiallized as anyAgent or anyNonce (m1.ag != anyAgent & m2.ag != anyAgent &)
     elsif m1.msgType = nonce & m2.msgType = nonce then
-	    return (m1.noncePart != anyNonce & m2.noncePart != anyNonce & matchNonce(m1.noncePart, m2.noncePart));
+	    return matchNonce(m1.noncePart, m2.noncePart); --- m1.noncePart != anyNonce & m2.noncePart != anyNonce &
     elsif m1.msgType = key & m2.msgType = key then
 	    return (m1.k.encType = m2.k.encType) & (matchAgent(m1.k.ag, m2.k.ag));
     elsif m1.msgType = aenc & m2.msgType = aenc then
@@ -1427,6 +1430,22 @@ let genMatchMsg () =
 	    return false;
     endif;	
   end;\n\n"
+
+and genMatchPat () =
+  sprintf "function matchPat(var m1:Message; sPatnSet: msgSet):boolean;
+  var flag:boolean;
+      i : indexType;
+  begin
+    flag := false;
+    i := 1;
+    while (i<sPatnSet.length+1) do
+      if(match(m1,msgs[sPatnSet.content[i]])) then
+        flag := true;
+      endif;
+      i := i+1;
+    end;
+    return flag;
+  end;\n"
 ;;
 
 
@@ -1584,14 +1603,14 @@ let rec initSpatSet actions patlist =
   |`Act1(seq, r1, r2, n, m) ->let patNum = (getPatNum m patlist) in
                               let atoms = getAtoms m in
                               sprintf "  for i : role%sNums do\n" r2 ^
-                              sprintf "    constructSpat%d(%s, sPat%dSet, gnum);\n" patNum (atoms2Str atoms r2) patNum ^
+                              sprintf "    constructSpat%d(%s, gnum);\n" patNum (atoms2Str atoms r2) ^
                               (* sprintf "    sPat%dSet.length := sPat%dSet.length + 1;\n" patNum patNum ^
                               sprintf "    sPat%dSet.content[sPat%dSet.length] := constructSpat%d(%s);\n" patNum patNum patNum (atoms2Str atoms r2) ^ *)
                               sprintf "  endfor;\n"
   |`Act2(seq, r1, r2, m) ->let patNum = (getPatNum m patlist) in
                            let atoms = getAtoms m in
                            sprintf "  for i : role%sNums do\n" r2 ^
-                           sprintf "    constructSpat%d(%s, sPat%dSet, gnum);\n" patNum (atoms2Str atoms r2) patNum ^
+                           sprintf "    constructSpat%d(%s, gnum);\n" patNum (atoms2Str atoms r2) ^
                            (* sprintf "    sPat%dSet.length := sPat%dSet.length + 1;\n" patNum patNum ^
                            sprintf "    sPat%dSet.content[sPat%dSet.length] := constructSpat%d(%s);\n" patNum patNum patNum (atoms2Str atoms r2) ^ *)
                            sprintf "  endfor;\n"

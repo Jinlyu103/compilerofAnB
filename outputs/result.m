@@ -154,7 +154,7 @@ procedure constructSpat1(Na:NonceType; Var num: indexType);
         endif;
       endif;
       i := i+1;
-    end;
+    endwhile;
     if(index=0) then
       msg_end := msg_end + 1 ;
       index := msg_end;
@@ -203,7 +203,7 @@ procedure isPat2(msg:Message; Var flag:boolean);
 
 ---spat2: A 
 procedure constructSpat2(A:AgentType; Var num: indexType);
- Var i, index : indexType;
+  Var i, index : indexType;
   begin
    index:=0;
    i := 1;
@@ -214,7 +214,7 @@ procedure constructSpat2(A:AgentType; Var num: indexType);
         endif;
       endif;
       i := i+1;
-    end;
+    endwhile;
     if(index=0) then
       msg_end := msg_end + 1 ;
       index := msg_end;
@@ -285,7 +285,7 @@ procedure constructSpat3(Na:NonceType; A:AgentType; Var num: indexType);
         endif;
       endif;
       i := i+1;
-    end;
+    endwhile;
     if(index=0) then
       msg_end := msg_end + 1 ;
       index := msg_end;
@@ -338,7 +338,7 @@ procedure isPat4(msg:Message; Var flag:boolean);
 
 ---spat4: pk(B) 
 procedure constructSpat4(BPk :AgentType; Var num: indexType);
- Var i, index : indexType;
+  Var i, index : indexType;
   begin
    index:=0;
    i := 1;
@@ -349,7 +349,7 @@ procedure constructSpat4(BPk :AgentType; Var num: indexType);
         endif;
       endif;
       i := i+1;
-    end;
+    endwhile;
     if(index=0) then
       msg_end := msg_end + 1 ;
       index := msg_end;
@@ -382,8 +382,8 @@ procedure lookAddPat5(Na:NonceType; A:AgentType; BPk :AgentType; Var msg:Message
      msg_end := msg_end + 1 ;
      index := msg_end;
      msgs[index].msgType := aenc;
-     msgs[index].aencMsg:=i1; 
-     msgs[index].aencKey:=i2; 
+     msgs[index].aencMsg := i1; 
+     msgs[index].aencKey := i2; 
      msgs[index].length := 1;
    endif;
    num:=index;
@@ -422,13 +422,13 @@ procedure constructSpat5(Na:NonceType; A:AgentType; BPk :AgentType; Var num: ind
         endif;
       endif;
       i := i+1;
-    end;
+    endwhile;
     if(index=0) then
       msg_end := msg_end + 1 ;
       index := msg_end;
       msgs[index].msgType := aenc;
-      msgs[index].aencMsg:=i1; 
-      msgs[index].aencKey:=i2; 
+      msgs[index].aencMsg := i1; 
+      msgs[index].aencKey := i2; 
       msgs[index].length := 1;
     endif;
     sPat5Set.length := sPat5Set.length + 1;
@@ -494,7 +494,7 @@ procedure constructSpat6(Na:NonceType; Nb:NonceType; Var num: indexType);
         endif;
       endif;
       i := i+1;
-    end;
+    endwhile;
     if(index=0) then
       msg_end := msg_end + 1 ;
       index := msg_end;
@@ -527,8 +527,8 @@ procedure lookAddPat7(Na:NonceType; Nb:NonceType; APk :AgentType; Var msg:Messag
      msg_end := msg_end + 1 ;
      index := msg_end;
      msgs[index].msgType := aenc;
-     msgs[index].aencMsg:=i1; 
-     msgs[index].aencKey:=i2; 
+     msgs[index].aencMsg := i1; 
+     msgs[index].aencKey := i2; 
      msgs[index].length := 1;
    endif;
    num:=index;
@@ -567,13 +567,13 @@ procedure constructSpat7(Na:NonceType; Nb:NonceType; APk :AgentType; Var num: in
         endif;
       endif;
       i := i+1;
-    end;
+    endwhile;
     if(index=0) then
       msg_end := msg_end + 1 ;
       index := msg_end;
       msgs[index].msgType := aenc;
-      msgs[index].aencMsg:=i1; 
-      msgs[index].aencKey:=i2; 
+      msgs[index].aencMsg := i1; 
+      msgs[index].aencKey := i2; 
       msgs[index].length := 1;
     endif;
     sPat7Set.length := sPat7Set.length + 1;
@@ -600,8 +600,8 @@ procedure lookAddPat8(Nb:NonceType; BPk :AgentType; Var msg:Message; Var num : i
      msg_end := msg_end + 1 ;
      index := msg_end;
      msgs[index].msgType := aenc;
-     msgs[index].aencMsg:=i1; 
-     msgs[index].aencKey:=i2; 
+     msgs[index].aencMsg := i1; 
+     msgs[index].aencKey := i2; 
      msgs[index].length := 1;
    endif;
    num:=index;
@@ -640,13 +640,13 @@ procedure constructSpat8(Nb:NonceType; BPk :AgentType; Var num: indexType);
         endif;
       endif;
       i := i+1;
-    end;
+    endwhile;
     if(index=0) then
       msg_end := msg_end + 1 ;
       index := msg_end;
       msgs[index].msgType := aenc;
-      msgs[index].aencMsg:=i1; 
-      msgs[index].aencKey:=i2; 
+      msgs[index].aencMsg := i1; 
+      msgs[index].aencKey := i2; 
       msgs[index].length := 1;
     endif;
     sPat8Set.length := sPat8Set.length + 1;
@@ -1030,9 +1030,9 @@ function match(var m1,m2:Message):boolean;
       i: indexType;
   begin 
     if m1.msgType = agent & m2.msgType = agent then
-	    return (m1.ag != anyAgent & m2.ag != anyAgent & matchAgent(m1.ag, m2.ag)); ---ag and noncePart should be initiallized as anyAgent or anyNonce 
+	    return matchAgent(m1.ag, m2.ag); ---ag and noncePart should be initiallized as anyAgent or anyNonce (m1.ag != anyAgent & m2.ag != anyAgent &)
     elsif m1.msgType = nonce & m2.msgType = nonce then
-	    return (m1.noncePart != anyNonce & m2.noncePart != anyNonce & matchNonce(m1.noncePart, m2.noncePart));
+	    return matchNonce(m1.noncePart, m2.noncePart); --- m1.noncePart != anyNonce & m2.noncePart != anyNonce &
     elsif m1.msgType = key & m2.msgType = key then
 	    return (m1.k.encType = m2.k.encType) & (matchAgent(m1.k.ag, m2.k.ag));
     elsif m1.msgType = aenc & m2.msgType = aenc then
@@ -1052,6 +1052,20 @@ function match(var m1,m2:Message):boolean;
     endif;	
   end;
 
+function matchPat(var m1:Message; sPatnSet: msgSet):boolean;
+  var flag:boolean;
+      i : indexType;
+  begin
+    flag := false;
+    i := 1;
+    while (i<sPatnSet.length+1) do
+      if(match(m1,msgs[sPatnSet.content[i]])) then
+        flag := true;
+      endif;
+      i := i+1;
+    end;
+    return flag;
+  end;
 ruleset i:roleANums do
 rule " roleA1 "
 roleA[i].st = A1 & ch[1].empty = true 
@@ -1272,7 +1286,7 @@ rule "intruderGetMsgFromCh[3]"
 ruleset i: msgLen do
   ruleset j: roleBNums do
     rule "intruderEmitMsgIntoCh[1]"
-      ch[1].empty=true & i <= pat5Set.length & pat5Set.content[i] != 0 & Spy_known[pat5Set.content[i]]
+      ch[1].empty=true & i <= pat5Set.length & pat5Set.content[i] != 0 & Spy_known[pat5Set.content[i]] & matchPat(msgs[pat5Set.content[i]], sPat5Set)
       ==>
       begin
         if (!emit[pat5Set.content[i]]) then  --- & msgs[msgs[pat5Set.content[i]].aencKey].k.ag=roleB[j].B
@@ -1298,7 +1312,7 @@ endruleset;
 ruleset i: msgLen do
   ruleset j: roleANums do
     rule "intruderEmitMsgIntoCh[2]"
-      ch[2].empty=true & i <= pat7Set.length & pat7Set.content[i] != 0 & Spy_known[pat7Set.content[i]]
+      ch[2].empty=true & i <= pat7Set.length & pat7Set.content[i] != 0 & Spy_known[pat7Set.content[i]] & matchPat(msgs[pat7Set.content[i]], sPat7Set)
       ==>
       begin
         if (!emit[pat7Set.content[i]]) then  --- & msgs[msgs[pat7Set.content[i]].aencKey].k.ag=roleA[j].A
@@ -1324,7 +1338,7 @@ endruleset;
 ruleset i: msgLen do
   ruleset j: roleBNums do
     rule "intruderEmitMsgIntoCh[3]"
-      ch[3].empty=true & i <= pat8Set.length & pat8Set.content[i] != 0 & Spy_known[pat8Set.content[i]]
+      ch[3].empty=true & i <= pat8Set.length & pat8Set.content[i] != 0 & Spy_known[pat8Set.content[i]] & matchPat(msgs[pat8Set.content[i]], sPat8Set)
       ==>
       begin
         if (!emit[pat8Set.content[i]]) then  --- & msgs[msgs[pat8Set.content[i]].aencKey].k.ag=roleB[j].B
@@ -1684,13 +1698,13 @@ startstate
     Spy_known[msg_end] := true;
   endfor;
   for i : roleBNums do
-    constructSpat5(roleB[i].Na, roleB[i].A, roleB[i].B, sPat5Set, gnum);
+    constructSpat5(roleB[i].Na, roleB[i].A, roleB[i].B, gnum);
   endfor;
   for i : roleANums do
-    constructSpat7(roleA[i].Na, roleA[i].Nb, roleA[i].A, sPat7Set, gnum);
+    constructSpat7(roleA[i].Na, roleA[i].Nb, roleA[i].A, gnum);
   endfor;
   for i : roleBNums do
-    constructSpat8(roleB[i].Nb, roleB[i].B, sPat8Set, gnum);
+    constructSpat8(roleB[i].Nb, roleB[i].B, gnum);
   endfor;
 
 end;
