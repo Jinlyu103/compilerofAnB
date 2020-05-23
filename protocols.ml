@@ -884,7 +884,7 @@ let genConstrustSpatN m i patList =
                   sprintf "%s" subStat ^
                   sprintf "    i := 1;\n" ^
                   sprintf "    while(i<= msg_end) do\n" ^
-                  sprintf "      if (msgs[i].msgType = concat) then\n"^
+                  sprintf "      if (msgs[i].msgType = concat & msgs[i].length = %d) then\n" (List.length msgs)^
                   sprintf "        if (%s) then\n" ifConcatPart ^
                   sprintf "          index := i;\n" ^
                   sprintf "        endif;\n" ^
@@ -892,7 +892,7 @@ let genConstrustSpatN m i patList =
                   sprintf "      i := i+1;\n" ^
                   sprintf "    endwhile;\n" ^
                   sprintf "    if(index=0) then\n"^
-                  sprintf "      msg_end := msg_end + 1 ;\n      index := msg_end;\n      msgs[index].msgType := aenc;\n%s      msgs[index].length := %d;\n" conPartStr (List.length msgs)^
+                  sprintf "      msg_end := msg_end + 1 ;\n      index := msg_end;\n      msgs[index].msgType := concat;\n%s      msgs[index].length := %d;\n" conPartStr (List.length msgs)^
                   sprintf "    endif;\n"^
                   sprintf "    sPat%dSet.length := sPat%dSet.length + 1;\n" patNum patNum^
                   sprintf "    sPat%dSet.content[sPat%dSet.length] := index;\n" patNum patNum^
@@ -1602,6 +1602,7 @@ let rec initSpatSet actions patlist =
   |`Null -> ""
   |`Act1(seq, r1, r2, n, m) ->let patNum = (getPatNum m patlist) in
                               let atoms = getAtoms m in
+                              let atoms = del_duplicate atoms in
                               sprintf "  for i : role%sNums do\n" r2 ^
                               sprintf "    constructSpat%d(%s, gnum);\n" patNum (atoms2Str atoms r2) ^
                               (* sprintf "    sPat%dSet.length := sPat%dSet.length + 1;\n" patNum patNum ^
@@ -1609,6 +1610,7 @@ let rec initSpatSet actions patlist =
                               sprintf "  endfor;\n"
   |`Act2(seq, r1, r2, m) ->let patNum = (getPatNum m patlist) in
                            let atoms = getAtoms m in
+                           let atoms = del_duplicate atoms in
                            sprintf "  for i : role%sNums do\n" r2 ^
                            sprintf "    constructSpat%d(%s, gnum);\n" patNum (atoms2Str atoms r2) ^
                            (* sprintf "    sPat%dSet.length := sPat%dSet.length + 1;\n" patNum patNum ^
