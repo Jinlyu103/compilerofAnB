@@ -308,7 +308,15 @@ let rec aencryptRule (m,k) patList=
 
 and printEncRule (m,k) i i1 i2 =
   sprintf "    rule \"encrypt %d\"	---pat%d\n" i i^
-  sprintf "      i<=pat%dSet.length & pat%dSet.content[i] != 0 & Spy_known[pat%dSet.content[i]] &\n      j<=pat%dSet.length & pat%dSet.content[j] != 0 & Spy_known[pat%dSet.content[j]] &\n      !Spy_known[construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j])]\n      ==>\n" i1 i1 i1 i2 i2 i2 i i1 i2 i1 i2^
+  sprintf "      i<=pat%dSet.length & pat%dSet.content[i] != 0 & Spy_known[pat%dSet.content[i]] &\n" i1 i1 i1 ^
+  sprintf "      j<=pat%dSet.length & pat%dSet.content[j] != 0 & Spy_known[pat%dSet.content[j]] &\n" i2 i2 i2 ^
+  sprintf "      matchPat(msgs[construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j])], sPat%dSet) &\n" i i1 i2 i1 i2 i ^ 
+  sprintf "      !Spy_known[construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j])] \n       ==>\n" i i1 i2 i1 i2 ^
+  (* sprintf "      
+        i<=pat%dSet.length & pat%dSet.content[i] != 0 & Spy_known[pat%dSet.content[i]] &\n
+        j<=pat%dSet.length & pat%dSet.content[j] != 0 & Spy_known[pat%dSet.content[j]] &\n
+        !Spy_known[construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j])] &\n      
+        & matchPat(msgs[construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j])], sPat%dSet)==>\n" i1 i1 i1 i2 i2 i2 i i1 i2 i1 i2 i^ *)
   sprintf "      var encMsgNo:indexType;\n"^
   sprintf "      begin\n"^
   sprintf "        if (msgs[pat%dSet.content[j]].k.encType=PK) then\n" i2^ (*ag=intruder.B*)
@@ -431,7 +439,7 @@ and printEnconcatRule msgs i patNumList =
   in
   let patSetStr = String.concat ~sep:"," (List.mapi ~f:(fun k (m,j) -> sprintf "pat%dSet.content[i%d]" j k) patNumList)
   in
-  str1 ^ str2 ^ sprintf " &\n      !Spy_known[construct%dBy%s(%s)]\n      ==>\n" i subMsgNo patSetStr ^ (*pat%dSet.content[i],pat%dSet.content[j]*)
+  str1 ^ str2 ^ sprintf " &\n      matchPat(msgs[construct%dBy%s(%s)], sPat%dSet)&\n      !Spy_known[construct%dBy%s(%s)]\n      ==>\n" i subMsgNo patSetStr i i subMsgNo patSetStr ^ (*pat%dSet.content[i],pat%dSet.content[j]*)
   sprintf "      var concatMsgNo:indexType;\n      begin\n" ^
   sprintf "        concatMsgNo := construct%dBy%s(%s);\n" i subMsgNo patSetStr ^
   sprintf "        Spy_known[concatMsgNo]:=true;\n" ^
