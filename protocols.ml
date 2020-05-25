@@ -450,6 +450,137 @@ and printEnconcatRule msgs i patNumList =
   sprintf "      end;\n"
 ;;
 
+(* adecryption process for `Aenc(m,k) pattern *)
+let printADecryption (m,k) patlist=
+  let i = getPatNum (`Aenc(m,k)) patlist in
+  let mNum = getPatNum m patlist in
+  (* let kNum = getPatNum k patlist in *)
+  sprintf "procedure aDeryptionPat%d(msg: Message);\n" i ^
+  sprintf "  var key_inv:Message;\n      msgPat%d:indexType;\n  	  flag_pat%d:boolean;\n" mNum mNum ^
+  sprintf "  begin\n" ^
+  sprintf "    if (! Spy_known[msg.aencMsg]) then\n" ^
+  sprintf "       key_inv := inverseKey(msg.aencKey);\n" ^
+  sprintf "       if (key_inv.k.ag = Intruder) then\n" ^
+  sprintf "         Spy_known[msg.aencMsg]:=true;\n" ^
+  sprintf "         msgPat%d:=msg.aencMsg;\n" mNum ^
+  sprintf "         isPat%d(msgs[msgPat%d],flag_pat%d);\n" mNum mNum mNum ^
+  sprintf "         if (flag_pat%d) then\n" mNum ^
+  sprintf "           if (!exist(pat%dSet,msgPat%d)) then\n" mNum mNum^
+  sprintf "             pat%dSet.length:=pat%dSet.length+1;\n             pat%dSet.content[pat%dSet.length]:=msgPat%d;\n" mNum mNum mNum mNum mNum^
+  sprintf "           endif;\n"^
+  sprintf "         endif;\n"^
+  sprintf "       endif;\n" ^
+  sprintf "    endif;\n"^
+  sprintf "  end;\n\n"
+;;
+
+(* aEncryption process for `Aenc(m,k) pattern *)
+let printAEncryption (m,k) patlist =
+  let i = getPatNum (`Aenc(m,k)) patlist in
+  let mNum = getPatNum m patlist in
+  let kNum = getPatNum k patlist in
+  sprintf "procedure aEncryptionPat%d();\n" i ^
+  sprintf "  var i, j, encMsgNo:indexType;\n"^
+  sprintf "  begin\n" ^
+  sprintf "    i := 1;\n" ^
+  sprintf "    while (i < pat%dSet.length) do\n" mNum ^
+  sprintf "      j := 1;\n" ^
+  sprintf "      while (j<pat%dSet.length) do\n" kNum ^ 
+  sprintf "         if (matchPat(msgs[construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j])], sPat%dSet) &\n" i mNum kNum mNum kNum i ^
+  sprintf "            !Spy_known[construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j])]) then\n" i mNum kNum mNum kNum ^
+  sprintf "            if (msgs[pat%dSet.content[j]].k.encType=PK) then\n" kNum ^
+  sprintf "              encMsgNo := construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j]);\n" i mNum kNum mNum kNum ^
+  sprintf "              if (!exist(pat%dSet,encMsgNo)) then\n" i ^
+  sprintf "                 pat%dSet.length := pat%dSet.length+1;\n" i i^
+  sprintf "                 pat%dSet.content[pat%dSet.length]:=encMsgNo;\n" i i^
+  sprintf "              endif; \n" ^
+  sprintf "              if (!Spy_known[encMsgNo]) then\n"^
+  sprintf "                 Spy_known[encMsgNo] := true;\n"^
+  sprintf "              endif;\n"^
+  sprintf "           endif;\n" ^
+  sprintf "         endif;\n" ^
+  sprintf "      endwhile;\n" ^
+  sprintf "    endwhile;\n" ^
+  sprintf "  end;\n\n"
+;;
+
+(* deconcat process for `Concat msgs pattern *)
+let printDeconcat msgs patlist = 
+  let i = getPatNum (`Concat msgs) patlist in
+  let msgPatStr = String.concat ~sep:", " (List.mapi ~f:(fun j m -> sprintf "msgPat%d" (j+1)) msgs) in
+  let flagPatStr = String.concat ~sep:", " (List.mapi ~f:(fun j m -> sprintf "flagPat%d" (j+1)) msgs) in
+  let subMsgNum = String.concat (List.mapi ~f:(fun j m -> sprintf "%d" (getPatNum m patlist)) msgs) in
+  let procStr = String.concat (List.mapi ~f:(fun j m -> sprintf "    if (!Spy_known[msgs[pat%dSet.content[i]].concatPart[%d]]) then\n" i (j+1) ^
+                                                        sprintf "      Spy_known[msgs[pat%dSet.content[i]].concatPart[%d]]:=true;\n" i (j+1) ^
+                                                        sprintf "      msgPat%d := msgs[pat%dSet.content[i]].concatPart[%d];\n" (j+1) i (j+1) ^
+                                                        sprintf "      isPat%d(msgs[msgPat%d],flag_pat%d);\n" (getPatNum m patlist) (j+1) (j+1) ^
+                                                        sprintf "      if (flag_pat%d) then\n" (j+1) ^
+                                                        sprintf "        if(!exist(pat%dSet,msgPat%d)) then\n" (getPatNum m patlist) (j+1) ^
+                                                        sprintf "           pat%dSet.length:=pat%dSet.length+1;\n" (getPatNum m patlist) (getPatNum m patlist) ^
+                                                        sprintf "           pat%dSet.content[pat%dSet.length] := msgPat%d;\n" (getPatNum m patlist) (getPatNum m patlist) (j+1) ^
+                                                        sprintf "        endif;\n" ^
+                                                        sprintf "      endif;\n" ^
+                                                        sprintf "    endif;\n") msgs)
+  in
+  sprintf "procedure deconcatPat%d(msg: Message);\n" i ^
+  sprintf "  var %s:indexType;\n  	  %s:boolean;\n" msgPatStr flagPatStr^
+  sprintf "  begin\n" ^
+  sprintf "%s" procStr ^
+  sprintf "  end;\n\n"
+;;
+
+(* enconcat process for `Concat msgs pattern *)
+let printEnconcat msgs patlist =
+  let i = getPatNum (`Concat msgs) patlist in
+  let parts = String.concat ~sep:", " (List.mapi ~f:(fun j m-> sprintf "i%d" (j+1)) msgs) in
+  let subNoStr = String.concat (List.mapi ~f:(fun j m-> sprintf "%d" (j+1) ) msgs) in
+  let subNoParas = String.concat ~sep:", " (List.mapi ~f:(fun j m -> sprintf "pat%dSet.content[i%d]" (getPatNum m patlist) (j+1)) msgs) in
+  let whileStr = String.concat (List.mapi ~f:(fun j m-> let space = ref "" in
+                                                        for i=0 to j do
+                                                          space := !space ^ "  "
+                                                        done;
+                                                        sprintf "%s  i%d := 1;\n" !space (j+1) ^
+                                                        sprintf "%s  while (i%d <= pat%dSet.length) do\n" !space (j+1) (getPatNum m patlist)) msgs) 
+  in
+  let endwhileStr  = String.concat (List.rev (List.mapi ~f:(fun j m-> let space = ref "" in
+                                                            for i=0 to j do
+                                                                space := !space ^ sprintf "  "
+                                                            done ;
+                                                          sprintf "%s  endwhile;\n" !space ) msgs) )
+  in
+  let ifSpace = ref "" in
+  for k = 0 to (List.length msgs) do
+    ifSpace := !ifSpace ^ "  "
+  done;                      
+  sprintf "procedure enconcatPat%d();\n" i ^
+  sprintf "  var %s, concatMsgNo: indexType;\n" parts ^
+  sprintf "  begin\n" ^
+  sprintf "%s" whileStr ^
+  sprintf "%s  if (matchPat(msgs[construct%dBy%s(%s)], sPat%dSet) &\n" !ifSpace i subNoStr subNoParas i ^
+  sprintf "%s      !Spy_known[construct%dBy%s(%s)]) then\n" !ifSpace i subNoStr subNoParas ^
+  (* sprintf "       if (msgs[pat%dSet.content[j]].k.encType=PK) then\n" kNum ^ *)
+  sprintf "%s       concatMsgNo := construct%dBy%s(%s);\n" !ifSpace i subNoStr subNoParas ^
+  sprintf "%s       if (!exist(pat%dSet,concatMsgNo)) then\n" !ifSpace i ^
+  sprintf "%s           pat%dSet.length := pat%dSet.length+1;\n" !ifSpace i i^
+  sprintf "%s           pat%dSet.content[pat%dSet.length]:=concatMsgNo;\n" !ifSpace i i^
+  sprintf "%s       endif; \n" !ifSpace^
+  sprintf "%s       if (!Spy_known[concatMsgNo]) then\n" !ifSpace^
+  sprintf "%s          Spy_known[concatMsgNo] := true;\n" !ifSpace^
+  sprintf "%s       endif;\n" !ifSpace^
+  (* sprintf "       endif;\n" ^ *)
+  sprintf "%s  endif;\n" !ifSpace^
+  sprintf "%s" endwhileStr ^
+  sprintf "  end;\n\n"
+;;
+let printDeduction i p patlist = 
+  match p with
+  |`Aenc (m1,k1) -> printADecryption (m1,k1) patlist ^
+                    printAEncryption (m1,k1) patlist
+  |`Concat msgs -> printDeconcat msgs patlist ^
+                   printEnconcat msgs patlist
+  | _ -> ""
+;;
+
 let print_murphiRule_byPats pat i patList =
   match pat with
   |`Aenc (m1,k1) -> sprintf "--- encrypt and decrypt rules of pat: aenc(%s,%s), for intruder\n" (output_msg m1) (output_msg k1)^
@@ -476,13 +607,31 @@ let print_murphiRules_EncsDecs actions knws =
   match actions with
   | `Null -> sprintf "null"
   | `Actlist arr -> let patlist = getPatList actions in    (* get all patterns from actions *)
-                    let non_dup = del_duplicate patlist in (* delete duplicate *)
-                    let non_equivalent = getEqvlMsgPattern non_dup in (* delete equivalent class *) 
-                    String.concat (List.mapi ~f:(fun i pat -> print_murphiRule_byPats pat (i+1) non_equivalent ) non_equivalent)
+                    let patlist = del_duplicate patlist in (* delete duplicate *)
+                    let patlist = getEqvlMsgPattern patlist in (* delete equivalent class *) 
+                    String.concat (List.mapi ~f:(fun i pat -> print_murphiRule_byPats pat (i+1) patlist ) patlist)
   | _ -> let patlist = getPatList actions in    (* get all patterns from actions *)
 		    	                  let non_dup = del_duplicate patlist in (* delete duplicate *)
                             let non_equivalent = getEqvlMsgPattern non_dup in (* delete equivalent class *) 
-                            String.concat (List.mapi ~f:(fun i pat -> print_murphiRule_byPats pat (i+1) non_equivalent ) non_equivalent)
+                            String.concat (List.mapi ~f:(fun i pat -> print_murphiRule_byPats pat (i+1) patlist ) patlist)
+;;
+
+(* print procedures or functions of deduction process: encryption/decryption/enconcation/deconcation*)
+let printIntruderProcedures actions knws =
+  match actions with
+  | `Null -> ""
+  | `Act1 (seq,r1,r2,n,m) ->let patlist = getPatList actions in    (* get all patterns from actions *)
+                            let patlist = del_duplicate patlist in (* delete duplicate *)
+                            let patlist = getEqvlMsgPattern patlist in (* delete equivalent class *)  
+                            String.concat (List.mapi ~f:(fun i p -> printDeduction i p patlist) patlist)
+  | `Act2 (seq,r1,r2,m) ->let patlist = getPatList actions in    (* get all patterns from actions *)
+                          let patlist = del_duplicate patlist in (* delete duplicate *)
+                          let patlist = getEqvlMsgPattern patlist in (* delete equivalent class *)  
+                          String.concat (List.mapi ~f:(fun i p -> printDeduction i p patlist) patlist)
+  | `Actlist arr -> let patlist = getPatList actions in    (* get all patterns from actions *)
+                    let patlist = del_duplicate patlist in (* delete duplicate *)
+                    let patlist = getEqvlMsgPattern patlist in (* delete equivalent class *)  
+                    String.concat (List.mapi ~f:(fun i p -> printDeduction i p patlist) patlist)
 ;;
 
 (* 2019-12-20 *)
@@ -1536,18 +1685,22 @@ let rec printMurphiRecords knw nlist aglist =
 let trActionsToMurphi actions knws =
   match actions with
   |`Null -> sprintf "null"
-  |`Act1 (seq,r1,r2,n,m) -> print_procedures actions ^ (* print prcedures and functions. *)                   
+  |`Act1 (seq,r1,r2,n,m) -> print_procedures actions ^ (* print prcedures and functions. *)
+                            printIntruderProcedures actions knws^                   
                             print_murphiRule actions knws^ (* print rules for roleA and roleB *)
-                            print_murphiRule_ofIntruder actions^ (* print rules for intruder *)
-                            print_murphiRules_EncsDecs actions knws(* encryption and decryption rules, enconcat and deconcat rules *)
-  |`Act2 (seq,r1,r2,m) -> print_procedures actions ^ (* print prcedures and functions. *)                   
+                            print_murphiRule_ofIntruder actions (* print rules for intruder *)
+                            (*print_murphiRules_EncsDecs actions knws*)(* encryption and decryption rules, enconcat and deconcat rules *)
+  |`Act2 (seq,r1,r2,m) -> print_procedures actions ^ (* print prcedures and functions. *)
+                          printIntruderProcedures actions knws^                   
                           print_murphiRule actions knws^ (* print rules for roleA and roleB *)
-                          print_murphiRule_ofIntruder actions^ (* print rules for intruder *)
-                          print_murphiRules_EncsDecs actions knws(* encryption and decryption rules, enconcat and deconcat rules *)
-  |`Actlist arr -> print_procedures actions ^ (* print prcedures and functions. *)                   
+                          print_murphiRule_ofIntruder actions (* print rules for intruder *)
+                          (*print_murphiRules_EncsDecs actions knws*)(* encryption and decryption rules, enconcat and deconcat rules *)
+  |`Actlist arr -> print_procedures actions ^ (* print prcedures and functions. *)    
+                   printIntruderProcedures actions knws^               
                    print_murphiRule actions knws^ (* print rules for roleA and roleB *)
-                   print_murphiRule_ofIntruder actions^ (* print rules for intruder *)
-		               print_murphiRules_EncsDecs actions knws(* encryption and decryption rules, enconcat and deconcat rules *)
+                   print_murphiRule_ofIntruder actions (* print rules for intruder *)
+                   (* print_murphiRules_EncsDecs actions knws  *)
+                   (* encryption and decryption rules, enconcat and deconcat rules*)
 ;;
 
 let print_startstate r num m knws =
