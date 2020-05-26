@@ -459,7 +459,7 @@ let printADecryption (m,k) patlist=
   sprintf "  var key_inv:Message;\n      msgPat%d:indexType;\n  	  flag_pat%d:boolean;\n" mNum mNum ^
   sprintf "  begin\n" ^
   sprintf "    if (! Spy_known[msg.aencMsg]) then\n" ^
-  sprintf "       key_inv := inverseKey(msg.aencKey);\n" ^
+  sprintf "       key_inv := inverseKey(msgs[msg.aencKey]);\n" ^
   sprintf "       if (key_inv.k.ag = Intruder) then\n" ^
   sprintf "         Spy_known[msg.aencMsg]:=true;\n" ^
   sprintf "         msgPat%d:=msg.aencMsg;\n" mNum ^
@@ -510,11 +510,11 @@ let printDeconcat msgs patlist =
   let msgPatStr = String.concat ~sep:", " (List.mapi ~f:(fun j m -> sprintf "msgPat%d" (j+1)) msgs) in
   let flagPatStr = String.concat ~sep:", " (List.mapi ~f:(fun j m -> sprintf "flagPat%d" (j+1)) msgs) in
   let subMsgNum = String.concat (List.mapi ~f:(fun j m -> sprintf "%d" (getPatNum m patlist)) msgs) in
-  let procStr = String.concat (List.mapi ~f:(fun j m -> sprintf "    if (!Spy_known[msgs[pat%dSet.content[i]].concatPart[%d]]) then\n" i (j+1) ^
-                                                        sprintf "      Spy_known[msgs[pat%dSet.content[i]].concatPart[%d]]:=true;\n" i (j+1) ^
-                                                        sprintf "      msgPat%d := msgs[pat%dSet.content[i]].concatPart[%d];\n" (j+1) i (j+1) ^
-                                                        sprintf "      isPat%d(msgs[msgPat%d],flag_pat%d);\n" (getPatNum m patlist) (j+1) (j+1) ^
-                                                        sprintf "      if (flag_pat%d) then\n" (j+1) ^
+  let procStr = String.concat (List.mapi ~f:(fun j m -> sprintf "    if (!Spy_known[msg.concatPart[%d]]) then\n" (j+1) ^
+                                                        sprintf "      Spy_known[msg.concatPart[%d]] := true;\n" (j+1) ^
+                                                        sprintf "      msgPat%d := msg.concatPart[%d];\n" (j+1) (j+1) ^
+                                                        sprintf "      isPat%d(msgs[msgPat%d],flagPat%d);\n" (getPatNum m patlist) (j+1) (j+1) ^
+                                                        sprintf "      if (flagPat%d) then\n" (j+1) ^
                                                         sprintf "        if(!exist(pat%dSet,msgPat%d)) then\n" (getPatNum m patlist) (j+1) ^
                                                         sprintf "           pat%dSet.length:=pat%dSet.length+1;\n" (getPatNum m patlist) (getPatNum m patlist) ^
                                                         sprintf "           pat%dSet.content[pat%dSet.length] := msgPat%d;\n" (getPatNum m patlist) (getPatNum m patlist) (j+1) ^
@@ -533,7 +533,7 @@ let printDeconcat msgs patlist =
 let printEnconcat msgs patlist =
   let i = getPatNum (`Concat msgs) patlist in
   let parts = String.concat ~sep:", " (List.mapi ~f:(fun j m-> sprintf "i%d" (j+1)) msgs) in
-  let subNoStr = String.concat (List.mapi ~f:(fun j m-> sprintf "%d" (j+1) ) msgs) in
+  let subNoStr = String.concat (List.mapi ~f:(fun j m-> sprintf "%d" (getPatNum m patlist) ) msgs) in
   let subNoParas = String.concat ~sep:", " (List.mapi ~f:(fun j m -> sprintf "pat%dSet.content[i%d]" (getPatNum m patlist) (j+1)) msgs) in
   let whileStr = String.concat (List.mapi ~f:(fun j m-> let space = ref "" in
                                                         for i=0 to j do
@@ -648,16 +648,44 @@ let rec getMsgs actions =
 
 let genCodeOfIntruderGetMsg (seq,r,m) patList = 
   let j = getPatNum m patList in
+  (* let deductionStr = match m with
+                    |`Aenc (m1,k1) -> sprintf "aDeryptionPat%d(msg);\n" j 
+                    |`Concat msgs -> sprintf "deconcatPat%d(msg);\n" j
+                    |`Var n -> sprintf "--- nonce: %s\n" n
+                    |`Str r1 -> sprintf "--- agent: %s\n" r1
+                    |`Pk r1 -> sprintf "--- pk(%s)\n" r1
+                    |`Sk r1 -> sprintf "--- sk(%s)\n" r1
+                    |`K(r1,r2) -> sprintf "--- symk(%s, %s)\n" r1 r2
+                    |`Null -> "--- null\n"
+  in *)
+  let deductionStr = String.concat (List.map ~f:(fun p -> let pNum = getPatNum p patList in
+                                                          match p with
+                                                          |`Aenc(m1, k1) -> sprintf "        i := 1;\n"  ^
+                                                                            sprintf "        while (i<=pat%dSet.length) do\n" pNum ^
+                                                                            sprintf "          aDeryptionPat%d(msgs[pat%dSet.content[i]]);\n" pNum pNum ^
+                                                                            sprintf "          aEncryptionPat%d();\n" pNum ^
+                                                                            sprintf "          i := i+1;\n" ^
+                                                                            sprintf "        endwhile;\n"
+                                                          |`Concat msgs ->sprintf "        i := 1;\n" ^
+                                                                          sprintf "        while (i<= pat%dSet.length) do\n" pNum ^
+                                                                          sprintf "           deconcatPat%d(msgs[pat%dSet.content[i]]);\n" pNum pNum ^
+                                                                          sprintf "           enconcatPat%d();\n" pNum ^
+                                                                          sprintf "           i := i+1;\n" ^
+                                                                          sprintf "        endwhile;\n"
+                                                          |`Var n -> sprintf "        --- nonce: %s\n" n
+                                                          |`Str r1 -> sprintf "        --- agent: %s\n" r1
+                                                          |`Pk r1 -> sprintf "        --- pk(%s)\n" r1
+                                                          |`Sk r1 -> sprintf "        --- sk(%s)\n" r1
+                                                          |`K(r1,r2) -> sprintf "        --- symk(%s, %s)\n" r1 r2
+                                                          |`Null -> "        --- null\n" ) patList)
+  in
   sprintf "\n---rule of intruder to get msg from ch[%d] \n" seq ^
   sprintf "rule \"intruderGetMsgFromCh[%d]\" \n" seq ^ 
   sprintf "  ch[%d].empty = false\n  ==>\n" seq ^
-  (* sprintf "  ch.empty = false\n  ==>\n" ^ *)
-  sprintf "  var flag_pat%d:boolean;\n      msgNo:indexType;\n      msg:Message;\n" j^
+  sprintf "  var flag_pat%d:boolean;\n      i, msgNo:indexType;\n      msg:Message;\n" j^
   sprintf "  begin\n" ^
-  (* sprintf "    put \"Intruder getMsgFromch[%d]\";\n" seq^  *)
   sprintf "    msg := ch[%d].msg;\n" seq ^ 
   sprintf "    get_msgNo(msg, msgNo);\n"^ 
-  (* sprintf "    put msgNo;\n"^  *)
   sprintf "    isPat%d(msg,flag_pat%d);\n" j j^ 
   (* sprintf "    put flag_pat%d;\n" j ^ *)
   sprintf "    if (flag_pat%d) then\n" j^
@@ -666,6 +694,7 @@ let genCodeOfIntruderGetMsg (seq,r,m) patList =
   sprintf "        pat%dSet.length:=pat%dSet.length+1;\n" j j^
   sprintf "        pat%dSet.content[pat%dSet.length]:=msgNo;\n" j j^
   sprintf "        Spy_known[msgNo] := true;\n"^
+  sprintf "%s" deductionStr ^(* deduction of the recieving msg, decrypt, deconcat, encrypt, enconcat*)
   sprintf "      endif;\n" ^
   sprintf "      ch[%d].empty := true;\n      clear ch[%d].msg;\n" seq seq^
   sprintf "    endif;\n" ^
