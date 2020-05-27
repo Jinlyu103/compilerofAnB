@@ -460,7 +460,7 @@ let printADecryption (m,k) patlist=
   sprintf "  begin\n" ^
   sprintf "    if (! Spy_known[msg.aencMsg]) then\n" ^
   sprintf "       key_inv := inverseKey(msgs[msg.aencKey]);\n" ^
-  sprintf "       if (key_inv.k.ag = Intruder) then\n" ^
+  sprintf "       if (key_inv.k.ag = Intruder | key_inv.k.encType = PK) then\n" ^
   sprintf "         Spy_known[msg.aencMsg]:=true;\n" ^
   sprintf "         msgPat%d:=msg.aencMsg;\n" mNum ^
   sprintf "         isPat%d(msgs[msgPat%d],flag_pat%d);\n" mNum mNum mNum ^
@@ -483,23 +483,25 @@ let printAEncryption (m,k) patlist =
   sprintf "  var i, j, encMsgNo:indexType;\n"^
   sprintf "  begin\n" ^
   sprintf "    i := 1;\n" ^
-  sprintf "    while (i < pat%dSet.length) do\n" mNum ^
+  sprintf "    while (i <= pat%dSet.length) do\n" mNum ^
   sprintf "      j := 1;\n" ^
-  sprintf "      while (j<pat%dSet.length) do\n" kNum ^ 
-  sprintf "         if (matchPat(msgs[construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j])], sPat%dSet) &\n" i mNum kNum mNum kNum i ^
-  sprintf "            !Spy_known[construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j])]) then\n" i mNum kNum mNum kNum ^
-  sprintf "            if (msgs[pat%dSet.content[j]].k.encType=PK) then\n" kNum ^
-  sprintf "              encMsgNo := construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j]);\n" i mNum kNum mNum kNum ^
-  sprintf "              if (!exist(pat%dSet,encMsgNo)) then\n" i ^
-  sprintf "                 pat%dSet.length := pat%dSet.length+1;\n" i i^
-  sprintf "                 pat%dSet.content[pat%dSet.length]:=encMsgNo;\n" i i^
-  sprintf "              endif; \n" ^
-  sprintf "              if (!Spy_known[encMsgNo]) then\n"^
-  sprintf "                 Spy_known[encMsgNo] := true;\n"^
-  sprintf "              endif;\n"^
-  sprintf "           endif;\n" ^
-  sprintf "         endif;\n" ^
+  sprintf "      while (j<=pat%dSet.length) do\n" kNum ^ 
+  sprintf "        if (matchPat(msgs[construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j])], sPat%dSet) &\n" i mNum kNum mNum kNum i ^
+  sprintf "           !Spy_known[construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j])]) then\n" i mNum kNum mNum kNum ^
+  sprintf "           if (msgs[pat%dSet.content[j]].k.encType=PK) then\n" kNum ^
+  sprintf "             encMsgNo := construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j]);\n" i mNum kNum mNum kNum ^
+  sprintf "             if (!exist(pat%dSet,encMsgNo)) then\n" i ^
+  sprintf "                pat%dSet.length := pat%dSet.length+1;\n" i i^
+  sprintf "                pat%dSet.content[pat%dSet.length]:=encMsgNo;\n" i i^
+  sprintf "             endif; \n" ^
+  sprintf "             if (!Spy_known[encMsgNo]) then\n"^
+  sprintf "                Spy_known[encMsgNo] := true;\n"^
+  sprintf "             endif;\n"^
+  sprintf "          endif;\n" ^
+  sprintf "        endif;\n" ^
+  sprintf "        j := j+1;\n" ^
   sprintf "      endwhile;\n" ^
+  sprintf "      i := i+1;\n" ^
   sprintf "    endwhile;\n" ^
   sprintf "  end;\n\n"
 ;;
@@ -546,6 +548,7 @@ let printEnconcat msgs patlist =
                                                             for i=0 to j do
                                                                 space := !space ^ sprintf "  "
                                                             done ;
+                                                          sprintf "%s    i%d := i%d + 1;\n" !space (j+1) (j+1) ^
                                                           sprintf "%s  endwhile;\n" !space ) msgs) )
   in
   let ifSpace = ref "" in
@@ -661,17 +664,17 @@ let genCodeOfIntruderGetMsg (seq,r,m) patList =
   let deductionStr = String.concat (List.map ~f:(fun p -> let pNum = getPatNum p patList in
                                                           match p with
                                                           |`Aenc(m1, k1) -> sprintf "        i := 1;\n"  ^
-                                                                            sprintf "        while (i<=pat%dSet.length) do\n" pNum ^
-                                                                            sprintf "          aDeryptionPat%d(msgs[pat%dSet.content[i]]);\n" pNum pNum ^
-                                                                            sprintf "          aEncryptionPat%d();\n" pNum ^
+                                                                            sprintf "        while (i <= pat%dSet.length) do\n" pNum ^
+                                                                            sprintf "          aDeryptionPat%d(msgs[pat%dSet.content[i]]);\n" pNum pNum ^                                                                            
                                                                             sprintf "          i := i+1;\n" ^
-                                                                            sprintf "        endwhile;\n"
+                                                                            sprintf "        endwhile;\n" ^
+                                                                            sprintf "        aEncryptionPat%d();\n" pNum 
                                                           |`Concat msgs ->sprintf "        i := 1;\n" ^
-                                                                          sprintf "        while (i<= pat%dSet.length) do\n" pNum ^
-                                                                          sprintf "           deconcatPat%d(msgs[pat%dSet.content[i]]);\n" pNum pNum ^
-                                                                          sprintf "           enconcatPat%d();\n" pNum ^
-                                                                          sprintf "           i := i+1;\n" ^
-                                                                          sprintf "        endwhile;\n"
+                                                                          sprintf "        while (i <= pat%dSet.length) do\n" pNum ^                                                                          
+                                                                          sprintf "          deconcatPat%d(msgs[pat%dSet.content[i]]);\n" pNum pNum ^
+                                                                          sprintf "          i := i+1;\n" ^
+                                                                          sprintf "        endwhile;\n" ^
+                                                                          sprintf "        enconcatPat%d();\n" pNum 
                                                           |`Var n -> sprintf "        --- nonce: %s\n" n
                                                           |`Str r1 -> sprintf "        --- agent: %s\n" r1
                                                           |`Pk r1 -> sprintf "        --- pk(%s)\n" r1
@@ -1309,9 +1312,15 @@ let genDestruct m i patlist =
                                                    |`Sk r -> r ^ "Sk"
                                                    |_ -> "" 
                                         in
+                                        let m1Str = match m1 with
+                                                    |`Var n -> sprintf "    %s := msgs[msgNum%d.aencMsg].noncePart;\n" n (i+1)
+                                                    |`Str r -> sprintf "    %s := msgs[msgNum%d.aencMsg].ag;\n" r (i+1)
+                                                    |_ -> ""
+                                        in
                                         sprintf "    msgNum%d := msgs[msg.concatPart[%d]];\n" (i+1) (i+1)^
                                         sprintf "    k := msgs[msgNum%d.aencKey].k;\n" (i+1) ^
-                                        sprintf "    %s := k.ag" keyAg
+                                        sprintf "    %s := k.ag;\n" keyAg ^
+                                        sprintf "%s" m1Str 
                       |_ -> "") msgs) in
                   str1 ^ sprintf "  Var %s: Message;
     k: KeyType;
@@ -1958,7 +1967,7 @@ let printMurphiConsTypeVars actions k env=
   sprintf "const\n" ^
   String.concat ~sep:"\n" (List.map ~f:(fun r -> sprintf "  role%sNum:1;" r) rlist) ^
   "
-  totalFact:100;
+  totalFact:1000;
   msgLength:15;
   chanNum:10;\n" ^
 
