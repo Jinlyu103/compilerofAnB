@@ -115,8 +115,8 @@ let rec isSamePat m1 m2 =
   | (`Senc(m1',k1'),`Senc(m2',k2')) -> if (isSamePat k1' k2') && (isSamePat m1' m2') then true else false
   | (`Pk r1,`Pk r2) -> true
   | (`Sk r1,`Sk r2) -> true
-  | (`Pk r1,`Sk r2) -> true  (* sk(r1),pk(r1) are the same pat, they are stored into the same patSet*)
-  | (`Sk r1,`Pk r2) -> true
+  | (`Pk r1,`Sk r2) -> false  (* sk(r1),pk(r1) are the same pat, they are stored into the same patSet*)
+  | (`Sk r1,`Pk r2) -> false
   | (`K(r11,r12),`K(r21,r22)) -> true
   | (`Var n1,`Var n2) -> true
   | (`Concat msgs1,`Concat msgs2) -> isSameList msgs1 msgs2

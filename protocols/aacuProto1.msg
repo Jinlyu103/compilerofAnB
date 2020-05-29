@@ -24,7 +24,7 @@ Environment:{
 }
 Goals:{
 [sec1] nonce(secSK);
-[auth1] Host non-injectively agrees with Server on nonce(r)
+[auth1] Server non-injectively agrees with Host on nonce(r)
 }
 end
 
