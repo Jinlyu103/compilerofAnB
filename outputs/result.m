@@ -1760,6 +1760,7 @@ procedure aDeryptionPat4(msg: Message);
            if (!exist(pat2Set,msgPat2)) then
              pat2Set.length:=pat2Set.length+1;
              pat2Set.content[pat2Set.length]:=msgPat2;
+             ;
            endif;
          endif;
        endif;
@@ -1837,6 +1838,7 @@ procedure deconcatPat5(msg: Message);
         if(!exist(pat4Set,msgPat4)) then
            pat4Set.length:=pat4Set.length+1;
            pat4Set.content[pat4Set.length] := msgPat4;
+           aDeryptionPat4(msgs[msgPat4]);
         endif;
       endif;
     endif;
@@ -1889,6 +1891,7 @@ procedure aDeryptionPat7(msg: Message);
            if (!exist(pat5Set,msgPat5)) then
              pat5Set.length:=pat5Set.length+1;
              pat5Set.content[pat5Set.length]:=msgPat5;
+             deconcatPat5(msgs[msgPat5]);
            endif;
          endif;
        endif;
@@ -1944,6 +1947,7 @@ procedure deconcatPat8(msg: Message);
         if(!exist(pat7Set,msgPat2)) then
            pat7Set.length:=pat7Set.length+1;
            pat7Set.content[pat7Set.length] := msgPat2;
+           aDeryptionPat7(msgs[msgPat2]);
         endif;
       endif;
     endif;
@@ -2029,6 +2033,7 @@ procedure deconcatPat9(msg: Message);
         if(!exist(pat4Set,msgPat5)) then
            pat4Set.length:=pat4Set.length+1;
            pat4Set.content[pat4Set.length] := msgPat5;
+           aDeryptionPat4(msgs[msgPat5]);
         endif;
       endif;
     endif;
@@ -2085,6 +2090,7 @@ procedure aDeryptionPat10(msg: Message);
            if (!exist(pat9Set,msgPat9)) then
              pat9Set.length:=pat9Set.length+1;
              pat9Set.content[pat9Set.length]:=msgPat9;
+             deconcatPat9(msgs[msgPat9]);
            endif;
          endif;
        endif;
@@ -2140,6 +2146,7 @@ procedure deconcatPat11(msg: Message);
         if(!exist(pat10Set,msgPat2)) then
            pat10Set.length:=pat10Set.length+1;
            pat10Set.content[pat10Set.length] := msgPat2;
+           aDeryptionPat10(msgs[msgPat2]);
         endif;
       endif;
     endif;
@@ -2184,6 +2191,7 @@ procedure aDeryptionPat12(msg: Message);
            if (!exist(pat2Set,msgPat2)) then
              pat2Set.length:=pat2Set.length+1;
              pat2Set.content[pat2Set.length]:=msgPat2;
+             ;
            endif;
          endif;
        endif;
@@ -2239,6 +2247,7 @@ procedure deconcatPat13(msg: Message);
         if(!exist(pat12Set,msgPat2)) then
            pat12Set.length:=pat12Set.length+1;
            pat12Set.content[pat12Set.length] := msgPat2;
+           aDeryptionPat12(msgs[msgPat2]);
         endif;
       endif;
     endif;
@@ -2416,64 +2425,8 @@ rule "intruderGetMsgFromCh[1]"
         pat8Set.length:=pat8Set.length+1;
         pat8Set.content[pat8Set.length]:=msgNo;
         Spy_known[msgNo] := true;
-        --- agent: A
-        --- nonce: Na
-        --- pk(B)
-        i := 1;
-        while (i <= pat4Set.length) do
-          aDeryptionPat4(msgs[pat4Set.content[i]]);
-          i := i+1;
-        endwhile;
-        aEncryptionPat4();
-        i := 1;
-        while (i <= pat5Set.length) do
-          deconcatPat5(msgs[pat5Set.content[i]]);
-          i := i+1;
-        endwhile;
-        enconcatPat5();
-        --- sk(A)
-        i := 1;
-        while (i <= pat7Set.length) do
-          aDeryptionPat7(msgs[pat7Set.content[i]]);
-          i := i+1;
-        endwhile;
-        aEncryptionPat7();
-        i := 1;
-        while (i <= pat8Set.length) do
-          deconcatPat8(msgs[pat8Set.content[i]]);
-          i := i+1;
-        endwhile;
-        enconcatPat8();
-        i := 1;
-        while (i <= pat9Set.length) do
-          deconcatPat9(msgs[pat9Set.content[i]]);
-          i := i+1;
-        endwhile;
-        enconcatPat9();
-        i := 1;
-        while (i <= pat10Set.length) do
-          aDeryptionPat10(msgs[pat10Set.content[i]]);
-          i := i+1;
-        endwhile;
-        aEncryptionPat10();
-        i := 1;
-        while (i <= pat11Set.length) do
-          deconcatPat11(msgs[pat11Set.content[i]]);
-          i := i+1;
-        endwhile;
-        enconcatPat11();
-        i := 1;
-        while (i <= pat12Set.length) do
-          aDeryptionPat12(msgs[pat12Set.content[i]]);
-          i := i+1;
-        endwhile;
-        aEncryptionPat12();
-        i := 1;
-        while (i <= pat13Set.length) do
-          deconcatPat13(msgs[pat13Set.content[i]]);
-          i := i+1;
-        endwhile;
-        enconcatPat13();
+       deconcatPat8(msg);
+       enconcatPat8();
       endif;
       ch[1].empty := true;
       clear ch[1].msg;
@@ -2496,64 +2449,8 @@ rule "intruderGetMsgFromCh[2]"
         pat11Set.length:=pat11Set.length+1;
         pat11Set.content[pat11Set.length]:=msgNo;
         Spy_known[msgNo] := true;
-        --- agent: A
-        --- nonce: Na
-        --- pk(B)
-        i := 1;
-        while (i <= pat4Set.length) do
-          aDeryptionPat4(msgs[pat4Set.content[i]]);
-          i := i+1;
-        endwhile;
-        aEncryptionPat4();
-        i := 1;
-        while (i <= pat5Set.length) do
-          deconcatPat5(msgs[pat5Set.content[i]]);
-          i := i+1;
-        endwhile;
-        enconcatPat5();
-        --- sk(A)
-        i := 1;
-        while (i <= pat7Set.length) do
-          aDeryptionPat7(msgs[pat7Set.content[i]]);
-          i := i+1;
-        endwhile;
-        aEncryptionPat7();
-        i := 1;
-        while (i <= pat8Set.length) do
-          deconcatPat8(msgs[pat8Set.content[i]]);
-          i := i+1;
-        endwhile;
-        enconcatPat8();
-        i := 1;
-        while (i <= pat9Set.length) do
-          deconcatPat9(msgs[pat9Set.content[i]]);
-          i := i+1;
-        endwhile;
-        enconcatPat9();
-        i := 1;
-        while (i <= pat10Set.length) do
-          aDeryptionPat10(msgs[pat10Set.content[i]]);
-          i := i+1;
-        endwhile;
-        aEncryptionPat10();
-        i := 1;
-        while (i <= pat11Set.length) do
-          deconcatPat11(msgs[pat11Set.content[i]]);
-          i := i+1;
-        endwhile;
-        enconcatPat11();
-        i := 1;
-        while (i <= pat12Set.length) do
-          aDeryptionPat12(msgs[pat12Set.content[i]]);
-          i := i+1;
-        endwhile;
-        aEncryptionPat12();
-        i := 1;
-        while (i <= pat13Set.length) do
-          deconcatPat13(msgs[pat13Set.content[i]]);
-          i := i+1;
-        endwhile;
-        enconcatPat13();
+       deconcatPat11(msg);
+       enconcatPat11();
       endif;
       ch[2].empty := true;
       clear ch[2].msg;
@@ -2576,64 +2473,8 @@ rule "intruderGetMsgFromCh[3]"
         pat13Set.length:=pat13Set.length+1;
         pat13Set.content[pat13Set.length]:=msgNo;
         Spy_known[msgNo] := true;
-        --- agent: A
-        --- nonce: Na
-        --- pk(B)
-        i := 1;
-        while (i <= pat4Set.length) do
-          aDeryptionPat4(msgs[pat4Set.content[i]]);
-          i := i+1;
-        endwhile;
-        aEncryptionPat4();
-        i := 1;
-        while (i <= pat5Set.length) do
-          deconcatPat5(msgs[pat5Set.content[i]]);
-          i := i+1;
-        endwhile;
-        enconcatPat5();
-        --- sk(A)
-        i := 1;
-        while (i <= pat7Set.length) do
-          aDeryptionPat7(msgs[pat7Set.content[i]]);
-          i := i+1;
-        endwhile;
-        aEncryptionPat7();
-        i := 1;
-        while (i <= pat8Set.length) do
-          deconcatPat8(msgs[pat8Set.content[i]]);
-          i := i+1;
-        endwhile;
-        enconcatPat8();
-        i := 1;
-        while (i <= pat9Set.length) do
-          deconcatPat9(msgs[pat9Set.content[i]]);
-          i := i+1;
-        endwhile;
-        enconcatPat9();
-        i := 1;
-        while (i <= pat10Set.length) do
-          aDeryptionPat10(msgs[pat10Set.content[i]]);
-          i := i+1;
-        endwhile;
-        aEncryptionPat10();
-        i := 1;
-        while (i <= pat11Set.length) do
-          deconcatPat11(msgs[pat11Set.content[i]]);
-          i := i+1;
-        endwhile;
-        enconcatPat11();
-        i := 1;
-        while (i <= pat12Set.length) do
-          aDeryptionPat12(msgs[pat12Set.content[i]]);
-          i := i+1;
-        endwhile;
-        aEncryptionPat12();
-        i := 1;
-        while (i <= pat13Set.length) do
-          deconcatPat13(msgs[pat13Set.content[i]]);
-          i := i+1;
-        endwhile;
-        enconcatPat13();
+       deconcatPat13(msg);
+       enconcatPat13();
       endif;
       ch[3].empty := true;
       clear ch[3].msg;
