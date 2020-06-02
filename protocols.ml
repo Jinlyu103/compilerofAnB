@@ -54,12 +54,12 @@ let genRuleName rolename i =
 ;;
 
 let genSendGuard rolename i seq =
-  sprintf "role%s[i].st = %s%d & ch[%d].empty = true \n==>\n" rolename rolename i seq 
+  sprintf "role%s[i].st = %s%d & ch[%d].empty = true & !role%s[i].commit\n==>\n" rolename rolename i seq rolename
   (* sprintf "role%s[i].st = %s%d & ch.empty = true \n==>\n" rolename rolename i  *)
 ;;
 
 let genRecvGuard rolename i seq =
-  sprintf "role%s[i].st = %s%d & ch[%d].empty = false \n==>\n" rolename rolename i seq
+  sprintf "role%s[i].st = %s%d & ch[%d].empty = false & !role%s[i].commit\n==>\n" rolename rolename i seq rolename
   (* sprintf "role%s[i].st = %s%d & ch.empty = false \n==>\n" rolename rolename i  *)
 ;;
 
@@ -1230,6 +1230,16 @@ let genCons m i patList =
   sprintf "  end;\n"
 ;;
 
+let atoms2Str' atoms =
+  String.concat ~sep:", " (List.map ~f:(fun a-> 
+                         match a with
+                        |`Var n -> n 
+                        |`Str r -> r
+                        |`Pk role -> role ^ "Pk"
+                        |`Sk role -> role ^ "Sk"
+                        |_ -> "") atoms)
+;;
+
 let genDestruct m i patlist =
   let atoms =getAtoms m in 
   let atoms = del_duplicate atoms in
@@ -1273,9 +1283,12 @@ let genDestruct m i patlist =
                                                    |`Sk r -> r ^ "Sk"
                                                    |_ -> "" 
                                         in
-                                        let m1Str = match m1 with
+                                        let m1Str = let m1PatNum = getPatNum m1 patlist in
+                                                    let m1Atoms = getAtoms m1 in
+                                                    match m1 with
                                                     |`Var n -> sprintf "    %s := msgs[msgNum%d.aencMsg].noncePart" n (i+1)
                                                     |`Str r -> sprintf "    %s := msgs[msgNum%d.aencMsg].ag" r (i+1)
+                                                    |`Concat msgs -> sprintf "    destruct%d(msgs[msgNum%d.aencMsg], %s)" m1PatNum (i+1) (atoms2Str' m1Atoms)
                                                     |_ -> ""
                                         in
                                         sprintf "    msgNum%d := msgs[msg.concatPart[%d]];\n" (i+1) (i+1)^
@@ -1907,7 +1920,7 @@ let printMurphiConsTypeVars actions k env=
   String.concat ~sep:"\n" (List.map ~f:(fun r -> sprintf "  role%sNum:1;" r) rlist) ^
   "
   totalFact:1000;
-  msgLength:15;
+  msgLength:10;
   chanNum:10;\n" ^
 
   (* print type*)
