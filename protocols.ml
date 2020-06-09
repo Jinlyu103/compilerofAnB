@@ -426,12 +426,12 @@ let printADecryption (m,k) patlist=
   let i = getPatNum (`Aenc(m,k)) patlist in
   let mNum = getPatNum m patlist in
   let deductAencMsg = match m with
-                      |`Aenc(m1,m2) -> sprintf "aDeryptionPat%d(msgs[msgPat%d])" mNum mNum
-                      |`Concat msgs -> sprintf "deconcatPat%d(msgs[msgPat%d])" mNum mNum
+                      |`Aenc(m1,m2) -> sprintf "             aDecryptionPat%d(msgs[msgPat%d]);\n" mNum mNum
+                      |`Concat msgs -> sprintf "             deconcatPat%d(msgs[msgPat%d]);\n" mNum mNum
                       |_-> ""
   in
   (* let kNum = getPatNum k patlist in *)
-  sprintf "procedure aDeryptionPat%d(msg: Message);\n" i ^
+  sprintf "procedure aDecryptionPat%d(msg: Message);\n" i ^
   sprintf "  var key_inv:Message;\n      msgPat%d:indexType;\n  	  flag_pat%d:boolean;\n" mNum mNum ^
   sprintf "  begin\n" ^
   sprintf "    if (! Spy_known[msg.aencMsg]) then\n" ^
@@ -443,7 +443,7 @@ let printADecryption (m,k) patlist=
   sprintf "         if (flag_pat%d) then\n" mNum ^
   sprintf "           if (!exist(pat%dSet,msgPat%d)) then\n" mNum mNum^
   sprintf "             pat%dSet.length:=pat%dSet.length+1;\n             pat%dSet.content[pat%dSet.length]:=msgPat%d;\n" mNum mNum mNum mNum mNum^
-  sprintf "             %s;\n" deductAencMsg ^
+  sprintf "%s" deductAencMsg ^
   sprintf "           endif;\n"^
   sprintf "         endif;\n"^
   sprintf "       endif;\n" ^
@@ -490,7 +490,7 @@ let printDeconcat msgs patlist =
   let flagPatStr = String.concat ~sep:", " (List.mapi ~f:(fun j m -> sprintf "flagPat%d" (j+1)) msgs) in
   let subMsgNum = String.concat (List.mapi ~f:(fun j m -> sprintf "%d" (getPatNum m patlist)) msgs) in
   let procStr = String.concat (List.mapi ~f:(fun j m -> let deductSubStr = match m with
-                                                                          |`Aenc (m1,k1) -> sprintf "           aDeryptionPat%d(msgs[msgPat%d]);\n" (getPatNum m patlist) (j+1)
+                                                                          |`Aenc (m1,k1) -> sprintf "           aDecryptionPat%d(msgs[msgPat%d]);\n" (getPatNum m patlist) (j+1)
                                                                           |_ -> ""
                                                         in
                                                         sprintf "    if (!Spy_known[msg.concatPart[%d]]) then\n" (j+1) ^
@@ -624,7 +624,7 @@ let rec getMsgs actions =
 let genCodeOfIntruderGetMsg (seq,r,m) patList = 
   let j = getPatNum m patList in
   let deductionStr = match m with
-                    |`Aenc (m1,k1) -> sprintf "      aDeryptionPat%d(msg);\n" j ^
+                    |`Aenc (m1,k1) -> sprintf "      aDecryptionPat%d(msg);\n" j ^
                                       sprintf "      aEncryptionPat%d();\n" j
                     |`Concat msgs -> sprintf "       deconcatPat%d(msg);\n" j ^
                                      sprintf "       enconcatPat%d();\n" j
@@ -639,7 +639,7 @@ let genCodeOfIntruderGetMsg (seq,r,m) patList =
                                                           match p with
                                                           |`Aenc(m1, k1) -> sprintf "        i := 1;\n"  ^
                                                                             sprintf "        while (i <= pat%dSet.length) do\n" pNum ^
-                                                                            sprintf "          aDeryptionPat%d(msgs[pat%dSet.content[i]]);\n" pNum pNum ^                                                                            
+                                                                            sprintf "          aDecryptionPat%d(msgs[pat%dSet.content[i]]);\n" pNum pNum ^                                                                            
                                                                             sprintf "          i := i+1;\n" ^
                                                                             sprintf "        endwhile;\n" ^
                                                                             sprintf "        aEncryptionPat%d();\n" pNum 
@@ -1286,11 +1286,11 @@ let genDestruct m i patlist =
                   |_ -> ""     
   end   
   |`Concat msgs -> let msgNums = String.concat ~sep:"," (List.mapi ~f:(fun i m -> sprintf "msgNum%d" (i+1)) msgs) in
-                   let stats = String.concat ~sep:";\n" (List.mapi ~f:(fun i m -> match m with
+                   let stats = String.concat (List.mapi ~f:(fun i m -> match m with
                       |`Str r -> sprintf "    msgNum%d := msgs[msg.concatPart[%d]];\n" (i+1) (i+1) ^
-                                 sprintf "    %s := msgNum%d.ag" r (i+1)
+                                 sprintf "    %s := msgNum%d.ag;\n" r (i+1)
                       |`Var n -> sprintf "    msgNum%d := msgs[msg.concatPart[%d]];\n" (i+1) (i+1) ^
-                                 sprintf "    %s := msgNum%d.noncePart" n (i+1)
+                                 sprintf "    %s := msgNum%d.noncePart;\n" n (i+1)
                       |`Aenc(m1,k1) -> let keyAg = match k1 with 
                                                    |`Pk r -> r ^ "Pk"
                                                    |`Sk r -> r ^ "Sk"
@@ -1299,15 +1299,17 @@ let genDestruct m i patlist =
                                         let m1Str = let m1PatNum = getPatNum m1 patlist in
                                                     let m1Atoms = getAtoms m1 in
                                                     match m1 with
-                                                    |`Var n -> sprintf "    %s := msgs[msgNum%d.aencMsg].noncePart" n (i+1)
-                                                    |`Str r -> sprintf "    %s := msgs[msgNum%d.aencMsg].ag" r (i+1)
-                                                    |`Concat msgs -> sprintf "    destruct%d(msgs[msgNum%d.aencMsg], %s)" m1PatNum (i+1) (atoms2Str' m1Atoms)
+                                                    |`Var n -> sprintf "    %s := msgs[msgNum%d.aencMsg].noncePart;\n" n (i+1)
+                                                    |`Str r -> sprintf "    %s := msgs[msgNum%d.aencMsg].ag;\n" r (i+1)
+                                                    |`Concat msgs -> sprintf "    destruct%d(msgs[msgNum%d.aencMsg], %s);\n" m1PatNum (i+1) (atoms2Str' m1Atoms)
                                                     |_ -> ""
                                         in
                                         sprintf "    msgNum%d := msgs[msg.concatPart[%d]];\n" (i+1) (i+1)^
                                         sprintf "    k := msgs[msgNum%d.aencKey].k;\n" (i+1) ^
                                         sprintf "    %s := k.ag;\n" keyAg ^
                                         sprintf "%s" m1Str 
+                      |`Pk r -> sprintf "    msgNum%d := msgs[msg.concatPart[%d]];\n" (i+1) (i+1) ^
+                                sprintf "    %sPk := msgNum%d.k.ag;\n" r (i+1)
                       |_ -> "") msgs) in
                   str1 ^ sprintf "  Var %s: Message;
     k: KeyType;
@@ -1814,6 +1816,7 @@ let printImpofStart actions knws =
                                                      sprintf "  sPat%dSet.length := 0;\n" (getPatNum p non_equivalent)) non_equivalent)
   in
   let kNum = getPatNum (`Pk "A") non_equivalent in
+  let rNum = getPatNum (`Str "Intruder") non_equivalent in (* the init_knws of intruder should include the id of itself *)
   let str4 = sprintf "
   for i:indexType do 
     Spy_known[i] := false;
@@ -1843,7 +1846,24 @@ let printImpofStart actions knws =
   for i:indexType do 
     Spy_known[i] := false;
   endfor;\n" ^
-  str3 ^ str4 ^ (initSpatSet actions non_equivalent) ^ (* initialize sample pattern Set *)
+  str3 ^ str4 ^
+  sprintf "  msg_end := msg_end + 1;\n" ^
+  sprintf "  msgs[msg_end].msgType := agent;\n" ^
+  sprintf "  msgs[msg_end].ag := Intruder;\n" ^
+  sprintf "  msgs[msg_end].length := 1;\n" ^
+  sprintf "  pat%dSet.length := pat%dSet.length + 1;\n" rNum rNum ^
+  sprintf "  pat%dSet.content[pat%dSet.length] := msg_end;\n" rNum rNum ^
+  sprintf "  Spy_known[msg_end] := true;\n" ^
+
+  sprintf "  msg_end := msg_end + 1;\n" ^
+  sprintf "  msgs[msg_end].msgType := key;\n" ^
+  sprintf "  msgs[msg_end].k.ag := Intruder;\n" ^
+  sprintf "  msgs[msg_end].k.encType := PK;\n" ^
+  sprintf "  msgs[msg_end].length := 1;\n" ^
+  sprintf "  pat%dSet.length := pat%dSet.length + 1;\n" kNum kNum ^
+  sprintf "  pat%dSet.content[pat%dSet.length] := msg_end;\n" kNum kNum ^
+  sprintf "  Spy_known[msg_end] := true;\n" ^
+   (initSpatSet actions non_equivalent) ^ (* initialize sample pattern Set *)
   "\n"
 ;;
 
@@ -1932,7 +1952,7 @@ let printMurphiConsTypeVars actions k env=
   sprintf "const\n" ^
   String.concat ~sep:"\n" (List.map ~f:(fun r -> sprintf "  role%sNum:1;" r) rlist) ^
   "
-  totalFact:1000;
+  totalFact:400;
   msgLength:10;
   chanNum:10;\n" ^
 
