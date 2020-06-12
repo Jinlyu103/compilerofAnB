@@ -1763,6 +1763,17 @@ let atoms2Str atoms recvRole =
                                       |_ -> "" ) atoms)
 ;;
 
+let atoms2StrIntruder atoms sendRole recvRole =
+  String.concat ~sep:"," (List.map ~f:(fun a-> match a with
+                                      |`Null -> sprintf "null"
+                                      |`Var n -> sprintf "role%s[i].%s" recvRole n
+                                      |`Str r -> if r = sendRole then "Intruder" else sprintf "role%s[i].%s" recvRole r
+                                      |`Pk rolename -> if rolename = sendRole then "Intruder" else sprintf "role%s[i].%s" recvRole rolename
+                                      |`Sk rolename -> if rolename = sendRole then "Intruder" else sprintf "role%s[i].%s" recvRole rolename
+                                      |`K (r1,r2) -> sprintf "role%s[i].%s, role%s[i].%s" recvRole r1 recvRole r2
+                                      |_ -> "") atoms)
+;;
+
 let rec initSpatSet actions patlist = 
   match actions with
   |`Null -> ""
@@ -1771,6 +1782,7 @@ let rec initSpatSet actions patlist =
                               let atoms = del_duplicate atoms in
                               sprintf "  for i : role%sNums do\n" r2 ^
                               sprintf "    constructSpat%d(%s, gnum);\n" patNum (atoms2Str atoms r2) ^
+                              sprintf "    constructSpat%d(%s, gnum);\n" patNum (atoms2StrIntruder atoms r1 r2) ^
                               (* sprintf "    sPat%dSet.length := sPat%dSet.length + 1;\n" patNum patNum ^
                               sprintf "    sPat%dSet.content[sPat%dSet.length] := constructSpat%d(%s);\n" patNum patNum patNum (atoms2Str atoms r2) ^ *)
                               sprintf "  endfor;\n"
@@ -1835,11 +1847,22 @@ let printImpofStart actions knws =
   let str4 = String.concat (List.map ~f:(fun r -> sprintf "  for i : role%sNums do\n" r ^
                                                   sprintf "    msg_end := msg_end+1;\n    msgs[msg_end].msgType := key;\n" ^
                                                   sprintf "    msgs[msg_end].k.ag := role%s[i].%s;\n" r r^
-                                                  sprintf "    msgs[msg_end].k.encType:=PK;\n    msgs[msg_end].length := 1;\n    pat%dSet.length := pat%dSet.length + 1;\n" kNum kNum ^
+                                                  sprintf "    msgs[msg_end].k.encType:=PK;\n    msgs[msg_end].length := 1;\n" ^
+                                                  sprintf "    pat%dSet.length := pat%dSet.length + 1;\n" kNum kNum^
                                                   sprintf "    pat%dSet.content[pat%dSet.length] :=msg_end;\n" kNum kNum ^
                                                   sprintf "    Spy_known[msg_end] := true;\n"^
                                                   sprintf "  endfor;\n"
                             ) rlist)
+  in
+  let rolesKnownOfIntruder = String.concat (List.map ~f:(fun r -> sprintf "  for i : role%sNums do\n" r ^
+                                                                  sprintf "    msg_end := msg_end+1;\n    msgs[msg_end].msgType := agent;\n" ^
+                                                                  sprintf "    msgs[msg_end].ag := role%s[i].%s;\n" r r^
+                                                                  sprintf "    msgs[msg_end].length := 1;\n" ^
+                                                                  sprintf "    pat%dSet.length := pat%dSet.length + 1;\n" rNum rNum^
+                                                                  sprintf "    pat%dSet.content[pat%dSet.length] :=msg_end;\n" rNum rNum ^
+                                                                  sprintf "    Spy_known[msg_end] := true;\n"^
+                                                                  sprintf "  endfor;\n"
+                                            ) rlist)
   in
   str1 ^ str2 ^ 
   "  endfor;
@@ -1847,6 +1870,7 @@ let printImpofStart actions knws =
     Spy_known[i] := false;
   endfor;\n" ^
   str3 ^ str4 ^
+  sprintf "\n%s" rolesKnownOfIntruder^
   sprintf "  msg_end := msg_end + 1;\n" ^
   sprintf "  msgs[msg_end].msgType := agent;\n" ^
   sprintf "  msgs[msg_end].ag := Intruder;\n" ^
@@ -1871,6 +1895,7 @@ let rec printGoal2Murphi g =
   match g with
   |`Null -> sprintf "null\n"
   |`Secretgoal (seq,m) -> printSecGoal (seq,m)
+  |`Secretgoal1 (seq,m,r1,r2) -> printSecGoal1 (seq,m,r1,r2)
   |`Agreegoal (seq,r1,r2,m) -> printAgreeGoal (seq,r1,r2,m) 
   |`Goallist gols -> String.concat (List.map ~f:(fun g -> printGoal2Murphi g) gols)
 
@@ -1882,6 +1907,22 @@ invariant \"%s\"
     ->
     Spy_known[i] = false
 end;\n" seq (output_msg m)
+
+and printSecGoal1 (seq,m, r1, r2) =
+  sprintf "\ninvariant \"%s\"" seq^
+  sprintf "  forall i:indexType do\n" ^
+  sprintf "    forall j:role%sNums do\n" r1 ^
+  sprintf "      forall k: role%sNums do\n" r2 ^
+  sprintf "        (msgs[i].msgType=nonce & msgs[i].noncePart = role%s[j].%s &\n" r1 (output_msg m)^ 
+  sprintf "         role%s[j].%s != Intruder & role%s[j].%s != Intruder &\n" r1 r1 r1 r2 ^
+  sprintf "         role%s[k].%s != Intruder) ---& role%s[k].%s != Intruder )\n" r2 r2 r2 r1 ^
+  sprintf "        ->\n" ^
+  sprintf "        Spy_known[i] = false\n" ^
+  sprintf "      endforall\n" ^
+  sprintf "    endforall\n" ^
+  sprintf "  endforall;\n" 
+  (* sprintf "end;\n" *)
+
 and printAgreeGoal (seq,r1,r2,m) = 
   let mstr = (output_msg m) in
   sprintf "\ninvariant \"%s\"\n" seq ^

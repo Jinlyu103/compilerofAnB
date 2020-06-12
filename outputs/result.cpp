@@ -12583,6 +12583,48 @@ else
 mu_Spy_known[mu_msg_end] = mu_true;
 };
 };
+{
+for(int mu_i = 1; mu_i <= 1; mu_i++) {
+mu_msg_end = (mu_msg_end) + (1);
+mu_msgs[mu_msg_end].mu_msgType = mu_agent;
+mu_msgs[mu_msg_end].mu_ag = mu_roleS[mu_i].mu_S;
+mu_msgs[mu_msg_end].mu_length = 1;
+mu_pat1Set.mu_length = (mu_pat1Set.mu_length) + (1);
+if (mu_msg_end.isundefined())
+  mu_pat1Set.mu_content[mu_pat1Set.mu_length].undefine();
+else
+  mu_pat1Set.mu_content[mu_pat1Set.mu_length] = mu_msg_end;
+mu_Spy_known[mu_msg_end] = mu_true;
+};
+};
+{
+for(int mu_i = 1; mu_i <= 1; mu_i++) {
+mu_msg_end = (mu_msg_end) + (1);
+mu_msgs[mu_msg_end].mu_msgType = mu_agent;
+mu_msgs[mu_msg_end].mu_ag = mu_roleC[mu_i].mu_C;
+mu_msgs[mu_msg_end].mu_length = 1;
+mu_pat1Set.mu_length = (mu_pat1Set.mu_length) + (1);
+if (mu_msg_end.isundefined())
+  mu_pat1Set.mu_content[mu_pat1Set.mu_length].undefine();
+else
+  mu_pat1Set.mu_content[mu_pat1Set.mu_length] = mu_msg_end;
+mu_Spy_known[mu_msg_end] = mu_true;
+};
+};
+{
+for(int mu_i = 1; mu_i <= 1; mu_i++) {
+mu_msg_end = (mu_msg_end) + (1);
+mu_msgs[mu_msg_end].mu_msgType = mu_agent;
+mu_msgs[mu_msg_end].mu_ag = mu_roleAS[mu_i].mu_AS;
+mu_msgs[mu_msg_end].mu_length = 1;
+mu_pat1Set.mu_length = (mu_pat1Set.mu_length) + (1);
+if (mu_msg_end.isundefined())
+  mu_pat1Set.mu_content[mu_pat1Set.mu_length].undefine();
+else
+  mu_pat1Set.mu_content[mu_pat1Set.mu_length] = mu_msg_end;
+mu_Spy_known[mu_msg_end] = mu_true;
+};
+};
 mu_msg_end = (mu_msg_end) + (1);
 mu_msgs[mu_msg_end].mu_msgType = mu_agent;
 mu_msgs[mu_msg_end].mu_ag = mu_Intruder;
@@ -12607,6 +12649,7 @@ mu_Spy_known[mu_msg_end] = mu_true;
 {
 for(int mu_i = 1; mu_i <= 1; mu_i++) {
 mu_constructSpat3 ( mu_roleAS[mu_i].mu_C, mu_roleAS[mu_i].mu_S, mu_roleAS[mu_i].mu_N1, mu_gnum );
+mu_constructSpat3 ( mu_Intruder, mu_roleAS[mu_i].mu_S, mu_roleAS[mu_i].mu_N1, mu_gnum );
 };
 };
 {
@@ -12617,11 +12660,13 @@ mu_constructSpat8 ( mu_roleC[mu_i].mu_AS, mu_roleC[mu_i].mu_C, mu_roleC[mu_i].mu
 {
 for(int mu_i = 1; mu_i <= 1; mu_i++) {
 mu_constructSpat12 ( mu_roleS[mu_i].mu_C, mu_roleS[mu_i].mu_S, mu_roleS[mu_i].mu_T, mu_roleS[mu_i].mu_L, mu_roleS[mu_i].mu_N2, mu_roleS[mu_i].mu_S, mu_roleS[mu_i].mu_C, mu_gnum );
+mu_constructSpat12 ( mu_Intruder, mu_roleS[mu_i].mu_S, mu_roleS[mu_i].mu_T, mu_roleS[mu_i].mu_L, mu_roleS[mu_i].mu_N2, mu_roleS[mu_i].mu_S, mu_Intruder, mu_gnum );
 };
 };
 {
 for(int mu_i = 1; mu_i <= 1; mu_i++) {
 mu_constructSpat3 ( mu_roleAS[mu_i].mu_S, mu_roleAS[mu_i].mu_C, mu_roleAS[mu_i].mu_N3, mu_gnum );
+mu_constructSpat3 ( mu_Intruder, mu_roleAS[mu_i].mu_C, mu_roleAS[mu_i].mu_N3, mu_gnum );
 };
 };
 {
@@ -12692,30 +12737,61 @@ bool mu__condition_387() // Condition for Rule "auth1"
 
 /**** end rule declaration ****/
 
-int mu__invariant_388() // Invariant "sec1"
+int mu__invariant_388() // Invariant "sec2"
 {
 bool mu__quant389; 
 mu__quant389 = TRUE;
 {
 for(int mu_i = 0; mu_i <= 400; mu_i++) {
-bool mu__boolexpr390;
-bool mu__boolexpr391;
-  if (!((mu_msgs[mu_i].mu_msgType) == (mu_nonce))) mu__boolexpr391 = FALSE ;
+bool mu__quant390; 
+mu__quant390 = TRUE;
+{
+for(int mu_j = 1; mu_j <= 1; mu_j++) {
+bool mu__quant391; 
+mu__quant391 = TRUE;
+{
+for(int mu_k = 1; mu_k <= 1; mu_k++) {
+bool mu__boolexpr392;
+bool mu__boolexpr393;
+bool mu__boolexpr394;
+bool mu__boolexpr395;
+bool mu__boolexpr396;
+  if (!((mu_msgs[mu_i].mu_msgType) == (mu_nonce))) mu__boolexpr396 = FALSE ;
   else {
-  mu__boolexpr391 = ((mu_msgs[mu_i].mu_noncePart) == (mu_n2)) ; 
+  mu__boolexpr396 = ((mu_msgs[mu_i].mu_noncePart) == (mu_roleC[mu_j].mu_N2)) ; 
 }
-  if (!(mu__boolexpr391)) mu__boolexpr390 = TRUE ;
+  if (!(mu__boolexpr396)) mu__boolexpr395 = FALSE ;
   else {
-  mu__boolexpr390 = ((mu_Spy_known[mu_i]) == (mu_false)) ; 
+  mu__boolexpr395 = ((mu_roleC[mu_j].mu_C) != (mu_Intruder)) ; 
 }
-if ( !(mu__boolexpr390) )
+  if (!(mu__boolexpr395)) mu__boolexpr394 = FALSE ;
+  else {
+  mu__boolexpr394 = ((mu_roleC[mu_j].mu_S) != (mu_Intruder)) ; 
+}
+  if (!(mu__boolexpr394)) mu__boolexpr393 = FALSE ;
+  else {
+  mu__boolexpr393 = ((mu_roleS[mu_k].mu_S) != (mu_Intruder)) ; 
+}
+  if (!(mu__boolexpr393)) mu__boolexpr392 = TRUE ;
+  else {
+  mu__boolexpr392 = ((mu_Spy_known[mu_i]) == (mu_false)) ; 
+}
+if ( !(mu__boolexpr392) )
+  { mu__quant391 = FALSE; break; }
+};
+};
+if ( !(mu__quant391) )
+  { mu__quant390 = FALSE; break; }
+};
+};
+if ( !(mu__quant390) )
   { mu__quant389 = FALSE; break; }
 };
 };
 return mu__quant389;
 };
 
-bool mu__condition_392() // Condition for Rule "sec1"
+bool mu__condition_397() // Condition for Rule "sec2"
 {
   return mu__invariant_388( );
 }
@@ -12723,7 +12799,7 @@ bool mu__condition_392() // Condition for Rule "sec1"
 /**** end rule declaration ****/
 
 const rulerec invariants[] = {
-{"sec1", &mu__condition_392, NULL, },
+{"sec2", &mu__condition_397, NULL, },
 {"auth1", &mu__condition_387, NULL, },
 };
 const unsigned short numinvariants = 2;

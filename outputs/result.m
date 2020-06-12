@@ -3379,6 +3379,34 @@ startstate
     pat4Set.content[pat4Set.length] :=msg_end;
     Spy_known[msg_end] := true;
   endfor;
+
+  for i : roleSNums do
+    msg_end := msg_end+1;
+    msgs[msg_end].msgType := agent;
+    msgs[msg_end].ag := roleS[i].S;
+    msgs[msg_end].length := 1;
+    pat1Set.length := pat1Set.length + 1;
+    pat1Set.content[pat1Set.length] :=msg_end;
+    Spy_known[msg_end] := true;
+  endfor;
+  for i : roleCNums do
+    msg_end := msg_end+1;
+    msgs[msg_end].msgType := agent;
+    msgs[msg_end].ag := roleC[i].C;
+    msgs[msg_end].length := 1;
+    pat1Set.length := pat1Set.length + 1;
+    pat1Set.content[pat1Set.length] :=msg_end;
+    Spy_known[msg_end] := true;
+  endfor;
+  for i : roleASNums do
+    msg_end := msg_end+1;
+    msgs[msg_end].msgType := agent;
+    msgs[msg_end].ag := roleAS[i].AS;
+    msgs[msg_end].length := 1;
+    pat1Set.length := pat1Set.length + 1;
+    pat1Set.content[pat1Set.length] :=msg_end;
+    Spy_known[msg_end] := true;
+  endfor;
   msg_end := msg_end + 1;
   msgs[msg_end].msgType := agent;
   msgs[msg_end].ag := Intruder;
@@ -3396,15 +3424,18 @@ startstate
   Spy_known[msg_end] := true;
   for i : roleASNums do
     constructSpat3(roleAS[i].C, roleAS[i].S, roleAS[i].N1, gnum);
+    constructSpat3(Intruder,roleAS[i].S,roleAS[i].N1, gnum);
   endfor;
   for i : roleCNums do
     constructSpat8(roleC[i].AS, roleC[i].C, roleC[i].N1, roleC[i].S, roleC[i].AS, gnum);
   endfor;
   for i : roleSNums do
     constructSpat12(roleS[i].C, roleS[i].S, roleS[i].T, roleS[i].L, roleS[i].N2, roleS[i].S, roleS[i].C, gnum);
+    constructSpat12(Intruder,roleS[i].S,roleS[i].T,roleS[i].L,roleS[i].N2,roleS[i].S,Intruder, gnum);
   endfor;
   for i : roleASNums do
     constructSpat3(roleAS[i].S, roleAS[i].C, roleAS[i].N3, gnum);
+    constructSpat3(Intruder,roleAS[i].C,roleAS[i].N3, gnum);
   endfor;
   for i : roleSNums do
     constructSpat8(roleS[i].AS, roleS[i].S, roleS[i].N3, roleS[i].C, roleS[i].AS, gnum);
@@ -3415,12 +3446,17 @@ startstate
 
 end;
 
-invariant "sec1"
-  forall i:indexType do
-    (msgs[i].msgType=nonce & msgs[i].noncePart = n2)
-    ->
-    Spy_known[i] = false
-end;
+invariant "sec2"  forall i:indexType do
+    forall j:roleCNums do
+      forall k: roleSNums do
+        (msgs[i].msgType=nonce & msgs[i].noncePart = roleC[j].N2 &
+         roleC[j].C != Intruder & roleC[j].S != Intruder &
+         roleS[k].S != Intruder) ---& roleS[k].C != Intruder )
+        ->
+        Spy_known[i] = false
+      endforall
+    endforall
+  endforall;
 
 invariant "auth1"
   forall i: roleCNums do

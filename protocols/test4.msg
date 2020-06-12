@@ -16,3 +16,5 @@ Environment:{
 [agent3] CA [1] : <>
 }
 end
+
+[sec2] C!=Intruder --> S!=Intruder --> AS!=Inretuder --> Nonce(N2);

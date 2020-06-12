@@ -52,6 +52,7 @@ type environment = [
 type goal = [
   (*|`Secretgoal of identifier * message * roleName_list*)
   |`Secretgoal of identifier * message
+  |`Secretgoal1 of identifier * message * roleName * roleName
   |`Agreegoal of identifier * roleName * roleName * message
   |`Goallist of goal list
   |`Null

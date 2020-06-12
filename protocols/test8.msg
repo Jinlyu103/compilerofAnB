@@ -18,7 +18,7 @@ Environment:{
 [agent3] AS[1] : <as>
 }
 Goals:{
-[sec1] nonce(n2);
+[sec2] nonce(N2) keep confidential between C and S;
 [auth1] S non-injectively agrees with C on nonce(N2)
 }
 end
