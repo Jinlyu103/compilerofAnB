@@ -20,12 +20,12 @@ type message = [
   | `Var of identifier
   | `Str of roleName
   | `Concat of message list
-  | `Aenc of message*message   (* Asymmetric encryption *)
-  | `Senc of message*message   (* Symmetric encryption *)
+  | `Aenc of message * message   (* Asymmetric encryption *)
+  | `Senc of message * message   (* Symmetric encryption *)
   | `Hash of message
   | `Pk of roleName
   | `Sk of roleName
-  | `K of roleName*roleName
+  | `K of roleName * roleName
 ];;
 
 type action = [
@@ -36,7 +36,7 @@ type action = [
 ];;
 
 type knowledge = [
-  | `Knowledge of roleName*message
+  | `Knowledge of roleName * message
   | `Knowledge_list of knowledge list
   | `Null
 ];;

@@ -11,7 +11,7 @@ Environment:{
 [agent2] B [1] : <Alice>
 }
 Goals:{
-[sec1] nonce(Y1);
+[sec1] nonce(Ya) keep confidential between A and B;
 [auth1] B non-injectively agrees with A on nonce(Ya)
 }
 end
