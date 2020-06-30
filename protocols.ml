@@ -60,12 +60,12 @@ let genRuleName rolename i =
 ;;
 
 let genSendGuard rolename i seq =
-  sprintf "role%s[i].st = %s%d & ch[%d].empty = true \n==>\n" rolename rolename i seq 
+  sprintf "role%s[i].st = %s%d & ch[%d].empty = true & !role%s[i].commit \n==>\n" rolename rolename i seq rolename
   (* sprintf "role%s[i].st = %s%d & ch.empty = true \n==>\n" rolename rolename i  *)
 ;;
 
 let genRecvGuard rolename i seq =
-  sprintf "role%s[i].st = %s%d & ch[%d].empty = false \n==>\n" rolename rolename i seq
+  sprintf "role%s[i].st = %s%d & ch[%d].empty = false & !role%s[i].commit\n==>\n" rolename rolename i seq rolename
   (* sprintf "role%s[i].st = %s%d & ch.empty = false \n==>\n" rolename rolename i  *)
 ;;
 
