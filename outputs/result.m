@@ -18,6 +18,8 @@ type
   KeyType: record 
     encType: EncryptType; 
     ag: AgentType; 
+    ag1:AgentType;
+    ag2:AgentType;
   end;
 
   AStatus: enum{A1,A2,A3};
@@ -66,10 +68,6 @@ type
    st: BStatus;
    commit : boolean;
   end;
-
-  ---RoleIntruder: record
-  ---  B : AgentType;
-  ---send;
 
   msgSet: record
     content : Array[indexType] of indexType;
@@ -835,11 +833,16 @@ function inverseKey(msgK:Message):Message;
     key_inv.msgType := null;
     if (msgK.msgType=key) then
       key_inv.msgType := msgK.msgType;
-      key_inv.k.ag := msgK.k.ag;
-      if (msgK.k.encType=PK) then
+      if (msgK.k.encType = PK) then
         key_inv.k.encType := SK;
-      elsif (msgK.k.encType=SK) then
+        key_inv.k.ag := msgK.k.ag;
+      elsif (msgK.k.encType = SK) then
         key_inv.k.encType := PK;
+        key_inv.k.ag := msgK.k.ag;
+      elsif (msgK.k.encType = Symk) then
+        key_inv.k.encType := Symk;
+        key_inv.k.ag1 := msgK.k.ag1;
+        key_inv.k.ag2 := msgK.k.ag2;
       endif;
     endif;
     return key_inv;

@@ -13,8 +13,8 @@ Environment:{
 [agent2] B [1] : <Bob.nonce(Nb)>
 }
 Goals:{
-[sec1] nonce(Nb);
-[auth1] B non-injectively agrees with A on nonce(Na)
+[secrecy] nonce(Nb);
+[weakB] B non-injectively agrees with A on nonce(Na)
 }
 end
 

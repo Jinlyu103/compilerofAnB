@@ -43,7 +43,7 @@ let rec getAtoms msg =
   |`Senc (m1,m2)-> List.concat (List.map ~f:getAtoms [m1;m2])
   |`Pk rolename -> [`Pk rolename]
   |`Sk rolename -> [`Sk rolename]
-  |`K (r1,r2)	-> [`Str r1;`Str r2]
+  |`K (r1,r2)	-> [`K(r1,r2)] (* the symmetrix should be one atoms *)
 
 and getEachAtoms msgs =
   remove (List.concat (List.map ~f:getAtoms msgs)) `Null
@@ -103,20 +103,13 @@ let rec genSendAct rolename seq i m atoms length msgofRolename patlist =
   let patNum = getPatNum m patlist in
   sprintf "var msg:Message;\n    msgNo:indexType;\nbegin\n" ^
   sprintf "   clear msg;\n   cons%d(%s,msg,msgNo);\n" patNum (sendAtoms2Str rolename i atoms msgofRolename) ^
-  (* sprintf "   ---%sCh%dPat := msgNo;\n" r2 seq ^ *)
+  
   sprintf "   ch[%d].empty := false;\n" seq ^ 
   sprintf "   ch[%d].msg := msg;\n" seq ^
   sprintf "   ch[%d].sender := role%s[i].%s;\n" seq rolename rolename ^ 
   sprintf "   ch[%d].receiver := Intruder;\n" seq ^
   sprintf "   role%s[i].st := %s%d;\n" rolename rolename ((i mod length)+1) ^
   sprintf "   put \"send%d. \";\n   put ch[%d].sender;\n   put \"   \";\n   put ch[%d].receiver;\n   put \"   msg: \";\n   printMsg(ch[%d].msg);\n   put \"\\n\";\n" i seq seq seq ^ 
-
-  (* sprintf "   ch.empty := false;\n" ^ 
-  sprintf "   ch.msg := msg;\n"  ^
-  sprintf "   ch.sender := role%s[i].%s;\n" rolename rolename ^
-  sprintf "   ch.receiver := Intruder;\n"   (* role%s[i].%s: rolename (getPkAg atoms msgofRolename) *)^
-  sprintf "   role%s[i].st := %s%d;\n" rolename rolename ((i mod length)+1) ^
-  sprintf "   put \"send%d. \";\n   put ch.sender;\n   put \"   \";\n   put ch.receiver;\n   put \"   msg: \";\n   printMsg(ch.msg);\n   put \"\\n\";\n" i  ^ *)
   commitStr ^
   sprintf "end;\n"
   (* (i+1) should be (i+1) % length of the strand list *)
@@ -160,7 +153,6 @@ let rec genRecvAct rolename seq i m atoms length msgofRolename patlist =
   let patNum = getPatNum m patlist in
   sprintf "var flag_pat%d:boolean;\n    msg:Message;\n    msgNo:indexType;\nbegin\n" patNum ^ 
   sprintf "   clear msg;\n   msg := ch[%d].msg;\n   isPat%d(msg, flag_pat%d);\n" seq patNum patNum  ^ 
-  (* sprintf "   clear msg;\n   msg := ch.msg;\n   isPat%d(msg, flag_pat%d);\n"  patNum patNum  ^  *)
   (* sprintf "   put flag_pat%d;\n" patNum ^ *)
   sprintf "   if(flag_pat%d) then\n" patNum ^
   sprintf "     destruct%d(msg,%s);\n" patNum (recvAtoms2Str atoms rolename) ^
@@ -1235,11 +1227,16 @@ let genInverseKeyCode ()=
     key_inv.msgType := null;
     if (msgK.msgType=key) then
       key_inv.msgType := msgK.msgType;
-      key_inv.k.ag := msgK.k.ag;
-      if (msgK.k.encType=PK) then
+      if (msgK.k.encType = PK) then
         key_inv.k.encType := SK;
-      elsif (msgK.k.encType=SK) then
+        key_inv.k.ag := msgK.k.ag;
+      elsif (msgK.k.encType = SK) then
         key_inv.k.encType := PK;
+        key_inv.k.ag := msgK.k.ag;
+      elsif (msgK.k.encType = Symk) then
+        key_inv.k.encType := Symk;
+        key_inv.k.ag1 := msgK.k.ag1;
+        key_inv.k.ag2 := msgK.k.ag2;
       endif;
     endif;
     return key_inv;
@@ -1797,6 +1794,8 @@ let printMurphiConsTypeVars actions k env=
   KeyType: record 
     encType: EncryptType; 
     ag: AgentType; 
+    ag1:AgentType;
+    ag2:AgentType;
   end;\n\n  %s;\n" (agentSStatus rlist lensOfactStr)
   (*AStatus : enum {A1,A2,A3}; ---the roles status should be derived from actions and the principals
   BStatus : enum {B1,B2,B3};*)
@@ -1819,11 +1818,10 @@ let printMurphiConsTypeVars actions k env=
     receiver : AgentType;
     empty : boolean;
   end;\n" ^ printMurphiRecords k nlist rlist ^ (* print records of principals *)
-  "
-  ---RoleIntruder: record
+  (* ---RoleIntruder: record
   ---  B : AgentType;
-  ---send;
-
+  ---send; *)
+"
   msgSet: record
     content : Array[indexType] of indexType;
     length : indexType;
