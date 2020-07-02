@@ -14,6 +14,7 @@ Actions:{
 [6] NW->UE () : enc{<NW.string(H-HandShake-NW)>}Kseaf
 }
 Environment:{
+[agent1] UE[1] : <ue.nonce(rue)>
 
 }
 Goals:{
