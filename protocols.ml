@@ -629,6 +629,7 @@ let atoms2Parms atoms =
   |`Str s -> s ^ ":AgentType"
   |`Pk role -> role ^ "Pk :AgentType"
   |`Sk role -> role ^ "Sk :AgentType"
+  |`K (r1,r2) -> r1^"symk1:AgentType;" ^ r2 ^"symk2:AgentType"
   |_ -> "" ) atoms )
 ;;
 
@@ -701,7 +702,7 @@ let genSynthCode m i patList =
                                                      (str, getPatNum (`Hash m) patList)
                                   |Some (`Pk r) -> (r^"Pk", getPatNum (`Pk r) patList)
                                   |Some (`Sk r) -> (r^"Sk", getPatNum (`Sk r) patList)
-                                  |Some (`K (r1, r2)) -> let str = sprintf "%s, %s" r1 r2
+                                  |Some (`K (r1, r2)) -> let str = sprintf "%ssymk1, %ssymk2" r1 r2
                                                          in
                                                          (str, getPatNum (`K (r1, r2)) patList)
                                   |Some (`Aenc (m1,k1)) -> let atoms = getAtoms (`Aenc(m1,k1)) in
@@ -809,6 +810,27 @@ let genSynthCode m i patList =
     num:=index;
     msg:=msgs[index];
   end;\n\n" role role
+  |`K (r1,r2) -> str1 ^ 
+                 sprintf "  Var index : indexType;\n  begin\n" ^
+                 sprintf "    index := 0;\n" ^
+                 sprintf "    for i :indexType do\n"^
+                 sprintf "      if (msgs[i].msgType = key) then \n" ^
+                 sprintf "        if (msgs[i].k.encType = Symk & msgs[i].k.ag1 = %ssymk1 & msgs[i].k.ag2 = %ssymk2) then\n" r1 r2 ^
+                 sprintf "          index := i;\n"^
+                 sprintf "        endif;\n"^
+                 sprintf "      endif;\n" ^
+                 sprintf "    endfor;\n" ^
+                 sprintf "    if (index = 0) then\n" ^
+                 sprintf "      msg_end := msg_end + 1;\n"^
+                 sprintf "      index := msg_end;\n"^
+                 sprintf "      msgs[index].msgType := key;\n" ^
+                 sprintf "      msgs[index].k.encType := Symk;\n"^
+                 sprintf "      msgs[index].k.ag1:=%ssymk1;\n" r1^
+                 sprintf "      msgs[index].k.ag2:=%ssymk2;\n" r2^
+                 sprintf "    endif;\n"^
+                 sprintf "    num := index;\n"^
+                 sprintf "    msg := msgs[index];\n"^
+                 sprintf "  end;\n\n"
   |`Var n ->str1 ^ sprintf "  Var index : indexType;\n  begin
       index:=0;
       for i: indexType do
@@ -1418,7 +1440,13 @@ and genMatch () =
     elsif m1.msgType = nonce & m2.msgType = nonce then
 	    return matchNonce(m1.noncePart, m2.noncePart); --- m1.noncePart != anyNonce & m2.noncePart != anyNonce &
     elsif m1.msgType = key & m2.msgType = key then
-	    return (m1.k.encType = m2.k.encType) & (matchAgent(m1.k.ag, m2.k.ag));
+      if m1.k.encType = PK then
+        return (m1.k.encType = m2.k.encType) & (matchAgent(m1.k.ag, m2.k.ag));
+      elsif m1.k.encType = SK then
+        return (m1.k.encType = m2.k.encType) & (matchAgent(m1.k.ag, m2.k.ag));
+      elsif m1.k.encType = Symk then
+        return (m1.k.encType = m2.k.encType) & (matchAgent(m1.k.ag1, m2.k.ag1)) & (matchAgent(m1.k.ag2, m2.k.ag2));
+      endif;
     elsif m1.msgType = aenc & m2.msgType = aenc then
 	    return match(msgs[m1.aencMsg], msgs[m2.aencMsg]) & match(msgs[m1.aencKey], msgs[m2.aencKey]);
     elsif m1.msgType = senc & m2.msgType = senc then
