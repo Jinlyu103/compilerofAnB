@@ -328,7 +328,7 @@ procedure constructSpat3(A:AgentType; B:AgentType; Na:NonceType; Var num: indexT
   end;
 
 ---pat4: k(A,B) 
-procedure lookAddPat4(Asymk1:AgentType;Bsymk2:AgentType; Var msg:Message; Var num : indexType);
+procedure lookAddPat4(Asymk1:AgentType; Bsymk2:AgentType; Var msg:Message; Var num : indexType);
   Var index : indexType;
   begin
     index := 0;
@@ -351,8 +351,47 @@ procedure lookAddPat4(Asymk1:AgentType;Bsymk2:AgentType; Var msg:Message; Var nu
     msg := msgs[index];
   end;
 
+---pat4: k(A,B) 
+procedure isPat4(msg:Message; Var flag:boolean);
+  var flag1:boolean;
+  begin
+    flag1:=false;
+    if msg.msgType = key & msg.k.encType = Symk then
+      flag1:=true;
+    endif;
+    flag:=flag1;
+  end;
+
+---spat4: k(A,B) 
+procedure constructSpat4(Asymk1:AgentType; Bsymk2:AgentType; Var num: indexType);
+  Var i, index : indexType;
+  begin
+   index:=0;
+   i := 1;
+   while(i<= msg_end) do
+      if (msgs[i].msgType = key & msgs[i].k.encType = Symk) then
+        if (msgs[i].k.ag1 = Asymk1 & msgs[i].k.ag2 = Bsymk2) then
+          index := i;
+        endif;
+      endif;
+      i := i+1;
+    endwhile;
+    if(index=0) then
+      msg_end := msg_end + 1 ;
+      index := msg_end;
+      msgs[index].msgType := key;
+      msgs[index].k.encType := Symk;
+      msgs[index].k.ag1 := Asymk1;
+      msgs[index].k.ag2 := Bsymk2;
+      msgs[index].length := 1;
+    endif;
+    sPat4Set.length := sPat4Set.length + 1;
+    sPat4Set.content[sPat4Set.length] := index;
+    num := index;
+  end;
+
 ---pat5: k(A,B).A 
-procedure lookAddPat5(Asymk1:AgentType;Bsymk2:AgentType; A:AgentType; Var msg:Message; Var num : indexType);
+procedure lookAddPat5(Asymk1:AgentType; Bsymk2:AgentType; A:AgentType; Var msg:Message; Var num : indexType);
   Var msg1, msg2 : Message;
       index,i1,i2 : indexType;
   begin
@@ -395,11 +434,11 @@ procedure isPat5(msg:Message; Var flag:boolean);
      flag := flag1;
   end;
 ---spat5: k(A,B).A 
-procedure constructSpat5(Asymk1:AgentType;Bsymk2:AgentType; A:AgentType; Var num: indexType);
+procedure constructSpat5(Asymk1:AgentType; Bsymk2:AgentType; A:AgentType; Var num: indexType);
   Var i,index, i1, i2:indexType;
   begin
     index:=0;
-    constructSpat4(, i1);
+    constructSpat4(Asymk1, Bsymk2, i1);
     constructSpat1(A, i2);
     i := 1;
     while(i<= msg_end) do
@@ -423,8 +462,81 @@ procedure constructSpat5(Asymk1:AgentType;Bsymk2:AgentType; A:AgentType; Var num
     num := index;
   end;
 
+---pat6: senc{< k(A,B).A >}k(B,S) 
+procedure lookAddPat6(Asymk1:AgentType; Bsymk2:AgentType; A:AgentType; Bsymk1:AgentType; Ssymk2:AgentType; Var msg:Message; Var num : indexType);
+  Var msg1, msg2: Message;
+      index,i1,i2:indexType;
+  begin
+   index:=0;
+   lookAddPat5(Asymk1, Bsymk2, A,msg1,i1);
+   lookAddPat4(Bsymk1, Ssymk2,msg2,i2);
+   for i : indexType do
+     if (msgs[i].msgType = senc) then
+       if (msgs[i].sencMsg = i1 & msgs[i].sencKey = i2) then
+          index:=i;
+       endif;
+     endif;
+   endfor;
+   if(index=0) then
+     msg_end := msg_end + 1 ;
+     index := msg_end;
+     msgs[index].msgType := senc;
+     msgs[index].sencMsg := i1; 
+     msgs[index].sencKey := i2; 
+     msgs[index].length := 1;
+   endif;
+   num:=index;
+   msg:=msgs[index];
+  end;
+
+---pat6: senc{< k(A,B).A >}k(B,S) 
+procedure isPat6(msg:Message; Var flag:boolean);
+  var flag1,flagPart1,flagPart2 : boolean;
+  begin
+    flag1 := false;
+    flagPart1:=false;
+    flagPart2:=false;
+    if msg.msgType = senc then
+      isPat5(msgs[msg.aencMsg],flagPart1);
+      isPat4(msgs[msg.aencKey],flagPart2);
+      if flagPart1 & flagPart2 then
+        flag1 := true;
+      endif;
+    endif;
+    flag := flag1;
+  end;
+
+---spat6: senc{< k(A,B).A >}k(B,S) 
+procedure constructSpat6(Asymk1:AgentType; Bsymk2:AgentType; A:AgentType; Bsymk1:AgentType; Ssymk2:AgentType; Var num: indexType);
+  Var i,index,i1,i2:indexType;
+  begin
+    index:=0;
+    constructSpat5(Asymk1, Bsymk2, A, i1);
+    constructSpat4(Bsymk1, Ssymk2, i2);
+    i := 1;
+    while(i <= msg_end) do
+      if (msgs[i].msgType = senc) then
+        if (msgs[i].sencMsg = i1 & msgs[i].sencKey = i2) then
+           index:=i;
+        endif;
+      endif;
+      i := i+1;
+    endwhile;
+    if(index=0) then
+      msg_end := msg_end + 1 ;
+      index := msg_end;
+      msgs[index].msgType := senc;
+      msgs[index].sencMsg := i1; 
+      msgs[index].sencKey := i2; 
+      msgs[index].length := 1;
+    endif;
+    sPat6Set.length := sPat6Set.length + 1;
+    sPat6Set.content[sPat6Set.length] := index;
+    num := index;
+  end;
+
 ---pat7: Na.B.k(A,B).senc{< k(A,B).A >}k(B,S) 
-procedure lookAddPat7(Na:NonceType; B:AgentType; Asymk1:AgentType;Bsymk2:AgentType; A:AgentType; Bsymk1:AgentType;Ssymk2:AgentType; Var msg:Message; Var num : indexType);
+procedure lookAddPat7(Na:NonceType; B:AgentType; Asymk1:AgentType; Bsymk2:AgentType; A:AgentType; Bsymk1:AgentType; Ssymk2:AgentType; Var msg:Message; Var num : indexType);
   Var msg1, msg2, msg3, msg4 : Message;
       index,i1,i2,i3,i4 : indexType;
   begin
@@ -432,7 +544,7 @@ procedure lookAddPat7(Na:NonceType; B:AgentType; Asymk1:AgentType;Bsymk2:AgentTy
    lookAddPat2(Na,msg1,i1);
    lookAddPat1(B,msg2,i2);
    lookAddPat4(Asymk1, Bsymk2,msg3,i3);
-   lookAddPat6(A,B,A,B,S,msg4,i4);
+   lookAddPat6(Asymk1,Bsymk2,A,Bsymk1,Ssymk2,msg4,i4);
    for i : indexType do
      if (msgs[i].msgType = concat & msgs[i].length = 4) then
        if (msgs[i].concatPart[1] = i1 & msgs[i].concatPart[2] = i2 & msgs[i].concatPart[3] = i3 & msgs[i].concatPart[4] = i4) then
@@ -475,14 +587,14 @@ procedure isPat7(msg:Message; Var flag:boolean);
      flag := flag1;
   end;
 ---spat7: Na.B.k(A,B).senc{< k(A,B).A >}k(B,S) 
-procedure constructSpat7(Na:NonceType; B:AgentType; Asymk1:AgentType;Bsymk2:AgentType; A:AgentType; Bsymk1:AgentType;Ssymk2:AgentType; Var num: indexType);
+procedure constructSpat7(Na:NonceType; B:AgentType; Asymk1:AgentType; Bsymk2:AgentType; A:AgentType; Bsymk1:AgentType; Ssymk2:AgentType; Var num: indexType);
   Var i,index, i1, i2, i3, i4:indexType;
   begin
     index:=0;
     constructSpat2(Na, i1);
     constructSpat1(B, i2);
-    constructSpat4(, i3);
-    constructSpat6(, A, , i4);
+    constructSpat4(Asymk1, Bsymk2, i3);
+    constructSpat6(Asymk1, Bsymk2, A, Bsymk1, Ssymk2, i4);
     i := 1;
     while(i<= msg_end) do
       if (msgs[i].msgType = concat & msgs[i].length = 4) then
@@ -504,6 +616,152 @@ procedure constructSpat7(Na:NonceType; B:AgentType; Asymk1:AgentType;Bsymk2:Agen
     endif;
     sPat7Set.length := sPat7Set.length + 1;
     sPat7Set.content[sPat7Set.length] := index;
+    num := index;
+  end;
+
+---pat8: senc{< Na.B.k(A,B).senc{< k(A,B).A >}k(B,S) >}k(A,S) 
+procedure lookAddPat8(Na:NonceType; B:AgentType; Asymk1:AgentType; Bsymk2:AgentType; A:AgentType; Bsymk1:AgentType; Ssymk2:AgentType; Var msg:Message; Var num : indexType);
+  Var msg1, msg2: Message;
+      index,i1,i2:indexType;
+  begin
+   index:=0;
+   lookAddPat7(Na, B, Asymk1, Bsymk2, A, Bsymk1, Ssymk2,msg1,i1);
+   lookAddPat4(Asymk1, Ssymk2,msg2,i2);
+   for i : indexType do
+     if (msgs[i].msgType = senc) then
+       if (msgs[i].sencMsg = i1 & msgs[i].sencKey = i2) then
+          index:=i;
+       endif;
+     endif;
+   endfor;
+   if(index=0) then
+     msg_end := msg_end + 1 ;
+     index := msg_end;
+     msgs[index].msgType := senc;
+     msgs[index].sencMsg := i1; 
+     msgs[index].sencKey := i2; 
+     msgs[index].length := 1;
+   endif;
+   num:=index;
+   msg:=msgs[index];
+  end;
+
+---pat8: senc{< Na.B.k(A,B).senc{< k(A,B).A >}k(B,S) >}k(A,S) 
+procedure isPat8(msg:Message; Var flag:boolean);
+  var flag1,flagPart1,flagPart2 : boolean;
+  begin
+    flag1 := false;
+    flagPart1:=false;
+    flagPart2:=false;
+    if msg.msgType = senc then
+      isPat7(msgs[msg.aencMsg],flagPart1);
+      isPat4(msgs[msg.aencKey],flagPart2);
+      if flagPart1 & flagPart2 then
+        flag1 := true;
+      endif;
+    endif;
+    flag := flag1;
+  end;
+
+---spat8: senc{< Na.B.k(A,B).senc{< k(A,B).A >}k(B,S) >}k(A,S) 
+procedure constructSpat8(Na:NonceType; B:AgentType; Asymk1:AgentType; Bsymk2:AgentType; A:AgentType; Bsymk1:AgentType; Ssymk2:AgentType; Var num: indexType);
+  Var i,index,i1,i2:indexType;
+  begin
+    index:=0;
+    constructSpat7(Na, B, Asymk1, Bsymk2, A, Bsymk1, Ssymk2, i1);
+    constructSpat4(Asymk1, Ssymk2, i2);
+    i := 1;
+    while(i <= msg_end) do
+      if (msgs[i].msgType = senc) then
+        if (msgs[i].sencMsg = i1 & msgs[i].sencKey = i2) then
+           index:=i;
+        endif;
+      endif;
+      i := i+1;
+    endwhile;
+    if(index=0) then
+      msg_end := msg_end + 1 ;
+      index := msg_end;
+      msgs[index].msgType := senc;
+      msgs[index].sencMsg := i1; 
+      msgs[index].sencKey := i2; 
+      msgs[index].length := 1;
+    endif;
+    sPat8Set.length := sPat8Set.length + 1;
+    sPat8Set.content[sPat8Set.length] := index;
+    num := index;
+  end;
+
+---pat9: senc{< Nb >}k(A,B) 
+procedure lookAddPat9(Nb:NonceType; Asymk1:AgentType; Bsymk2:AgentType; Var msg:Message; Var num : indexType);
+  Var msg1, msg2: Message;
+      index,i1,i2:indexType;
+  begin
+   index:=0;
+   lookAddPat2(Nb,msg1,i1);
+   lookAddPat4(Asymk1, Bsymk2,msg2,i2);
+   for i : indexType do
+     if (msgs[i].msgType = senc) then
+       if (msgs[i].sencMsg = i1 & msgs[i].sencKey = i2) then
+          index:=i;
+       endif;
+     endif;
+   endfor;
+   if(index=0) then
+     msg_end := msg_end + 1 ;
+     index := msg_end;
+     msgs[index].msgType := senc;
+     msgs[index].sencMsg := i1; 
+     msgs[index].sencKey := i2; 
+     msgs[index].length := 1;
+   endif;
+   num:=index;
+   msg:=msgs[index];
+  end;
+
+---pat9: senc{< Nb >}k(A,B) 
+procedure isPat9(msg:Message; Var flag:boolean);
+  var flag1,flagPart1,flagPart2 : boolean;
+  begin
+    flag1 := false;
+    flagPart1:=false;
+    flagPart2:=false;
+    if msg.msgType = senc then
+      isPat2(msgs[msg.aencMsg],flagPart1);
+      isPat4(msgs[msg.aencKey],flagPart2);
+      if flagPart1 & flagPart2 then
+        flag1 := true;
+      endif;
+    endif;
+    flag := flag1;
+  end;
+
+---spat9: senc{< Nb >}k(A,B) 
+procedure constructSpat9(Nb:NonceType; Asymk1:AgentType; Bsymk2:AgentType; Var num: indexType);
+  Var i,index,i1,i2:indexType;
+  begin
+    index:=0;
+    constructSpat2(Nb, i1);
+    constructSpat4(Asymk1, Bsymk2, i2);
+    i := 1;
+    while(i <= msg_end) do
+      if (msgs[i].msgType = senc) then
+        if (msgs[i].sencMsg = i1 & msgs[i].sencKey = i2) then
+           index:=i;
+        endif;
+      endif;
+      i := i+1;
+    endwhile;
+    if(index=0) then
+      msg_end := msg_end + 1 ;
+      index := msg_end;
+      msgs[index].msgType := senc;
+      msgs[index].sencMsg := i1; 
+      msgs[index].sencKey := i2; 
+      msgs[index].length := 1;
+    endif;
+    sPat9Set.length := sPat9Set.length + 1;
+    sPat9Set.content[sPat9Set.length] := index;
     num := index;
   end;
 
@@ -533,17 +791,17 @@ procedure destruct3(msg:Message; Var A:AgentType; Var B:AgentType; Var Na:NonceT
     msgNum3 := msgs[msg.concatPart[3]];
     Na := msgNum3.noncePart;
   end;
-procedure cons4(Asymk1:AgentType;Bsymk2:AgentType; Var msg:Message; Var num:indexType);
+procedure cons4(Asymk1:AgentType; Bsymk2:AgentType; Var msg:Message; Var num:indexType);
   begin
     clear msg;
-    clear num;    lookAddPat4(,msg,num);
+    clear num;    lookAddPat4(Asymk1, Bsymk2,msg,num);
   end;
-procedure cons5(Asymk1:AgentType;Bsymk2:AgentType; A:AgentType; Var msg:Message; Var num:indexType);
+procedure cons5(Asymk1:AgentType; Bsymk2:AgentType; A:AgentType; Var msg:Message; Var num:indexType);
   begin
     clear msg;
-    clear num;    lookAddPat5(, A,msg,num);
+    clear num;    lookAddPat5(Asymk1, Bsymk2, A,msg,num);
   end;
-procedure destruct5(msg:Message; ; Var A:AgentType);
+procedure destruct5(msg:Message; Var Asymk1:AgentType; Var Bsymk2:AgentType; Var A:AgentType);
   Var msgNum1,msgNum2: Message;
     k: KeyType;
   begin
@@ -551,17 +809,17 @@ procedure destruct5(msg:Message; ; Var A:AgentType);
     msgNum2 := msgs[msg.concatPart[2]];
     A := msgNum2.ag;
   end;
-procedure cons6(Asymk1:AgentType;Bsymk2:AgentType; A:AgentType; Bsymk1:AgentType;Ssymk2:AgentType; Var msg:Message; Var num:indexType);
+procedure cons6(Asymk1:AgentType; Bsymk2:AgentType; A:AgentType; Bsymk1:AgentType; Ssymk2:AgentType; Var msg:Message; Var num:indexType);
   begin
     clear msg;
-    clear num;    lookAddPat6(, A, ,msg,num);
+    clear num;    lookAddPat6(Asymk1, Bsymk2, A, Bsymk1, Ssymk2,msg,num);
   end;
-procedure cons7(Na:NonceType; B:AgentType; Asymk1:AgentType;Bsymk2:AgentType; A:AgentType; Bsymk1:AgentType;Ssymk2:AgentType; Var msg:Message; Var num:indexType);
+procedure cons7(Na:NonceType; B:AgentType; Asymk1:AgentType; Bsymk2:AgentType; A:AgentType; Bsymk1:AgentType; Ssymk2:AgentType; Var msg:Message; Var num:indexType);
   begin
     clear msg;
-    clear num;    lookAddPat7(Na, B, , A, ,msg,num);
+    clear num;    lookAddPat7(Na, B, Asymk1, Bsymk2, A, Bsymk1, Ssymk2,msg,num);
   end;
-procedure destruct7(msg:Message; Var Na:NonceType; Var B:AgentType; ; Var A:AgentType; );
+procedure destruct7(msg:Message; Var Na:NonceType; Var B:AgentType; Var Asymk1:AgentType; Var Bsymk2:AgentType; Var A:AgentType; Var Bsymk1:AgentType; Var Ssymk2:AgentType);
   Var msgNum1,msgNum2,msgNum3,msgNum4: Message;
     k: KeyType;
   begin
@@ -572,15 +830,15 @@ procedure destruct7(msg:Message; Var Na:NonceType; Var B:AgentType; ; Var A:Agen
 ;
 ;
   end;
-procedure cons8(Na:NonceType; B:AgentType; Asymk1:AgentType;Bsymk2:AgentType; A:AgentType; Bsymk1:AgentType;Ssymk2:AgentType; Asymk1:AgentType;Ssymk2:AgentType; Var msg:Message; Var num:indexType);
+procedure cons8(Na:NonceType; B:AgentType; Asymk1:AgentType; Bsymk2:AgentType; A:AgentType; Bsymk1:AgentType; Ssymk2:AgentType; Var msg:Message; Var num:indexType);
   begin
     clear msg;
-    clear num;    lookAddPat8(Na, B, , A, , ,msg,num);
+    clear num;    lookAddPat8(Na, B, Asymk1, Bsymk2, A, Bsymk1, Ssymk2,msg,num);
   end;
-procedure cons9(Nb:NonceType; Asymk1:AgentType;Bsymk2:AgentType; Var msg:Message; Var num:indexType);
+procedure cons9(Nb:NonceType; Asymk1:AgentType; Bsymk2:AgentType; Var msg:Message; Var num:indexType);
   begin
     clear msg;
-    clear num;    lookAddPat9(Nb, ,msg,num);
+    clear num;    lookAddPat9(Nb, Asymk1, Bsymk2,msg,num);
   end;
 
   procedure get_msgNo(msg:Message; Var num:indexType);
