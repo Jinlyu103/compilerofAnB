@@ -4010,8 +4010,8 @@ mu_flagPart1 = mu_false;
 mu_flagPart2 = mu_false;
 if ( (mu_msg.mu_msgType) == (mu_senc) )
 {
-mu_isPat5 ( mu_msgs[mu_msg.mu_aencMsg], mu_flagPart1 );
-mu_isPat4 ( mu_msgs[mu_msg.mu_aencKey], mu_flagPart2 );
+mu_isPat5 ( mu_msgs[mu_msg.mu_sencMsg], mu_flagPart1 );
+mu_isPat4 ( mu_msgs[mu_msg.mu_sencKey], mu_flagPart2 );
 bool mu__boolexpr38;
   if (!(mu_flagPart1)) mu__boolexpr38 = FALSE ;
   else {
@@ -4442,8 +4442,8 @@ mu_flagPart1 = mu_false;
 mu_flagPart2 = mu_false;
 if ( (mu_msg.mu_msgType) == (mu_senc) )
 {
-mu_isPat7 ( mu_msgs[mu_msg.mu_aencMsg], mu_flagPart1 );
-mu_isPat4 ( mu_msgs[mu_msg.mu_aencKey], mu_flagPart2 );
+mu_isPat7 ( mu_msgs[mu_msg.mu_sencMsg], mu_flagPart1 );
+mu_isPat4 ( mu_msgs[mu_msg.mu_sencKey], mu_flagPart2 );
 bool mu__boolexpr56;
   if (!(mu_flagPart1)) mu__boolexpr56 = FALSE ;
   else {
@@ -4614,8 +4614,8 @@ mu_flagPart1 = mu_false;
 mu_flagPart2 = mu_false;
 if ( (mu_msg.mu_msgType) == (mu_senc) )
 {
-mu_isPat2 ( mu_msgs[mu_msg.mu_aencMsg], mu_flagPart1 );
-mu_isPat4 ( mu_msgs[mu_msg.mu_aencKey], mu_flagPart2 );
+mu_isPat2 ( mu_msgs[mu_msg.mu_sencMsg], mu_flagPart1 );
+mu_isPat4 ( mu_msgs[mu_msg.mu_sencKey], mu_flagPart2 );
 bool mu__boolexpr61;
   if (!(mu_flagPart1)) mu__boolexpr61 = FALSE ;
   else {
@@ -9784,7 +9784,7 @@ bool mu__condition_296() // Condition for Rule "weakB"
 
 /**** end rule declaration ****/
 
-int mu__invariant_297() // Invariant "secrecy"
+int mu__invariant_297() // Invariant "secrecy2"
 {
 bool mu__quant298; 
 mu__quant298 = TRUE;
@@ -9792,9 +9792,19 @@ mu__quant298 = TRUE;
 for(int mu_i = 0; mu_i <= 100; mu_i++) {
 bool mu__boolexpr299;
 bool mu__boolexpr300;
-  if (!((mu_msgs[mu_i].mu_msgType) == (mu_nonce))) mu__boolexpr300 = FALSE ;
+bool mu__boolexpr301;
+bool mu__boolexpr302;
+  if (!((mu_msgs[mu_i].mu_msgType) == (mu_key))) mu__boolexpr302 = FALSE ;
   else {
-  mu__boolexpr300 = ((mu_msgs[mu_i].mu_noncePart) == (mu_Nb)) ; 
+  mu__boolexpr302 = ((mu_msgs[mu_i].mu_k.mu_encType) == (mu_Symk)) ; 
+}
+  if (!(mu__boolexpr302)) mu__boolexpr301 = FALSE ;
+  else {
+  mu__boolexpr301 = ((mu_msgs[mu_i].mu_k.mu_ag1) == (mu_Alice)) ; 
+}
+  if (!(mu__boolexpr301)) mu__boolexpr300 = FALSE ;
+  else {
+  mu__boolexpr300 = ((mu_msgs[mu_i].mu_k.mu_ag2) == (mu_Bob)) ; 
 }
   if (!(mu__boolexpr300)) mu__boolexpr299 = TRUE ;
   else {
@@ -9807,18 +9817,49 @@ if ( !(mu__boolexpr299) )
 return mu__quant298;
 };
 
-bool mu__condition_301() // Condition for Rule "secrecy"
+bool mu__condition_303() // Condition for Rule "secrecy2"
 {
   return mu__invariant_297( );
 }
 
 /**** end rule declaration ****/
 
+int mu__invariant_304() // Invariant "secrecy1"
+{
+bool mu__quant305; 
+mu__quant305 = TRUE;
+{
+for(int mu_i = 0; mu_i <= 100; mu_i++) {
+bool mu__boolexpr306;
+bool mu__boolexpr307;
+  if (!((mu_msgs[mu_i].mu_msgType) == (mu_nonce))) mu__boolexpr307 = FALSE ;
+  else {
+  mu__boolexpr307 = ((mu_msgs[mu_i].mu_noncePart) == (mu_Nb)) ; 
+}
+  if (!(mu__boolexpr307)) mu__boolexpr306 = TRUE ;
+  else {
+  mu__boolexpr306 = ((mu_Spy_known[mu_i]) == (mu_false)) ; 
+}
+if ( !(mu__boolexpr306) )
+  { mu__quant305 = FALSE; break; }
+};
+};
+return mu__quant305;
+};
+
+bool mu__condition_308() // Condition for Rule "secrecy1"
+{
+  return mu__invariant_304( );
+}
+
+/**** end rule declaration ****/
+
 const rulerec invariants[] = {
-{"secrecy", &mu__condition_301, NULL, },
+{"secrecy1", &mu__condition_308, NULL, },
+{"secrecy2", &mu__condition_303, NULL, },
 {"weakB", &mu__condition_296, NULL, },
 };
-const unsigned short numinvariants = 2;
+const unsigned short numinvariants = 3;
 
 /********************
   Normal/Canonicalization for scalarset

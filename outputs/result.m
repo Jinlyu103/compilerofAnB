@@ -499,8 +499,8 @@ procedure isPat6(msg:Message; Var flag:boolean);
     flagPart1:=false;
     flagPart2:=false;
     if msg.msgType = senc then
-      isPat5(msgs[msg.aencMsg],flagPart1);
-      isPat4(msgs[msg.aencKey],flagPart2);
+      isPat5(msgs[msg.sencMsg],flagPart1);
+      isPat4(msgs[msg.sencKey],flagPart2);
       if flagPart1 & flagPart2 then
         flag1 := true;
       endif;
@@ -656,8 +656,8 @@ procedure isPat8(msg:Message; Var flag:boolean);
     flagPart1:=false;
     flagPart2:=false;
     if msg.msgType = senc then
-      isPat7(msgs[msg.aencMsg],flagPart1);
-      isPat4(msgs[msg.aencKey],flagPart2);
+      isPat7(msgs[msg.sencMsg],flagPart1);
+      isPat4(msgs[msg.sencKey],flagPart2);
       if flagPart1 & flagPart2 then
         flag1 := true;
       endif;
@@ -729,8 +729,8 @@ procedure isPat9(msg:Message; Var flag:boolean);
     flagPart1:=false;
     flagPart2:=false;
     if msg.msgType = senc then
-      isPat2(msgs[msg.aencMsg],flagPart1);
-      isPat4(msgs[msg.aencKey],flagPart2);
+      isPat2(msgs[msg.sencMsg],flagPart1);
+      isPat4(msgs[msg.sencKey],flagPart2);
       if flagPart1 & flagPart2 then
         flag1 := true;
       endif;
@@ -2118,11 +2118,18 @@ startstate
 
 end;
 
-invariant "secrecy"
-  forall i:indexType do
-    (msgs[i].msgType=nonce & msgs[i].noncePart = Nb)
-    ->
-    Spy_known[i] = false
+invariant "secrecy1" 
+forall i:indexType do
+    (msgs[i].msgType=nonce & msgs[i].noncePart=Nb)
+     ->
+     Spy_known[i] = false
+end;
+
+invariant "secrecy2" 
+forall i:indexType do
+    (msgs[i].msgType=key & msgs[i].k.encType=Symk & msgs[i].k.ag1=Alice & msgs[i].k.ag2=Bob)
+     ->
+     Spy_known[i] = false
 end;
 
 invariant "weakB"

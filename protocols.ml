@@ -649,17 +649,12 @@ let genCodeOfIntruderGetMsg (seq,r,m) patList =
   sprintf "\n---rule of intruder to get msg from ch[%d] \n" seq ^
   sprintf "rule \"intruderGetMsgFromCh[%d]\" \n" seq ^ 
   sprintf "  ch[%d].empty = false\n  ==>\n" seq ^
-  (* sprintf "  ch.empty = false\n  ==>\n" ^ *)
   sprintf "  var flag_pat%d:boolean;\n      msgNo:indexType;\n      msg:Message;\n" j^
   sprintf "  begin\n" ^
-  (* sprintf "    put \"Intruder getMsgFromch[%d]\";\n" seq^  *)
   sprintf "    msg := ch[%d].msg;\n" seq ^ 
   sprintf "    get_msgNo(msg, msgNo);\n"^ 
-  (* sprintf "    put msgNo;\n"^  *)
   sprintf "    isPat%d(msg,flag_pat%d);\n" j j^ 
-  (* sprintf "    put flag_pat%d;\n" j ^ *)
   sprintf "    if (flag_pat%d) then\n" j^
-  (* sprintf "      put exist(pat%dSet,msgNo);\n" j^ *)
   sprintf "      if(!exist(pat%dSet,msgNo)) then\n" j^
   sprintf "        pat%dSet.length:=pat%dSet.length+1;\n" j j^
   sprintf "        pat%dSet.content[pat%dSet.length]:=msgNo;\n" j j^
@@ -1301,8 +1296,8 @@ let genIsPatCode m i patList =
                     sprintf "    flagPart1:=false;\n"^
                     sprintf "    flagPart2:=false;\n"^
                     sprintf "    if msg.msgType = senc then\n"^
-                    sprintf "      isPat%d(msgs[msg.aencMsg],flagPart1);\n" (getPatNum m1 patList)^
-                    sprintf "      isPat%d(msgs[msg.aencKey],flagPart2);\n" (getPatNum symk patList)^
+                    sprintf "      isPat%d(msgs[msg.sencMsg],flagPart1);\n" (getPatNum m1 patList)^
+                    sprintf "      isPat%d(msgs[msg.sencKey],flagPart2);\n" (getPatNum symk patList)^
                     sprintf "      if flagPart1 & flagPart2 then\n" ^
                     sprintf "        flag1 := true;\n"^
                     sprintf "      endif;\n"^
@@ -2140,13 +2135,39 @@ let rec printGoal2Murphi g =
   |`Goallist gols -> String.concat (List.map ~f:(fun g -> printGoal2Murphi g) gols)
 
 and printSecGoal (seq,m) =
-  sprintf "
-invariant \"%s\"
-  forall i:indexType do
-    (msgs[i].msgType=nonce & msgs[i].noncePart = %s)
-    ->
-    Spy_known[i] = false
-end;\n" seq (output_msg m)
+  let str1 = sprintf "\ninvariant \"%s\" \n" seq ^
+             sprintf "forall i:indexType do\n" 
+  in
+  match m with
+  |`Var n ->str1 ^ 
+            sprintf "    (msgs[i].msgType=nonce & msgs[i].noncePart=%s)\n" (output_msg m)^
+            sprintf "     ->\n" ^
+            sprintf "     Spy_known[i] = false\n" ^
+            sprintf "end;\n"
+  |`Pk r -> str1 ^ 
+            sprintf "    (msgs[i].msgType=key & msgs[i].k.encType=Pk & msgs[i].k.ag=%s)\n" r^
+            sprintf "     ->\n" ^
+            sprintf "     Spy_known[i] = false\n" ^
+            sprintf "end;\n"
+  |`Sk r -> str1 ^ 
+            sprintf "    (msgs[i].msgType=key & msgs[i].k.encType=Sk & msgs[i].k.ag=%s)\n" r^
+            sprintf "     ->\n" ^
+            sprintf "     Spy_known[i] = false\n" ^
+            sprintf "end;\n"
+  |`K(r1,r2) -> str1 ^ 
+                sprintf "    (msgs[i].msgType=key & msgs[i].k.encType=Symk & msgs[i].k.ag1=%s & msgs[i].k.ag2=%s)\n" r1 r2^
+                sprintf "     ->\n" ^
+                sprintf "     Spy_known[i] = false\n" ^
+                sprintf "end;\n"
+  |_ -> ""
+  
+(* sprintf "
+  invariant \"%s\"
+    forall i:indexType do
+      (msgs[i].msgType=nonce & msgs[i].noncePart = %s)
+      ->
+      Spy_known[i] = false
+  end;\n" seq (output_msg m) *)
 and printAgreeGoal (seq,r1,r2,m) = 
   let mstr = (output_msg m) in
   sprintf "\ninvariant \"%s\"\n" seq ^

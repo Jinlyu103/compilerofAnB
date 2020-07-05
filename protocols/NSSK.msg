@@ -17,7 +17,8 @@ Environment:{
 [agent3] S [1] : <Server.Alice.Bob.k(Alice,Bob).k(Alice,Server).k(Bob,Server)>
 }
 Goals:{
-[secrecy] nonce(Nb);
+[secrecy1] nonce(Nb);
+[secrecy2] k(Alice,Bob);
 [weakB] B non-injectively agrees with A on nonce(Na)
 }
 end
