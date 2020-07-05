@@ -122,6 +122,8 @@ var
   sPat8Set: msgSet;
   pat9Set: msgSet;
   sPat9Set: msgSet;
+  pat10Set: msgSet;
+  sPat10Set: msgSet;
 
   Spy_known: Array[indexType] of boolean;
   ---systemEvent   : array[eventNums] of Event;
@@ -765,6 +767,68 @@ procedure constructSpat9(Nb:NonceType; Asymk1:AgentType; Bsymk2:AgentType; Var n
     num := index;
   end;
 
+---pat10: pk(A) 
+procedure lookAddPat10(APk:AgentType; Var msg:Message; Var num : indexType);
+  Var index : indexType;
+  begin
+    index:=0;
+    for i: indexType do
+      if (msgs[i].msgType = key) then
+        if (msgs[i].k.encType = PK & msgs[i].k.ag = APk) then
+          index:=i;
+        endif;
+      endif;
+    endfor;
+    if(index=0) then
+      msg_end := msg_end + 1 ;
+      index := msg_end;
+      msgs[index].msgType := key;
+      msgs[index].k.encType:=PK; 
+      msgs[index].k.ag:=APk;
+      msgs[index].length := 1;
+    endif;
+    num:=index;
+    msg:=msgs[index];
+  end;
+
+---pat10: pk(A) 
+procedure isPat10(msg:Message; Var flag:boolean);
+  var flag1 : boolean;
+  begin
+    flag1 := false;
+    if (msg.msgType = key & msg.k.encType = PK) then
+      flag1 := true;
+    endif;
+    flag := flag1;
+  end;
+
+---spat10: pk(A) 
+procedure constructSpat10(APk:AgentType; Var num: indexType);
+  Var i, index : indexType;
+  begin
+   index:=0;
+   i := 1;
+   while(i<= msg_end) do
+      if (msgs[i].msgType = key & msgs[i].k.encType = PK) then
+        if (msgs[i].k.ag = APk) then
+          index := i;
+        endif;
+      endif;
+      i := i+1;
+    endwhile;
+    if(index=0) then
+      msg_end := msg_end + 1 ;
+      index := msg_end;
+      msgs[index].msgType := key;
+      msgs[index].k.encType := PK;
+      msgs[index].k.ag := APk;
+      msgs[index].length := 1;
+    endif;
+    sPat10Set.length := sPat10Set.length + 1;
+    sPat10Set.content[sPat10Set.length] := index;
+    num := index;
+  end;
+
 procedure cons1(A:AgentType; Var msg:Message; Var num:indexType);
   begin
     clear msg;
@@ -874,7 +938,7 @@ procedure destruct8(msg:Message; Var Na:NonceType; Var B:AgentType; Var Asymk1:A
     B:=msgNum2.ag;
     Asymk1:=msgNum3.k.ag1;
     Bsymk2:=msgNum3.k.ag2;
-    destruct6(Asymk1, Bsymk2, A, Bsymk1, Ssymk2);
+    destruct6(msgNum4,Asymk1, Bsymk2, A, Bsymk1, Ssymk2);
   end;
 procedure cons9(Nb:NonceType; Asymk1:AgentType; Bsymk2:AgentType; Var msg:Message; Var num:indexType);
   begin
@@ -892,6 +956,11 @@ procedure destruct9(msg:Message; Var Nb:NonceType; Var Asymk1:AgentType; Var Bsy
       sencMsg:=msgs[msg.sencMsg];
       Nb:=sencMsg.noncePart;
    end;
+procedure cons10(APk:AgentType; Var msg:Message; Var num:indexType);
+  begin
+    clear msg;
+    clear num;    lookAddPat10(APk,msg,num);
+  end;
 
   procedure get_msgNo(msg:Message; Var num:indexType);
     var index:indexType;
@@ -1154,6 +1223,8 @@ function construct9By24(msgNo2, msgNo4:indexType):indexType;
    endif;
    return index;
   end;
+--- Sorry, construct_function of this pattern has not been written!
+
 function exist(PatnSet:msgSet; msgNo:indexType):boolean;
   var flag:boolean;
   begin
@@ -1276,7 +1347,7 @@ begin
    isPat8(msg, flag_pat8);
    if(flag_pat8) then
      destruct8(msg,roleA[i].locNa,roleA[i].locB,roleA[i].locA,roleA[i].locB,roleA[i].locA,roleA[i].locB,roleA[i].locS);
-     if(matchNonce(roleA[i].locNa, roleA[i].Na) & matchAgent(roleA[i].locB, roleA[i].B) & null & matchAgent(roleA[i].locA, roleA[i].A) & null & null)then
+     if(matchNonce(roleA[i].locNa, roleA[i].Na) & matchAgent(roleA[i].locB, roleA[i].B) & matchAgent(roleA[i].locA, roleA[i].A) & matchAgent(roleA[i].locB, roleA[i].B) & matchAgent(roleA[i].locA, roleA[i].A) & matchAgent(roleA[i].locB, roleA[i].B) & matchAgent(roleA[i].locS, roleA[i].S))then
        ch[2].empty:=true;
        clear ch[2].msg;
        roleA[i].st := A3;
@@ -1297,7 +1368,7 @@ var msg:Message;
     msgNo:indexType;
 begin
    clear msg;
-   cons6(null,roleA[i].A,null,msg,msgNo);
+   cons6(roleA[i].A,roleA[i].B,roleA[i].A,roleA[i].B,roleA[i].S,msg,msgNo);
    ch[3].empty := false;
    ch[3].msg := msg;
    ch[3].sender := roleA[i].A;
@@ -1323,7 +1394,7 @@ begin
    isPat9(msg, flag_pat9);
    if(flag_pat9) then
      destruct9(msg,roleA[i].locNb,roleA[i].locA,roleA[i].locB);
-     if(matchNonce(roleA[i].locNb, roleA[i].Nb) & null)then
+     if(matchNonce(roleA[i].locNb, roleA[i].Nb) & matchAgent(roleA[i].locA, roleA[i].A) & matchAgent(roleA[i].locB, roleA[i].B))then
        ch[4].empty:=true;
        clear ch[4].msg;
        roleA[i].st := A5;
@@ -1344,7 +1415,7 @@ var msg:Message;
     msgNo:indexType;
 begin
    clear msg;
-   cons9(roleA[i].locNb,null,msg,msgNo);
+   cons9(roleA[i].Nb,roleA[i].A,roleA[i].B,msg,msgNo);
    ch[5].empty := false;
    ch[5].msg := msg;
    ch[5].sender := roleA[i].A;
@@ -1374,7 +1445,7 @@ begin
    isPat6(msg, flag_pat6);
    if(flag_pat6) then
      destruct6(msg,roleB[i].locA,roleB[i].locB,roleB[i].locA,roleB[i].locB,roleB[i].locS);
-     if(null & matchAgent(roleB[i].locA, roleB[i].A) & null)then
+     if(matchAgent(roleB[i].locA, roleB[i].A) & matchAgent(roleB[i].locB, roleB[i].B) & matchAgent(roleB[i].locA, roleB[i].A) & matchAgent(roleB[i].locB, roleB[i].B) & matchAgent(roleB[i].locS, roleB[i].S))then
        ch[3].empty:=true;
        clear ch[3].msg;
        roleB[i].st := B2;
@@ -1395,7 +1466,7 @@ var msg:Message;
     msgNo:indexType;
 begin
    clear msg;
-   cons9(roleB[i].Nb,null,msg,msgNo);
+   cons9(roleB[i].Nb,roleB[i].A,roleB[i].B,msg,msgNo);
    ch[4].empty := false;
    ch[4].msg := msg;
    ch[4].sender := roleB[i].B;
@@ -1421,7 +1492,7 @@ begin
    isPat9(msg, flag_pat9);
    if(flag_pat9) then
      destruct9(msg,roleB[i].locNb,roleB[i].locA,roleB[i].locB);
-     if(matchNonce(roleB[i].locNb, roleB[i].Nb) & null)then
+     if(matchNonce(roleB[i].locNb, roleB[i].Nb) & matchAgent(roleB[i].locA, roleB[i].A) & matchAgent(roleB[i].locB, roleB[i].B))then
        ch[5].empty:=true;
        clear ch[5].msg;
        roleB[i].st := B1;
@@ -1472,7 +1543,7 @@ var msg:Message;
     msgNo:indexType;
 begin
    clear msg;
-   cons8(roleS[i].locNa,roleS[i].B,null,roleS[i].A,null,null,msg,msgNo);
+   cons8(roleS[i].Na,roleS[i].B,roleS[i].A,roleS[i].B,roleS[i].A,roleS[i].B,roleS[i].S,msg,msgNo);
    ch[2].empty := false;
    ch[2].msg := msg;
    ch[2].sender := roleS[i].S;
@@ -1908,25 +1979,20 @@ startstate
   roleA[1].B := Bob;
   roleA[1].S := Server;
   roleA[1].Na := Na;
-  error: mismatching!
-  roleA[1].st := A1;
+    roleA[1].st := A1;
   roleA[1].commit := false;
   roleA[1].Nb := anyNonce;
   roleB[1].B := Bob;
   roleB[1].S := Server;
   roleB[1].Nb := Nb;
-  error: mismatching!
-  roleB[1].st := B1;
+    roleB[1].st := B1;
   roleB[1].commit := false;
   roleB[1].Na := anyNonce;
   roleB[1].A := anyAgent;
   roleS[1].S := Server;
   roleS[1].A := Alice;
   roleS[1].B := Bob;
-  error: mismatching!
-  error: mismatching!
-  error: mismatching!
-  roleS[1].st := S1;
+        roleS[1].st := S1;
   roleS[1].commit := false;
   roleS[1].Na := anyNonce;
   roleS[1].Nb := anyNonce;
@@ -1965,6 +2031,8 @@ startstate
     sPat8Set.content[i] := 0;
     pat9Set.content[i] := 0;
     sPat9Set.content[i] := 0;
+    pat10Set.content[i] := 0;
+    sPat10Set.content[i] := 0;
   endfor;
   for i:indexType do 
     Spy_known[i] := false;
@@ -1987,14 +2055,29 @@ startstate
   sPat8Set.length := 0;
   pat9Set.length := 0;
   sPat9Set.length := 0;
-  for i : roleANums do
+  pat10Set.length := 0;
+  sPat10Set.length := 0;
+
+  for i:indexType do 
+    Spy_known[i] := false;
+  endfor;
+
+  msg_end:=msg_end+1;
+  msgs[msg_end].msgType := key;
+  msgs[msg_end].k.ag:=Intruder;
+  msgs[msg_end].k.encType:=SK;
+  msgs[msg_end].length := 1;
+  pat10Set.length := pat10Set.length + 1; 
+  pat10Set.content[pat10Set.length] :=msg_end;
+  Spy_known[msg_end] := true;
+    for i : roleANums do
     msg_end := msg_end+1;
     msgs[msg_end].msgType := key;
     msgs[msg_end].k.ag := roleA[i].A;
     msgs[msg_end].k.encType:=PK;
     msgs[msg_end].length := 1;
-    pat0Set.length := pat0Set.length + 1;
-    pat0Set.content[pat0Set.length] :=msg_end;
+    pat10Set.length := pat10Set.length + 1;
+    pat10Set.content[pat10Set.length] :=msg_end;
     Spy_known[msg_end] := true;
   endfor;
   for i : roleBNums do
@@ -2003,8 +2086,8 @@ startstate
     msgs[msg_end].k.ag := roleB[i].B;
     msgs[msg_end].k.encType:=PK;
     msgs[msg_end].length := 1;
-    pat0Set.length := pat0Set.length + 1;
-    pat0Set.content[pat0Set.length] :=msg_end;
+    pat10Set.length := pat10Set.length + 1;
+    pat10Set.content[pat10Set.length] :=msg_end;
     Spy_known[msg_end] := true;
   endfor;
   for i : roleSNums do
@@ -2013,24 +2096,24 @@ startstate
     msgs[msg_end].k.ag := roleS[i].S;
     msgs[msg_end].k.encType:=PK;
     msgs[msg_end].length := 1;
-    pat0Set.length := pat0Set.length + 1;
-    pat0Set.content[pat0Set.length] :=msg_end;
+    pat10Set.length := pat10Set.length + 1;
+    pat10Set.content[pat10Set.length] :=msg_end;
     Spy_known[msg_end] := true;
   endfor;
   for i : roleSNums do
-    constructSpat3(roleS[i].A, roleS[i].B, roleS[i].Na, gnum);
+    constructSpat3(roleS[i].A,roleS[i].B,roleS[i].Na, gnum);
   endfor;
   for i : roleANums do
-    constructSpat8(roleA[i].Na, roleA[i].B, roleA[i].A, roleA[i].B, roleA[i].A, roleA[i].B, roleA[i].S, roleA[i].A, roleA[i].S, gnum);
+    constructSpat8(roleA[i].Na,roleA[i].B,roleA[i].A,roleA[i].A,roleA[i].A,roleA[i].B,roleA[i].B, gnum);
   endfor;
   for i : roleBNums do
-    constructSpat6(roleB[i].A, roleB[i].B, roleB[i].A, roleB[i].B, roleB[i].S, gnum);
+    constructSpat6(roleB[i].A,roleB[i].A,roleB[i].A,roleB[i].B,roleB[i].B, gnum);
   endfor;
   for i : roleANums do
-    constructSpat9(roleA[i].Nb, roleA[i].A, roleA[i].B, gnum);
+    constructSpat9(roleA[i].Nb,roleA[i].A,roleA[i].A, gnum);
   endfor;
   for i : roleBNums do
-    constructSpat9(roleB[i].Nb, roleB[i].A, roleB[i].B, gnum);
+    constructSpat9(roleB[i].Nb,roleB[i].A,roleB[i].A, gnum);
   endfor;
 
 end;

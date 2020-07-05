@@ -116,14 +116,64 @@ let rec genSendAct rolename seq i m atoms length msgofRolename patlist =
 
 and sendAtoms2Str rolename i atoms msgofRolename =
   let s = "role" ^ rolename ^"[i]." in
-  let loc = "role"^rolename^"[i].loc" in
-  String.concat ~sep:"," (List.map ~f:(fun a ->                         
+  let paralist = ref [] in
+  let atoms' = ref [] in
+  for i = 0 to (List.length atoms)-1 do
+    match List.nth atoms i with
+    |Some(`Var n) ->let n' = "nonce_"^n in
+                    if listwithout !atoms' n' then
+                    begin
+                      atoms' := !atoms'@[n'];
+                      let nstr = s^n in
+                      paralist := !paralist@[nstr];
+                    end
+    |Some(`Str r) ->let r' = "agent_"^r in
+                    if listwithout !atoms' r' then
+                    begin
+                      atoms':=!atoms'@[r'];
+                      let rstr = s^r in
+                      paralist := !paralist@[rstr];
+                    end
+    |Some(`Pk r) -> let r'="pk_"^r in
+                    if listwithout !atoms' r' then
+                    begin
+                      atoms':=!atoms'@[r'];
+                      let rstr = s^r in
+                      paralist:=!paralist@[rstr];
+                    end
+    |Some(`Sk r) -> let r'="sk_"^r in
+                    if listwithout !atoms' r' then
+                    begin
+                      atoms':=!atoms'@[r'];
+                      let rstr = s^r in
+                      paralist:=!paralist@[rstr];
+                    end
+    |Some(`K(r1,r2)) -> let r1'="symk1_"^r1 in
+                        if listwithout !atoms' r1' then
+                        begin
+                          atoms':=!atoms'@[r1'];
+                          let r1str = s^r1 in
+                          paralist:=!paralist@[r1str];
+                        end;
+                        let r2'="symk2_"^r2 in
+                        if listwithout !atoms' r2' then
+                        begin
+                          atoms':=!atoms'@[r2'];
+                          let r2str = s^r2 in
+                          paralist:=!paralist@[r2str];
+                        end;
+  |_ ->()
+  done;
+  String.concat ~sep:"," !paralist
+  (* let loc = "role"^rolename^"[i].loc" in *)
+  (* String.concat ~sep:"," (List.map ~f:(fun a ->                         
                         match a with
                         |`Var n -> if (existInit msgofRolename a)  then s ^ n else loc ^ n  (*if i = 1 then s ^ n else loc ^ n *)
                         |`Str r -> if (existInit msgofRolename a)  then s ^ r else loc ^ r
                         |`Pk r -> if (existInit msgofRolename (`Str r))  then s ^ r else loc ^ r
                         |`Sk r -> if (existInit msgofRolename (`Str r))  then s ^ r else loc ^ r
                         |_ -> "null" ) atoms)
+  *)
 and getPkAg atoms msgofRolename =
   let ag = ref "" in
   let atomlen = List.length atoms in
@@ -171,7 +221,7 @@ and recvAtoms2Str atoms rolename =
   let atoms' = ref [] in
   let str' = ref [] in
   let loc = "role"^rolename^"[i].loc" in
-  for i = 0 to List.length atoms do
+  for i = 0 to (List.length atoms)-1 do
     match List.nth atoms i with
     |Some (`Var n) -> let n' = "nonce_"^n in
                       if listwithout !atoms' n' then
@@ -218,7 +268,7 @@ and recvAtoms2Str atoms rolename =
     |_ -> ()
   done;
   String.concat ~sep:"," !str'
-  (* let loc = "role"^rolename^"[i].loc" in
+(* let loc = "role"^rolename^"[i].loc" in
   String.concat ~sep:"," (List.map ~f:(fun a ->
   match a with
   |`Var n -> loc ^ n
@@ -227,10 +277,62 @@ and recvAtoms2Str atoms rolename =
   |`Sk r -> loc ^ r
   |`K (r1,r2) -> sprintf "%s%s," loc r1 ^
                  sprintf "%s%s" loc r2
-  |_ -> "null") atoms) *)
+  |_ -> "null") atoms)
+*)
 
 and atoms2Str atoms rolename msgofRolename = 
   (* let loc = "role"^rolename^"[i].loc_" in   *)
+  let atoms' = ref [] in
+  let strlist = ref [] in
+  for i = 0 to (List.length atoms)-1 do
+    match List.nth atoms i with
+    |Some (`Var n) -> let n' = "nonce_"^n in
+                      if listwithout !atoms' n' then
+                      begin 
+                        atoms' := !atoms'@[n'];
+                        let nstr = sprintf "matchNonce(role%s[i].loc%s, role%s[i].%s)" rolename n rolename n in
+                        strlist := !strlist@[nstr];
+                      end
+    |Some (`Str r) -> let r' = "agent_"^r in
+                      if listwithout !atoms' r' then 
+                      begin
+                        atoms' := !atoms'@[r'];
+                        let rstr = sprintf "matchAgent(role%s[i].loc%s, role%s[i].%s)" rolename r rolename r in
+                        strlist := !strlist@[rstr];
+                      end
+    |Some (`Pk r) ->let r' = "pk_"^r in
+                    if listwithout !atoms' r' then 
+                    begin
+                      atoms' := !atoms'@[r'];
+                      let rstr = sprintf "matchAgent(role%s[i].loc%s, role%s[i].%s)" rolename r rolename r in
+                      strlist := !strlist@[rstr];
+                    end
+    |Some (`Sk r) ->let r' = "sk_"^r in
+                    if listwithout !atoms' r' then 
+                    begin
+                      atoms' := !atoms'@[r'];
+                      let rstr = sprintf "matchAgent(role%s[i].loc%s, role%s[i].%s)" rolename r rolename r in
+                      strlist := !strlist@[rstr]
+                    end
+    |Some (`K(r1,r2)) ->let r1' = "symk1_"^r1 in
+                        if listwithout !atoms' r1' then
+                        begin
+                          atoms' := !atoms'@[r1'];
+                          let r1str = sprintf "matchAgent(role%s[i].loc%s, role%s[i].%s)" rolename r1 rolename r1 in
+                          strlist := !strlist@[r1str];
+                        end;
+                        let r2' = "symk2_"^r2 in
+                        if listwithout !atoms' r2' then
+                        begin 
+                          atoms' := !atoms'@[r2'];
+                          let r2str = sprintf "matchAgent(role%s[i].loc%s, role%s[i].%s)" rolename r2 rolename r2 in
+                          strlist := !strlist@[r2str];
+                        end
+    |_ -> ()
+  done;
+  String.concat ~sep:" & " !strlist
+
+(*   
   let strlist = (List.map ~f:(fun  a ->
   match a with
   |`Var n -> sprintf "matchNonce(role%s[i].loc%s, role%s[i].%s)" rolename n rolename n
@@ -240,6 +342,7 @@ and atoms2Str atoms rolename msgofRolename =
   |_ -> "null" ) atoms)
   in
   String.concat ~sep:" & " (remove strlist "true")
+*)
 ;;
 
 (* let trans act m i rolename length msgOfrolename patlist =
@@ -1307,7 +1410,7 @@ let genDestruct m i patlist =
                   match m1 with
                   |`Concat msgs ->let msgNums = String.concat ~sep:"," (List.mapi ~f:(fun i m -> sprintf "msgNum%d" (i+1)) msgs) in
                                   let str2 = sprintf "  var k1:KeyType;\n    aencMsg,%s:Message;\n" msgNums ^
-                                             sprintf "  begin\n    clear msg1;\n   k1 := msgs[msg.aencKey].k;\n   %s := k1.ag;\n    aencMsg:=msgs[msg.aencMsg];\n" keyAg^
+                                             sprintf "  begin\n    clear aencMsg;\n    k1 := msgs[msg.aencKey].k;\n    %s := k1.ag;\n    aencMsg:=msgs[msg.aencMsg];\n" keyAg^
                                              String.concat ~sep:"\n" (List.mapi ~f:(fun i m -> sprintf "    msgNum%d:=msgs[aencMsg.concatPart[%d]];" (i+1) (i+1)) msgs)
                                   in 
                                   let str3 = (String.concat (List.mapi ~f:(fun i m'-> 
@@ -1319,9 +1422,9 @@ let genDestruct m i patlist =
                                               |`K (r1,r2) ->sprintf "    %ssymk1:=msgNum%d.k.ag1;\n" r1 (i+1)^
                                                             sprintf "    %ssymk2:=msgNum%d.k.ag2;\n" r2 (i+1)
                                               |`Aenc (m1',k1') -> let atoms' = getAtoms m' in
-                                                                  sprintf "    destruct%d(%s);\n" (getPatNum m' patlist) (atom2Str atoms')  
+                                                                  sprintf "    destruct%d(msgNum%d,%s);\n" (getPatNum m' patlist) (i+1) (atom2Str atoms')  
                                               |`Senc (m1',k1') -> let atoms' = getAtoms m' in
-                                                                  sprintf "    destruct%d(%s);\n" (getPatNum m' patlist) (atom2Str atoms')                             
+                                                                  sprintf "    destruct%d(msgNum%d,%s);\n" (getPatNum m' patlist) (i+1) (atom2Str atoms')                             
                                               |_ -> sprintf "" )msgs))
                                   in
                                   str1 ^ str2^ "\n" ^str3 ^ "  end;\n"
@@ -1334,15 +1437,7 @@ let genDestruct m i patlist =
                             sprintf "      msg1:=msgs[msg.aencMsg];\n" ^
                             sprintf "      %s:=msg1.noncePart;\n" n ^
                             sprintf "   end;\n"
-(* 
-  sprintf "  var k1:KeyType;\n    msg1,msgNum1,msgNum2:Message;\n   begin
-    clear msg1;
-    k1 := msgs[msg.aencKey].k;
-    %s := k1.ag;
-    msg1:=msgs[msg.aencMsg];
-    %s:=msg1.noncePart;
-  end;\n" keyAg n 
-*)
+
                   |_ -> ""     
   end 
   |`Senc (m1,`K(r1,r2)) ->begin
@@ -1367,9 +1462,9 @@ let genDestruct m i patlist =
                                                       |`K (r1,r2) ->sprintf "    %ssymk1:=msgNum%d.k.ag1;\n" r1 (i+1)^
                                                                     sprintf "    %ssymk2:=msgNum%d.k.ag2;\n" r2 (i+1)
                                                       |`Aenc (m1',k1') -> let atoms' = getAtoms m' in
-                                                                          sprintf "    destruct%d(%s);\n" (getPatNum m' patlist) (atom2Str atoms')   
+                                                                          sprintf "    destruct%d(msgNum%d,%s);\n" (getPatNum m' patlist) (i+1) (atom2Str atoms')   
                                                       |`Senc (m1',k1') -> let atoms' = getAtoms m' in
-                                                                          sprintf "    destruct%d(%s);\n" (getPatNum m' patlist) (atom2Str atoms')  
+                                                                          sprintf "    destruct%d(msgNum%d,%s);\n" (getPatNum m' patlist) (i+1) (atom2Str atoms')  
                                                       |_ -> sprintf "" )msgs))
                                           in
                                           str1 ^ str2^ "\n" ^str3 ^ "  end;\n"
@@ -1855,9 +1950,10 @@ let print_startstate r num m knws =
                                           |(`Concat msgs,`Concat msgs1) -> let strs = (List.map2_exn ~f:(fun m' m1' -> 
                                                                             match (m',m1') with
                                                                             |(`Var n,`Var n1) -> sprintf "role%s[%d].%s := %s;\n" r num n1 n
-                                                                            (* "role"^r^"["^(string_of_int num)^"]."^n1^" := "^n^";\n" *)
                                                                             |(`Str role,`Str role1) -> sprintf "role%s[%d].%s := %s;\n" r num role1 role
-                                                                            (* "role"^r^"["^(string_of_int num)^"]."^ role1^" := "^role^";\n"  *)
+                                                                            |(`Pk r1, `Pk r2) -> ""
+                                                                            |(`Sk r1, `Sk r2) -> ""
+                                                                            |(`K(r1,r2), `K(r1'r2')) ->""
                                                                             |_ -> "error: mismatching!\n") msgs msgs1) 
                                                                           in
                                                                           (String.concat (List.map ~f:(fun s -> sprintf "  %s" s) strs)) ^ 
@@ -1887,14 +1983,63 @@ let rec printMuriphiStart env k =
 
 (* pritn startstate of arrays *)
 let atoms2Str atoms recvRole = 
-  String.concat ~sep:", " (List.map ~f:(fun a -> match a with
+  let paralist = ref [] in
+  let atoms' = ref [] in
+  for i = 0 to (List.length atoms)-1 do
+    match List.nth atoms i with
+    |Some(`Var n) ->let n' = "nonce_"^n in
+                    if listwithout !atoms' n' then
+                    begin
+                      atoms' := !atoms'@[n'];
+                      let nstr = sprintf "role%s[i].%s" recvRole n in
+                      paralist := !paralist@[nstr];
+                    end
+    |Some(`Str r) ->let r' = "agent_"^r in
+                    if listwithout !atoms' r' then
+                    begin
+                      atoms':=!atoms'@[r'];
+                      let rstr = sprintf "role%s[i].%s" recvRole r in
+                      paralist := !paralist@[rstr];
+                    end
+    |Some(`Pk r) -> let r'="pk_"^r in
+                    if listwithout !atoms' r' then
+                    begin
+                      atoms':=!atoms'@[r'];
+                      let rstr = sprintf "role%s[i].%s" recvRole r in
+                      paralist:=!paralist@[rstr];
+                    end
+    |Some(`Sk r) -> let r'="sk_"^r in
+                    if listwithout !atoms' r' then
+                    begin
+                      atoms':=!atoms'@[r'];
+                      let rstr = sprintf "role%s[i].%s" recvRole r in
+                      paralist:=!paralist@[rstr];
+                    end
+    |Some(`K(r1,r2)) -> let r1'="symk1_"^r1 in
+                        if listwithout !atoms' r1' then
+                        begin
+                          atoms':=!atoms'@[r1'];
+                          let r1str = sprintf "role%s[i].%s" recvRole r1 in
+                          paralist:=!paralist@[r1str];
+                        end;
+                        let r2'="symk2_"^r2 in
+                        if listwithout !atoms' r2' then
+                        begin
+                          atoms':=!atoms'@[r2'];
+                          let r2str = sprintf "role%s[i].%s" recvRole r1 in
+                          paralist:=!paralist@[r2str];
+                        end;
+  |_ ->()
+  done;
+  String.concat ~sep:"," !paralist
+  (* String.concat ~sep:", " (List.map ~f:(fun a -> match a with
                                       |`Null -> sprintf "null"
                                       |`Var n -> sprintf "role%s[i].%s" recvRole n
                                       |`Str r -> sprintf "role%s[i].%s" recvRole r
                                       |`Pk rolename -> sprintf "role%s[i].%s" recvRole rolename
                                       |`Sk rolename -> sprintf "role%s[i].%s" recvRole rolename
                                       |`K (r1,r2) -> sprintf "role%s[i].%s, role%s[i].%s" recvRole r1 recvRole r2 (* symetric key must belong to 2 principals simultaneously *)
-                                      |_ -> "" ) atoms)
+                                      |_ -> "" ) atoms) *)
 ;;
 
 let rec initSpatSet actions patlist = 
@@ -1908,8 +2053,6 @@ let rec initSpatSet actions patlist =
                               let atoms = del_duplicate atoms in
                               sprintf "  for i : role%sNums do\n" r2 ^
                               sprintf "    constructSpat%d(%s, gnum);\n" patNum (atoms2Str atoms r2) ^
-                              (* sprintf "    sPat%dSet.length := sPat%dSet.length + 1;\n" patNum patNum ^
-                              sprintf "    sPat%dSet.content[sPat%dSet.length] := constructSpat%d(%s);\n" patNum patNum patNum (atoms2Str atoms r2) ^ *)
                               sprintf "  endfor;\n"
   |`Act2(seq, r1, r2, m) ->let patNum = (getPatNum m patlist) in
                            let atoms = getAtoms m in
@@ -1944,16 +2087,17 @@ let printImpofStart actions knws =
   for i:indexType do\n"
   in
   let patlist = getPatList actions in    (* get all patterns from actions *)
-  let non_dup = del_duplicate patlist in (* delete duplicate *)
-  let non_equivalent = getEqvlMsgPattern non_dup in
-  let str2 = String.concat (List.mapi ~f:(fun i p -> sprintf "    pat%dSet.content[i] := 0;\n" (getPatNum p non_equivalent) ^
-                                                     sprintf "    sPat%dSet.content[i] := 0;\n" (getPatNum p non_equivalent)) non_equivalent)
+  let patlist = del_duplicate patlist in (* delete duplicate *)
+  let patlist = getEqvlMsgPattern patlist in
+  let str2 = String.concat (List.mapi ~f:(fun i p -> sprintf "    pat%dSet.content[i] := 0;\n" (getPatNum p patlist) ^
+                                                     sprintf "    sPat%dSet.content[i] := 0;\n" (getPatNum p patlist)) patlist)
   in
-  let str3 = String.concat (List.mapi ~f:(fun i p -> sprintf "  pat%dSet.length := 0;\n" (getPatNum p non_equivalent) ^
-                                                     sprintf "  sPat%dSet.length := 0;\n" (getPatNum p non_equivalent)) non_equivalent)
+  let str3 = String.concat (List.mapi ~f:(fun i p -> sprintf "  pat%dSet.length := 0;\n" (getPatNum p patlist) ^
+                                                     sprintf "  sPat%dSet.length := 0;\n" (getPatNum p patlist)) patlist)
   in
-  let kNum = getPatNum (`Pk "A") non_equivalent in
-  let str4 = sprintf "
+  
+  let skNum = getPatNum (`Sk "A") patlist in
+  let str4 = if skNum <> 0 then sprintf "
   for i:indexType do 
     Spy_known[i] := false;
   endfor;
@@ -1966,13 +2110,15 @@ let printImpofStart actions knws =
   pat%dSet.length := pat%dSet.length + 1; 
   pat%dSet.content[pat%dSet.length] :=msg_end;
   Spy_known[msg_end] := true;
-  " kNum kNum kNum kNum
+  " skNum skNum skNum skNum 
+    else ""
   in
-  let str4 = String.concat (List.map ~f:(fun r -> sprintf "  for i : role%sNums do\n" r ^
+  let pkNum = getPatNum (`Pk "A") patlist in
+  let str5 = String.concat (List.map ~f:(fun r -> sprintf "  for i : role%sNums do\n" r ^
                                                   sprintf "    msg_end := msg_end+1;\n    msgs[msg_end].msgType := key;\n" ^
                                                   sprintf "    msgs[msg_end].k.ag := role%s[i].%s;\n" r r^
-                                                  sprintf "    msgs[msg_end].k.encType:=PK;\n    msgs[msg_end].length := 1;\n    pat%dSet.length := pat%dSet.length + 1;\n" kNum kNum ^
-                                                  sprintf "    pat%dSet.content[pat%dSet.length] :=msg_end;\n" kNum kNum ^
+                                                  sprintf "    msgs[msg_end].k.encType:=PK;\n    msgs[msg_end].length := 1;\n    pat%dSet.length := pat%dSet.length + 1;\n" pkNum pkNum ^
+                                                  sprintf "    pat%dSet.content[pat%dSet.length] :=msg_end;\n" pkNum pkNum ^
                                                   sprintf "    Spy_known[msg_end] := true;\n"^
                                                   sprintf "  endfor;\n"
                             ) rlist)
@@ -1982,7 +2128,7 @@ let printImpofStart actions knws =
   for i:indexType do 
     Spy_known[i] := false;
   endfor;\n" ^
-  str3 ^ str4 ^ (initSpatSet actions non_equivalent) ^ (* initialize sample pattern Set *)
+  str3 ^ str4 ^ str5 ^ (initSpatSet actions patlist) ^ (* initialize sample pattern Set *)
   "\n"
 ;;
 

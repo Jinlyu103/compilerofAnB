@@ -186,6 +186,8 @@ let rec getEqvlMsgPattern patlist =
 	| None -> ()
  	| Some x -> if existSamePat !non_eqvlPat x then () else non_eqvlPat := (insert x !non_eqvlPat) (* insert x into an appropriate position *)
   done;
+  if not (existSamePat !non_eqvlPat (`Pk "A")) then
+    non_eqvlPat:=(insert (`Pk "A") !non_eqvlPat);
   !non_eqvlPat
 
 and insert x patlist =
