@@ -782,14 +782,14 @@ procedure cons3(A:AgentType; B:AgentType; Na:NonceType; Var msg:Message; Var num
   end;
 procedure destruct3(msg:Message; Var A:AgentType; Var B:AgentType; Var Na:NonceType);
   Var msgNum1,msgNum2,msgNum3: Message;
-    k: KeyType;
+      k: KeyType;
   begin
     msgNum1 := msgs[msg.concatPart[1]];
     A := msgNum1.ag;
     msgNum2 := msgs[msg.concatPart[2]];
     B := msgNum2.ag;
     msgNum3 := msgs[msg.concatPart[3]];
-    Na := msgNum3.noncePart;
+    Na := msgNum3.noncePart
   end;
 procedure cons4(Asymk1:AgentType; Bsymk2:AgentType; Var msg:Message; Var num:indexType);
   begin
@@ -803,16 +803,33 @@ procedure cons5(Asymk1:AgentType; Bsymk2:AgentType; A:AgentType; Var msg:Message
   end;
 procedure destruct5(msg:Message; Var Asymk1:AgentType; Var Bsymk2:AgentType; Var A:AgentType);
   Var msgNum1,msgNum2: Message;
-    k: KeyType;
+      k: KeyType;
   begin
-;
+    msgNum1 := msgs[msg.concatPart[1]];
+    Asymk1 := msgNum1.k.ag1;
+    Bsymk2 := msgNum1.k.ag2;
     msgNum2 := msgs[msg.concatPart[2]];
-    A := msgNum2.ag;
+    A := msgNum2.ag
   end;
 procedure cons6(Asymk1:AgentType; Bsymk2:AgentType; A:AgentType; Bsymk1:AgentType; Ssymk2:AgentType; Var msg:Message; Var num:indexType);
   begin
     clear msg;
     clear num;    lookAddPat6(Asymk1, Bsymk2, A, Bsymk1, Ssymk2,msg,num);
+  end;
+procedure destruct6(msg:Message; Var Asymk1:AgentType; Var Bsymk2:AgentType; Var A:AgentType; Var Bsymk1:AgentType; Var Ssymk2:AgentType);
+  var sencMsg,msgNum1,msgNum2:Message;
+      k1: KeyType;
+  begin
+    clear sencMsg;
+    sencMsg:=msgs[msg.sencMsg];
+    k1:=msgs[msg.sencKey].k;
+    Bsymk1:=k1.ag1;
+    Ssymk2:=k1.ag2;
+    msgNum1:=msgs[sencMsg.concatPart[1]];
+    msgNum2:=msgs[sencMsg.concatPart[2]];
+    Asymk1:=msgNum1.k.ag1;
+    Bsymk2:=msgNum1.k.ag2;
+    A:=msgNum2.ag;
   end;
 procedure cons7(Na:NonceType; B:AgentType; Asymk1:AgentType; Bsymk2:AgentType; A:AgentType; Bsymk1:AgentType; Ssymk2:AgentType; Var msg:Message; Var num:indexType);
   begin
@@ -821,25 +838,60 @@ procedure cons7(Na:NonceType; B:AgentType; Asymk1:AgentType; Bsymk2:AgentType; A
   end;
 procedure destruct7(msg:Message; Var Na:NonceType; Var B:AgentType; Var Asymk1:AgentType; Var Bsymk2:AgentType; Var A:AgentType; Var Bsymk1:AgentType; Var Ssymk2:AgentType);
   Var msgNum1,msgNum2,msgNum3,msgNum4: Message;
-    k: KeyType;
+      k: KeyType;
   begin
     msgNum1 := msgs[msg.concatPart[1]];
     Na := msgNum1.noncePart;
     msgNum2 := msgs[msg.concatPart[2]];
     B := msgNum2.ag;
-;
-;
+    msgNum3 := msgs[msg.concatPart[3]];
+    Asymk1 := msgNum3.k.ag1;
+    Bsymk2 := msgNum3.k.ag2;
+    msgNum4 := msgs[msg.concatPart[4]];
+    k := msgs[msgNum4.aencKey].k;
+    Bsymk1 := k.ag1;
+    Ssymk2 := k.ag2
   end;
 procedure cons8(Na:NonceType; B:AgentType; Asymk1:AgentType; Bsymk2:AgentType; A:AgentType; Bsymk1:AgentType; Ssymk2:AgentType; Var msg:Message; Var num:indexType);
   begin
     clear msg;
     clear num;    lookAddPat8(Na, B, Asymk1, Bsymk2, A, Bsymk1, Ssymk2,msg,num);
   end;
+procedure destruct8(msg:Message; Var Na:NonceType; Var B:AgentType; Var Asymk1:AgentType; Var Bsymk2:AgentType; Var A:AgentType; Var Bsymk1:AgentType; Var Ssymk2:AgentType);
+  var sencMsg,msgNum1,msgNum2,msgNum3,msgNum4:Message;
+      k1: KeyType;
+  begin
+    clear sencMsg;
+    sencMsg:=msgs[msg.sencMsg];
+    k1:=msgs[msg.sencKey].k;
+    Asymk1:=k1.ag1;
+    Ssymk2:=k1.ag2;
+    msgNum1:=msgs[sencMsg.concatPart[1]];
+    msgNum2:=msgs[sencMsg.concatPart[2]];
+    msgNum3:=msgs[sencMsg.concatPart[3]];
+    msgNum4:=msgs[sencMsg.concatPart[4]];
+    Na:=msgNum1.noncePart;
+    B:=msgNum2.ag;
+    Asymk1:=msgNum3.k.ag1;
+    Bsymk2:=msgNum3.k.ag2;
+    destruct6(Asymk1, Bsymk2, A, Bsymk1, Ssymk2);
+  end;
 procedure cons9(Nb:NonceType; Asymk1:AgentType; Bsymk2:AgentType; Var msg:Message; Var num:indexType);
   begin
     clear msg;
     clear num;    lookAddPat9(Nb, Asymk1, Bsymk2,msg,num);
   end;
+procedure destruct9(msg:Message; Var Nb:NonceType; Var Asymk1:AgentType; Var Bsymk2:AgentType);
+  var k1:KeyType;
+      sencMsg:Message;
+   begin
+      clear sencMsg;
+      k1 := msgs[msg.sencKey].k;
+      Asymk1 := k1.ag1;
+      Bsymk2 := k1.ag2;
+      sencMsg:=msgs[msg.sencMsg];
+      Nb:=sencMsg.noncePart;
+   end;
 
   procedure get_msgNo(msg:Message; Var num:indexType);
     var index:indexType;
@@ -1223,7 +1275,7 @@ begin
    msg := ch[2].msg;
    isPat8(msg, flag_pat8);
    if(flag_pat8) then
-     destruct8(msg,roleA[i].locNa,roleA[i].locB,null,roleA[i].locA,null,null);
+     destruct8(msg,roleA[i].locNa,roleA[i].locB,roleA[i].locA,roleA[i].locB,roleA[i].locA,roleA[i].locB,roleA[i].locS);
      if(matchNonce(roleA[i].locNa, roleA[i].Na) & matchAgent(roleA[i].locB, roleA[i].B) & null & matchAgent(roleA[i].locA, roleA[i].A) & null & null)then
        ch[2].empty:=true;
        clear ch[2].msg;
@@ -1270,7 +1322,7 @@ begin
    msg := ch[4].msg;
    isPat9(msg, flag_pat9);
    if(flag_pat9) then
-     destruct9(msg,roleA[i].locNb,null);
+     destruct9(msg,roleA[i].locNb,roleA[i].locA,roleA[i].locB);
      if(matchNonce(roleA[i].locNb, roleA[i].Nb) & null)then
        ch[4].empty:=true;
        clear ch[4].msg;
@@ -1321,7 +1373,7 @@ begin
    msg := ch[3].msg;
    isPat6(msg, flag_pat6);
    if(flag_pat6) then
-     destruct6(msg,null,roleB[i].locA,null);
+     destruct6(msg,roleB[i].locA,roleB[i].locB,roleB[i].locA,roleB[i].locB,roleB[i].locS);
      if(null & matchAgent(roleB[i].locA, roleB[i].A) & null)then
        ch[3].empty:=true;
        clear ch[3].msg;
@@ -1368,7 +1420,7 @@ begin
    msg := ch[5].msg;
    isPat9(msg, flag_pat9);
    if(flag_pat9) then
-     destruct9(msg,roleB[i].locNb,null);
+     destruct9(msg,roleB[i].locNb,roleB[i].locA,roleB[i].locB);
      if(matchNonce(roleB[i].locNb, roleB[i].Nb) & null)then
        ch[5].empty:=true;
        clear ch[5].msg;
