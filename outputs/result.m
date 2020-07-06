@@ -972,7 +972,8 @@ procedure cons10(APk:AgentType; Var msg:Message; Var num:indexType);
         if (msgs[i].msgType = msg.msgType) then
           if ( (msg.msgType=agent & msgs[i].ag=msg.ag)
           | (msg.msgType=nonce & msgs[i].noncePart=msg.noncePart)
-          | (msg.msgType=key & (msgs[i].k.encType=msg.k.encType & msgs[i].k.ag=msg.k.ag))
+          | (msg.msgType=key & (msgs[i].k.encType=msg.k.encType & msg.k.encType != Symk & msgs[i].k.ag=msg.k.ag))
+          | (msg.msgType=key & (msgs[i].k.encType=msg.k.encType & msg.k.encType = Symk & msgs[i].k.ag1=msg.k.ag1 & msgs[i].k.ag2=msg.k.ag2))
           | (msg.msgType=aenc & (msgs[i].aencMsg=msg.aencMsg & msgs[i].aencKey=msg.aencKey))
           | (msg.msgType=senc & (msgs[i].sencMsg=msg.sencMsg & msgs[i].sencKey=msg.sencKey))
           ) then 
@@ -1913,6 +1914,56 @@ ruleset i0: msgLen do
 endruleset;
 endruleset;
 
+--- encrypt and decrypt rules of pat senc(k(A,B).A,k(B,S))
+ruleset i:msgLen do
+  rule "sdecrypt 6" --pat6
+    i<=pat6Set.length & pat6Set.content[i] != 0
+    & Spy_known[pat6Set.content[i]] & !Spy_known[msgs[pat6Set.content[i]].sencMsg]
+    ==>
+    var key_inv:Message;
+	      msgPat5,keyNo:indexType;
+	      flag_pat5:boolean;
+    begin
+      key_inv := inverseKey(msgs[msgs[pat6Set.content[i]].sencKey]);
+      get_msgNo(key_inv,keyNo);
+      if ( (key_inv.k.encType = Symk & (key_inv.k.ag1 = Intruder | key_inv.k.ag2 = Intruder)) | Spy_known[keyNo]) then
+        Spy_known[msgs[pat6Set.content[i]].sencMsg]:=true;
+        msgPat5:=msgs[pat6Set.content[i]].sencMsg;
+        isPat5(msgs[msgPat5],flag_pat5);
+        if (flag_pat5) then
+          if (!exist(pat5Set,msgPat5)) then
+            pat5Set.length:=pat5Set.length+1;
+            pat5Set.content[pat5Set.length]:=msgPat5;
+          endif;
+        endif;
+      endif;
+    end;
+endruleset;
+
+ruleset i:msgLen do 
+  ruleset j:msgLen do 
+    rule "sencrypt 6"  --pat6
+      i<=pat5Set.length & pat5Set.content[i] != 0 & Spy_known[pat5Set.content[i]] &
+      j<=pat4Set.length & pat4Set.content[j] != 0 & Spy_known[pat4Set.content[j]] &
+      matchPat(msgs[construct6By54(pat5Set.content[i],pat4Set.content[j])], sPat6Set) &
+      !Spy_known[construct6By54(pat5Set.content[i],pat4Set.content[j])] 
+       ==>
+      var encMsgNo:indexType;
+      begin
+        if (msgs[pat4Set.content[j]].k.encType=Symk) then
+          encMsgNo := construct6By54(pat5Set.content[i],pat4Set.content[j]);
+          if (!exist(pat6Set,encMsgNo)) then
+            pat6Set.length := pat6Set.length+1;
+            pat6Set.content[pat6Set.length]:=encMsgNo;
+          endif;
+          if (!Spy_known[encMsgNo]) then
+            Spy_known[encMsgNo] := true;
+          endif;
+        endif;
+      end;
+  endruleset;
+endruleset;
+
 --- enconcat and deconcat rules for pat: concat(Na.B.k(A,B).senc{< k(A,B).A >}k(B,S))
 
 ruleset i:msgLen do 
@@ -1972,6 +2023,106 @@ ruleset i0: msgLen do
 endruleset;
 endruleset;
 endruleset;
+endruleset;
+
+--- encrypt and decrypt rules of pat senc(Na.B.k(A,B).senc{< k(A,B).A >}k(B,S),k(A,S))
+ruleset i:msgLen do
+  rule "sdecrypt 8" --pat8
+    i<=pat8Set.length & pat8Set.content[i] != 0
+    & Spy_known[pat8Set.content[i]] & !Spy_known[msgs[pat8Set.content[i]].sencMsg]
+    ==>
+    var key_inv:Message;
+	      msgPat7,keyNo:indexType;
+	      flag_pat7:boolean;
+    begin
+      key_inv := inverseKey(msgs[msgs[pat8Set.content[i]].sencKey]);
+      get_msgNo(key_inv,keyNo);
+      if ( (key_inv.k.encType = Symk & (key_inv.k.ag1 = Intruder | key_inv.k.ag2 = Intruder)) | Spy_known[keyNo]) then
+        Spy_known[msgs[pat8Set.content[i]].sencMsg]:=true;
+        msgPat7:=msgs[pat8Set.content[i]].sencMsg;
+        isPat7(msgs[msgPat7],flag_pat7);
+        if (flag_pat7) then
+          if (!exist(pat7Set,msgPat7)) then
+            pat7Set.length:=pat7Set.length+1;
+            pat7Set.content[pat7Set.length]:=msgPat7;
+          endif;
+        endif;
+      endif;
+    end;
+endruleset;
+
+ruleset i:msgLen do 
+  ruleset j:msgLen do 
+    rule "sencrypt 8"  --pat8
+      i<=pat7Set.length & pat7Set.content[i] != 0 & Spy_known[pat7Set.content[i]] &
+      j<=pat4Set.length & pat4Set.content[j] != 0 & Spy_known[pat4Set.content[j]] &
+      matchPat(msgs[construct8By74(pat7Set.content[i],pat4Set.content[j])], sPat8Set) &
+      !Spy_known[construct8By74(pat7Set.content[i],pat4Set.content[j])] 
+       ==>
+      var encMsgNo:indexType;
+      begin
+        if (msgs[pat4Set.content[j]].k.encType=Symk) then
+          encMsgNo := construct8By74(pat7Set.content[i],pat4Set.content[j]);
+          if (!exist(pat8Set,encMsgNo)) then
+            pat8Set.length := pat8Set.length+1;
+            pat8Set.content[pat8Set.length]:=encMsgNo;
+          endif;
+          if (!Spy_known[encMsgNo]) then
+            Spy_known[encMsgNo] := true;
+          endif;
+        endif;
+      end;
+  endruleset;
+endruleset;
+
+--- encrypt and decrypt rules of pat senc(Nb,k(A,B))
+ruleset i:msgLen do
+  rule "sdecrypt 9" --pat9
+    i<=pat9Set.length & pat9Set.content[i] != 0
+    & Spy_known[pat9Set.content[i]] & !Spy_known[msgs[pat9Set.content[i]].sencMsg]
+    ==>
+    var key_inv:Message;
+	      msgPat2,keyNo:indexType;
+	      flag_pat2:boolean;
+    begin
+      key_inv := inverseKey(msgs[msgs[pat9Set.content[i]].sencKey]);
+      get_msgNo(key_inv,keyNo);
+      if ( (key_inv.k.encType = Symk & (key_inv.k.ag1 = Intruder | key_inv.k.ag2 = Intruder)) | Spy_known[keyNo]) then
+        Spy_known[msgs[pat9Set.content[i]].sencMsg]:=true;
+        msgPat2:=msgs[pat9Set.content[i]].sencMsg;
+        isPat2(msgs[msgPat2],flag_pat2);
+        if (flag_pat2) then
+          if (!exist(pat2Set,msgPat2)) then
+            pat2Set.length:=pat2Set.length+1;
+            pat2Set.content[pat2Set.length]:=msgPat2;
+          endif;
+        endif;
+      endif;
+    end;
+endruleset;
+
+ruleset i:msgLen do 
+  ruleset j:msgLen do 
+    rule "sencrypt 9"  --pat9
+      i<=pat2Set.length & pat2Set.content[i] != 0 & Spy_known[pat2Set.content[i]] &
+      j<=pat4Set.length & pat4Set.content[j] != 0 & Spy_known[pat4Set.content[j]] &
+      matchPat(msgs[construct9By24(pat2Set.content[i],pat4Set.content[j])], sPat9Set) &
+      !Spy_known[construct9By24(pat2Set.content[i],pat4Set.content[j])] 
+       ==>
+      var encMsgNo:indexType;
+      begin
+        if (msgs[pat4Set.content[j]].k.encType=Symk) then
+          encMsgNo := construct9By24(pat2Set.content[i],pat4Set.content[j]);
+          if (!exist(pat9Set,encMsgNo)) then
+            pat9Set.length := pat9Set.length+1;
+            pat9Set.content[pat9Set.length]:=encMsgNo;
+          endif;
+          if (!Spy_known[encMsgNo]) then
+            Spy_known[encMsgNo] := true;
+          endif;
+        endif;
+      end;
+  endruleset;
 endruleset;
 
 startstate

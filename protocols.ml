@@ -420,6 +420,57 @@ let getMaxLenMsg actions =
 (* 2019-12-18 *)
 (* encrypt and decrypt / enconcat and deconcat *)
 
+(* decrypt and encrypt rules of symmetric encryption *)
+let sdecryptRule (m,`K(r1,r2)) patList =
+  let i = getPatNum (`Senc (m,`K(r1,r2))) patList in
+  let mNum = getPatNum m patList in
+  let kNum = getPatNum (`K(r1,r2)) patList in
+  sprintf "  rule \"sdecrypt %d\" --pat%d\n" i i ^
+  sprintf "    i<=pat%dSet.length & pat%dSet.content[i] != 0\n" i i^
+  sprintf "    & Spy_known[pat%dSet.content[i]] & !Spy_known[msgs[pat%dSet.content[i]].sencMsg]\n" i i ^
+  sprintf "    ==>\n" ^
+  sprintf "    var key_inv:Message;\n	      msgPat%d,keyNo:indexType;\n	      flag_pat%d:boolean;\n" mNum mNum ^
+  sprintf "    begin\n" ^
+  sprintf "      key_inv := inverseKey(msgs[msgs[pat%dSet.content[i]].sencKey]);\n" i ^
+  sprintf "      get_msgNo(key_inv,keyNo);\n"^
+  sprintf "      if ( (key_inv.k.encType = Symk & (key_inv.k.ag1 = Intruder | key_inv.k.ag2 = Intruder)) | Spy_known[keyNo]) then\n" ^
+  sprintf "        Spy_known[msgs[pat%dSet.content[i]].sencMsg]:=true;\n" i ^
+  sprintf "        msgPat%d:=msgs[pat%dSet.content[i]].sencMsg;\n" mNum i^
+  sprintf "        isPat%d(msgs[msgPat%d],flag_pat%d);\n" mNum mNum mNum ^
+  sprintf "        if (flag_pat%d) then\n" mNum^
+  sprintf "          if (!exist(pat%dSet,msgPat%d)) then\n" mNum mNum^
+  sprintf "            pat%dSet.length:=pat%dSet.length+1;\n" mNum mNum ^
+  sprintf "            pat%dSet.content[pat%dSet.length]:=msgPat%d;\n" mNum mNum mNum^
+  sprintf "          endif;\n"^
+  sprintf "        endif;\n"^
+  sprintf "      endif;\n"^
+  sprintf "    end;\n"
+;;
+
+let sencrtptRule (m,`K(r1,r2)) patList =
+  let i = getPatNum (`Senc (m,`K(r1,r2))) patList in
+  let mNum = getPatNum m patList in
+  let kNum = getPatNum (`K(r1,r2)) patList in
+  sprintf "    rule \"sencrypt %d\"  --pat%d\n" i i ^
+  sprintf "      i<=pat%dSet.length & pat%dSet.content[i] != 0 & Spy_known[pat%dSet.content[i]] &\n" mNum mNum mNum ^
+  sprintf "      j<=pat%dSet.length & pat%dSet.content[j] != 0 & Spy_known[pat%dSet.content[j]] &\n" kNum kNum kNum ^
+  sprintf "      matchPat(msgs[construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j])], sPat%dSet) &\n" i mNum kNum mNum kNum i ^ 
+  sprintf "      !Spy_known[construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j])] \n       ==>\n" i mNum kNum mNum kNum ^
+  sprintf "      var encMsgNo:indexType;\n"^
+  sprintf "      begin\n"^
+  sprintf "        if (msgs[pat%dSet.content[j]].k.encType=Symk) then\n" kNum^ (*ag=intruder.B*)
+  sprintf "          encMsgNo := construct%dBy%d%d(pat%dSet.content[i],pat%dSet.content[j]);\n" i mNum kNum mNum kNum^
+  sprintf "          if (!exist(pat%dSet,encMsgNo)) then\n" i^
+  sprintf "            pat%dSet.length := pat%dSet.length+1;\n" i i^
+  sprintf "            pat%dSet.content[pat%dSet.length]:=encMsgNo;\n" i i^
+  sprintf "          endif;\n"^
+  sprintf "          if (!Spy_known[encMsgNo]) then\n"^
+  sprintf "            Spy_known[encMsgNo] := true;\n"^
+  sprintf "          endif;\n"^
+  sprintf "        endif;\n"^
+  sprintf "      end;\n"
+;;
+
 (* decryption rules for aenc(Na.A, Pk(B)), aenc(Na.Nb,Pk(A)) and aenc(Nb,Pk(B)) *)
 let rec adecryptRule (m,k) patList=  
   (*printf "  adecrypt\n";*)
@@ -429,9 +480,9 @@ let rec adecryptRule (m,k) patList=
   printDecRule (m,k) i i1 i2
 
 and printDecRule (m,k) i i1 i2 =
-   sprintf "  rule \"decrypt %d\"	---pat%d\n" i i^
+   sprintf "  rule \"adecrypt %d\"	---pat%d\n" i i^
    sprintf "    i<=pat%dSet.length & pat%dSet.content[i] != 0 & Spy_known[pat%dSet.content[i]] &\n    !Spy_known[msgs[pat%dSet.content[i]].aencMsg]\n    ==>\n" i i i i^
-   sprintf "    var key_inv:Message;\n	msgPat%d:indexType;\n	flag_pat%d:boolean;\n" i1 i1^
+   sprintf "    var key_inv:Message;\n	      msgPat%d:indexType;\n	      flag_pat%d:boolean;\n" i1 i1^
    sprintf "    begin\n"^
    sprintf "      key_inv := inverseKey(msgs[msgs[pat%dSet.content[i]].aencKey]);\n" i^
    sprintf "      if (key_inv.k.ag = Intruder) then\n"^
@@ -444,7 +495,6 @@ and printDecRule (m,k) i i1 i2 =
    sprintf "      endif;\n"^
    sprintf "    end;\n"
 ;;
-
 (* encryption rules for aenc(Na.A, Pk(B)), aenc(Na.Nb,Pk(A)) and aenc(Nb,Pk(B))*)
 let rec aencryptRule (m,k) patList=
   (*printf "  aencrypt\n"*)
@@ -605,7 +655,14 @@ let print_murphiRule_byPats pat i patList =
 		    sprintf "endruleset;\n\n" ^
 		    sprintf "ruleset i:msgLen do \n  ruleset j:msgLen do \n"^
 		    aencryptRule (m1,k1) patList^
-  	    sprintf "  endruleset;\nendruleset;\n\n" 
+        sprintf "  endruleset;\nendruleset;\n\n" 
+  |`Senc (m1,`K(r1,r2)) ->sprintf "--- encrypt and decrypt rules of pat senc(%s,k(%s,%s))\n" (output_msg m1) r1 r2 ^
+                          sprintf "ruleset i:msgLen do\n" ^
+                          sdecryptRule (m1,`K(r1,r2)) patList ^
+                          sprintf "endruleset;\n\n" ^
+                          sprintf "ruleset i:msgLen do \n  ruleset j:msgLen do \n" ^
+                          sencrtptRule (m1,`K(r1,r2)) patList ^
+                          sprintf "  endruleset;\nendruleset;\n\n"
   |`Concat msgs -> sprintf "--- enconcat and deconcat rules for pat: concat(%s)\n\n" (output_msg (`Concat msgs))^
 		   sprintf "ruleset i:msgLen do \n" ^
 		   (deconcatRule msgs patList) ^
@@ -623,13 +680,13 @@ let print_murphiRules_EncsDecs actions knws =
   match actions with
   | `Null -> sprintf "null"
   | `Actlist arr -> let patlist = getPatList actions in    (* get all patterns from actions *)
-                    let non_dup = del_duplicate patlist in (* delete duplicate *)
-                    let non_equivalent = getEqvlMsgPattern non_dup in (* delete equivalent class *) 
-                    String.concat (List.mapi ~f:(fun i pat -> print_murphiRule_byPats pat (i+1) non_equivalent ) non_equivalent)
+                    let patlist = del_duplicate patlist in (* delete duplicate *)
+                    let patlist = getEqvlMsgPattern patlist in (* delete equivalent class *) 
+                    String.concat (List.mapi ~f:(fun i pat -> print_murphiRule_byPats pat (i+1) patlist ) patlist)
   | _ -> let patlist = getPatList actions in    (* get all patterns from actions *)
-		    	                  let non_dup = del_duplicate patlist in (* delete duplicate *)
-                            let non_equivalent = getEqvlMsgPattern non_dup in (* delete equivalent class *) 
-                            String.concat (List.mapi ~f:(fun i pat -> print_murphiRule_byPats pat (i+1) non_equivalent ) non_equivalent)
+		     let patlist = del_duplicate patlist in (* delete duplicate *)
+         let patlist = getEqvlMsgPattern patlist in (* delete equivalent class *) 
+         String.concat (List.mapi ~f:(fun i pat -> print_murphiRule_byPats pat (i+1) patlist ) patlist)
 ;;
 
 (* 2019-12-20 *)
@@ -1528,7 +1585,8 @@ let genGet_msgNoCode () =
         if (msgs[i].msgType = msg.msgType) then
           if ( (msg.msgType=agent & msgs[i].ag=msg.ag)
           | (msg.msgType=nonce & msgs[i].noncePart=msg.noncePart)
-          | (msg.msgType=key & (msgs[i].k.encType=msg.k.encType & msgs[i].k.ag=msg.k.ag))
+          | (msg.msgType=key & (msgs[i].k.encType=msg.k.encType & msg.k.encType != Symk & msgs[i].k.ag=msg.k.ag))
+          | (msg.msgType=key & (msgs[i].k.encType=msg.k.encType & msg.k.encType = Symk & msgs[i].k.ag1=msg.k.ag1 & msgs[i].k.ag2=msg.k.ag2))
           | (msg.msgType=aenc & (msgs[i].aencMsg=msg.aencMsg & msgs[i].aencKey=msg.aencKey))
           | (msg.msgType=senc & (msgs[i].sencMsg=msg.sencMsg & msgs[i].sencKey=msg.sencKey))
           ) then 
