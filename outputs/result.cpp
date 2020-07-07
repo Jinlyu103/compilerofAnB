@@ -4932,27 +4932,17 @@ mu_lookAddPat6 ( mu_Asymk1, mu_Bsymk2, mu_A, mu_Bsymk1, mu_Ssymk2, mu_msg, mu_nu
 void mu_destruct6(mu_1_Message& mu_msg, mu_1_AgentType& mu_Asymk1, mu_1_AgentType& mu_Bsymk2, mu_1_AgentType& mu_A, mu_1_AgentType& mu_Bsymk1, mu_1_AgentType& mu_Ssymk2)
 {
 /*** Variable declaration ***/
-mu_1_Message mu_sencMsg("sencMsg",0);
+mu_1_KeyType mu_k1("k1",0);
 
 /*** Variable declaration ***/
-mu_1_Message mu_msgNum1("msgNum1",224);
-
-/*** Variable declaration ***/
-mu_1_Message mu_msgNum2("msgNum2",448);
-
-/*** Variable declaration ***/
-mu_1_KeyType mu_k1("k1",672);
+mu_1_Message mu_sencMsg("sencMsg",32);
 
 mu_sencMsg.clear();
-mu_sencMsg = mu_msgs[mu_msg.mu_sencMsg];
 mu_k1 = mu_msgs[mu_msg.mu_sencKey].mu_k;
 mu_Bsymk1 = mu_k1.mu_ag1;
 mu_Ssymk2 = mu_k1.mu_ag2;
-mu_msgNum1 = mu_msgs[mu_sencMsg.mu_concatPart[1]];
-mu_msgNum2 = mu_msgs[mu_sencMsg.mu_concatPart[2]];
-mu_Asymk1 = mu_msgNum1.mu_k.mu_ag1;
-mu_Bsymk2 = mu_msgNum1.mu_k.mu_ag2;
-mu_A = mu_msgNum2.mu_ag;
+mu_sencMsg = mu_msgs[mu_msg.mu_sencMsg];
+mu_destruct5 ( mu_sencMsg, mu_Asymk1, mu_Bsymk2, mu_A );
 };
 /*** end procedure declaration ***/
 
@@ -4989,9 +4979,7 @@ mu_msgNum3 = mu_msgs[mu_msg.mu_concatPart[3]];
 mu_Asymk1 = mu_msgNum3.mu_k.mu_ag1;
 mu_Bsymk2 = mu_msgNum3.mu_k.mu_ag2;
 mu_msgNum4 = mu_msgs[mu_msg.mu_concatPart[4]];
-mu_k = mu_msgs[mu_msgNum4.mu_aencKey].mu_k;
-mu_Bsymk1 = mu_k.mu_ag1;
-mu_Ssymk2 = mu_k.mu_ag2;
+mu_destruct6 ( mu_msgNum4, mu_Asymk1, mu_Bsymk2, mu_A, mu_Bsymk1, mu_Ssymk2 );
 };
 /*** end procedure declaration ***/
 
@@ -5006,37 +4994,17 @@ mu_lookAddPat8 ( mu_Na, mu_B, mu_Asymk1, mu_Bsymk2, mu_A, mu_Bsymk1, mu_Ssymk2, 
 void mu_destruct8(mu_1_Message& mu_msg, mu_1_NonceType& mu_Na, mu_1_AgentType& mu_B, mu_1_AgentType& mu_Asymk1, mu_1_AgentType& mu_Bsymk2, mu_1_AgentType& mu_A, mu_1_AgentType& mu_Bsymk1, mu_1_AgentType& mu_Ssymk2)
 {
 /*** Variable declaration ***/
-mu_1_Message mu_sencMsg("sencMsg",0);
+mu_1_KeyType mu_k1("k1",0);
 
 /*** Variable declaration ***/
-mu_1_Message mu_msgNum1("msgNum1",224);
-
-/*** Variable declaration ***/
-mu_1_Message mu_msgNum2("msgNum2",448);
-
-/*** Variable declaration ***/
-mu_1_Message mu_msgNum3("msgNum3",672);
-
-/*** Variable declaration ***/
-mu_1_Message mu_msgNum4("msgNum4",896);
-
-/*** Variable declaration ***/
-mu_1_KeyType mu_k1("k1",1120);
+mu_1_Message mu_sencMsg("sencMsg",32);
 
 mu_sencMsg.clear();
-mu_sencMsg = mu_msgs[mu_msg.mu_sencMsg];
 mu_k1 = mu_msgs[mu_msg.mu_sencKey].mu_k;
 mu_Asymk1 = mu_k1.mu_ag1;
 mu_Ssymk2 = mu_k1.mu_ag2;
-mu_msgNum1 = mu_msgs[mu_sencMsg.mu_concatPart[1]];
-mu_msgNum2 = mu_msgs[mu_sencMsg.mu_concatPart[2]];
-mu_msgNum3 = mu_msgs[mu_sencMsg.mu_concatPart[3]];
-mu_msgNum4 = mu_msgs[mu_sencMsg.mu_concatPart[4]];
-mu_Na = mu_msgNum1.mu_noncePart;
-mu_B = mu_msgNum2.mu_ag;
-mu_Asymk1 = mu_msgNum3.mu_k.mu_ag1;
-mu_Bsymk2 = mu_msgNum3.mu_k.mu_ag2;
-mu_destruct6 ( mu_msgNum4, mu_Asymk1, mu_Bsymk2, mu_A, mu_Bsymk1, mu_Ssymk2 );
+mu_sencMsg = mu_msgs[mu_msg.mu_sencMsg];
+mu_destruct7 ( mu_sencMsg, mu_Na, mu_B, mu_Asymk1, mu_Bsymk2, mu_A, mu_Bsymk1, mu_Ssymk2 );
 };
 /*** end procedure declaration ***/
 
@@ -8248,13 +8216,7 @@ mu_ch[5].mu_sender = mu_Intruder;
 mu_ch[5].mu_receiver = mu_roleB[mu_j].mu_B;
 mu_ch[5].mu_empty = mu_false;
 mu_emit[mu_pat9Set.mu_content[mu_i]] = mu_true;
-cout << "seq5. ";
-mu_ch[5].mu_sender.print();
-cout << "   ";
-mu_ch[5].mu_receiver.print();
-cout << "   msg: ";
-mu_printMsg ( mu_ch[5].mu_msg );
-cout << "\n";
+cout << "intruder emit msg into ch[5].\n";
 }
   };
 
@@ -8375,13 +8337,7 @@ mu_ch[4].mu_sender = mu_Intruder;
 mu_ch[4].mu_receiver = mu_roleA[mu_j].mu_A;
 mu_ch[4].mu_empty = mu_false;
 mu_emit[mu_pat9Set.mu_content[mu_i]] = mu_true;
-cout << "seq4. ";
-mu_ch[4].mu_sender.print();
-cout << "   ";
-mu_ch[4].mu_receiver.print();
-cout << "   msg: ";
-mu_printMsg ( mu_ch[4].mu_msg );
-cout << "\n";
+cout << "intruder emit msg into ch[4].\n";
 }
   };
 
@@ -8502,13 +8458,7 @@ mu_ch[3].mu_sender = mu_Intruder;
 mu_ch[3].mu_receiver = mu_roleB[mu_j].mu_B;
 mu_ch[3].mu_empty = mu_false;
 mu_emit[mu_pat6Set.mu_content[mu_i]] = mu_true;
-cout << "seq3. ";
-mu_ch[3].mu_sender.print();
-cout << "   ";
-mu_ch[3].mu_receiver.print();
-cout << "   msg: ";
-mu_printMsg ( mu_ch[3].mu_msg );
-cout << "\n";
+cout << "intruder emit msg into ch[3].\n";
 }
   };
 
@@ -8629,13 +8579,7 @@ mu_ch[2].mu_sender = mu_Intruder;
 mu_ch[2].mu_receiver = mu_roleA[mu_j].mu_A;
 mu_ch[2].mu_empty = mu_false;
 mu_emit[mu_pat8Set.mu_content[mu_i]] = mu_true;
-cout << "seq2. ";
-mu_ch[2].mu_sender.print();
-cout << "   ";
-mu_ch[2].mu_receiver.print();
-cout << "   msg: ";
-mu_printMsg ( mu_ch[2].mu_msg );
-cout << "\n";
+cout << "intruder emit msg into ch[2].\n";
 }
   };
 
@@ -8756,13 +8700,7 @@ mu_ch[1].mu_sender = mu_Intruder;
 mu_ch[1].mu_receiver = mu_roleS[mu_j].mu_S;
 mu_ch[1].mu_empty = mu_false;
 mu_emit[mu_pat3Set.mu_content[mu_i]] = mu_true;
-cout << "seq1. ";
-mu_ch[1].mu_sender.print();
-cout << "   ";
-mu_ch[1].mu_receiver.print();
-cout << "   msg: ";
-mu_printMsg ( mu_ch[1].mu_msg );
-cout << "\n";
+cout << "intruder emit msg into ch[1].\n";
 }
   };
 
@@ -8830,6 +8768,7 @@ else
   mu_pat9Set.mu_content[mu_pat9Set.mu_length] = mu_msgNo;
 mu_Spy_known[mu_msgNo] = mu_true;
 }
+cout << "intruder get msg into ch[5].\n";
 mu_ch[5].mu_empty = mu_true;
 mu_ch[5].mu_msg.clear();
 }
@@ -8899,6 +8838,7 @@ else
   mu_pat9Set.mu_content[mu_pat9Set.mu_length] = mu_msgNo;
 mu_Spy_known[mu_msgNo] = mu_true;
 }
+cout << "intruder get msg into ch[4].\n";
 mu_ch[4].mu_empty = mu_true;
 mu_ch[4].mu_msg.clear();
 }
@@ -8968,6 +8908,7 @@ else
   mu_pat6Set.mu_content[mu_pat6Set.mu_length] = mu_msgNo;
 mu_Spy_known[mu_msgNo] = mu_true;
 }
+cout << "intruder get msg into ch[3].\n";
 mu_ch[3].mu_empty = mu_true;
 mu_ch[3].mu_msg.clear();
 }
@@ -9037,6 +8978,7 @@ else
   mu_pat8Set.mu_content[mu_pat8Set.mu_length] = mu_msgNo;
 mu_Spy_known[mu_msgNo] = mu_true;
 }
+cout << "intruder get msg into ch[2].\n";
 mu_ch[2].mu_empty = mu_true;
 mu_ch[2].mu_msg.clear();
 }
@@ -9106,6 +9048,7 @@ else
   mu_pat3Set.mu_content[mu_pat3Set.mu_length] = mu_msgNo;
 mu_Spy_known[mu_msgNo] = mu_true;
 }
+cout << "intruder get msg into ch[1].\n";
 mu_ch[1].mu_empty = mu_true;
 mu_ch[1].mu_msg.clear();
 }
@@ -9199,13 +9142,7 @@ mu_ch[2].mu_msg = mu_msg;
 mu_ch[2].mu_sender = mu_roleS[mu_i].mu_S;
 mu_ch[2].mu_receiver = mu_Intruder;
 mu_roleS[mu_i].mu_st = mu_S1;
-cout << "send2. ";
-mu_ch[2].mu_sender.print();
-cout << "   ";
-mu_ch[2].mu_receiver.print();
-cout << "   msg: ";
-mu_printMsg ( mu_ch[2].mu_msg );
-cout << "\n";
+cout << "roleS[i] in st2\n";
 mu_roleS[mu_i].mu_commit = mu_true;
   };
 
@@ -9316,13 +9253,7 @@ mu_ch[1].mu_msg.clear();
 mu_roleS[mu_i].mu_st = mu_S2;
 }
 }
-cout << "recv1. ";
-mu_ch[1].mu_sender.print();
-cout << "   ";
-mu_ch[1].mu_receiver.print();
-cout << "   msg: ";
-mu_printMsg ( mu_msg );
-cout << "\n";
+cout << "roleS[i] in st1\n";
   };
 
 };
@@ -9432,13 +9363,7 @@ mu_ch[5].mu_msg.clear();
 mu_roleB[mu_i].mu_st = mu_B1;
 }
 }
-cout << "recv3. ";
-mu_ch[5].mu_sender.print();
-cout << "   ";
-mu_ch[5].mu_receiver.print();
-cout << "   msg: ";
-mu_printMsg ( mu_msg );
-cout << "\n";
+cout << "roleB[i] in st3\n";
 mu_roleB[mu_i].mu_commit = mu_true;
   };
 
@@ -9530,13 +9455,7 @@ mu_ch[4].mu_msg = mu_msg;
 mu_ch[4].mu_sender = mu_roleB[mu_i].mu_B;
 mu_ch[4].mu_receiver = mu_Intruder;
 mu_roleB[mu_i].mu_st = mu_B3;
-cout << "send2. ";
-mu_ch[4].mu_sender.print();
-cout << "   ";
-mu_ch[4].mu_receiver.print();
-cout << "   msg: ";
-mu_printMsg ( mu_ch[4].mu_msg );
-cout << "\n";
+cout << "roleB[i] in st2\n";
   };
 
 };
@@ -9656,13 +9575,7 @@ mu_ch[3].mu_msg.clear();
 mu_roleB[mu_i].mu_st = mu_B2;
 }
 }
-cout << "recv1. ";
-mu_ch[3].mu_sender.print();
-cout << "   ";
-mu_ch[3].mu_receiver.print();
-cout << "   msg: ";
-mu_printMsg ( mu_msg );
-cout << "\n";
+cout << "roleB[i] in st1\n";
   };
 
 };
@@ -9753,13 +9666,7 @@ mu_ch[5].mu_msg = mu_msg;
 mu_ch[5].mu_sender = mu_roleA[mu_i].mu_A;
 mu_ch[5].mu_receiver = mu_Intruder;
 mu_roleA[mu_i].mu_st = mu_A1;
-cout << "send5. ";
-mu_ch[5].mu_sender.print();
-cout << "   ";
-mu_ch[5].mu_receiver.print();
-cout << "   msg: ";
-mu_printMsg ( mu_ch[5].mu_msg );
-cout << "\n";
+cout << "roleA[i] in st5\n";
 mu_roleA[mu_i].mu_commit = mu_true;
   };
 
@@ -9870,13 +9777,7 @@ mu_ch[4].mu_msg.clear();
 mu_roleA[mu_i].mu_st = mu_A5;
 }
 }
-cout << "recv4. ";
-mu_ch[4].mu_sender.print();
-cout << "   ";
-mu_ch[4].mu_receiver.print();
-cout << "   msg: ";
-mu_printMsg ( mu_msg );
-cout << "\n";
+cout << "roleA[i] in st4\n";
   };
 
 };
@@ -9967,13 +9868,7 @@ mu_ch[3].mu_msg = mu_msg;
 mu_ch[3].mu_sender = mu_roleA[mu_i].mu_A;
 mu_ch[3].mu_receiver = mu_Intruder;
 mu_roleA[mu_i].mu_st = mu_A4;
-cout << "send3. ";
-mu_ch[3].mu_sender.print();
-cout << "   ";
-mu_ch[3].mu_receiver.print();
-cout << "   msg: ";
-mu_printMsg ( mu_ch[3].mu_msg );
-cout << "\n";
+cout << "roleA[i] in st3\n";
   };
 
 };
@@ -10103,13 +9998,7 @@ mu_ch[2].mu_msg.clear();
 mu_roleA[mu_i].mu_st = mu_A3;
 }
 }
-cout << "recv2. ";
-mu_ch[2].mu_sender.print();
-cout << "   ";
-mu_ch[2].mu_receiver.print();
-cout << "   msg: ";
-mu_printMsg ( mu_msg );
-cout << "\n";
+cout << "roleA[i] in st2\n";
   };
 
 };
@@ -10200,13 +10089,7 @@ mu_ch[1].mu_msg = mu_msg;
 mu_ch[1].mu_sender = mu_roleA[mu_i].mu_A;
 mu_ch[1].mu_receiver = mu_Intruder;
 mu_roleA[mu_i].mu_st = mu_A2;
-cout << "send1. ";
-mu_ch[1].mu_sender.print();
-cout << "   ";
-mu_ch[1].mu_receiver.print();
-cout << "   msg: ";
-mu_printMsg ( mu_ch[1].mu_msg );
-cout << "\n";
+cout << "roleA[i] in st1\n";
   };
 
 };

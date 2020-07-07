@@ -109,7 +109,8 @@ let rec genSendAct rolename seq i m atoms length msgofRolename patlist =
   sprintf "   ch[%d].sender := role%s[i].%s;\n" seq rolename rolename ^ 
   sprintf "   ch[%d].receiver := Intruder;\n" seq ^
   sprintf "   role%s[i].st := %s%d;\n" rolename rolename ((i mod length)+1) ^
-  sprintf "   put \"send%d. \";\n   put ch[%d].sender;\n   put \"   \";\n   put ch[%d].receiver;\n   put \"   msg: \";\n   printMsg(ch[%d].msg);\n   put \"\\n\";\n" i seq seq seq ^ 
+  sprintf "   put \"role%s[i] in st%d\\n\";\n" rolename i ^
+  (* sprintf "   put \"send%d. \";\n   put ch[%d].sender;\n   put \"   \";\n   put ch[%d].receiver;\n   put \"   msg: \";\n   printMsg(ch[%d].msg);\n   put \"\\n\";\n" i seq seq seq ^  *)
   commitStr ^
   sprintf "end;\n"
   (* (i+1) should be (i+1) % length of the strand list *)
@@ -208,12 +209,11 @@ let rec genRecvAct rolename seq i m atoms length msgofRolename patlist =
   sprintf "     destruct%d(msg,%s);\n" patNum (recvAtoms2Str atoms rolename) ^
   sprintf "     if(%s)then\n" (atoms2Str atoms rolename msgofRolename) ^
   sprintf "       ch[%d].empty:=true;\n       clear ch[%d].msg;\n" seq seq ^
-  (* sprintf "       ch.empty:=true;\n"  ^ *)
   sprintf "       role%s[i].st := %s%d;\n" rolename rolename ((i mod length)+1) ^
   sprintf "     endif;\n"^
   sprintf "   endif;\n" ^
-  sprintf "   put \"recv%d. \";\n   put ch[%d].sender;\n   put \"   \";\n   put ch[%d].receiver;\n   put \"   msg: \";\n   printMsg(msg);\n   put \"\\n\";\n" i seq seq ^
-  (* sprintf "   put \"recv%d. \";\n   put ch.sender;\n   put \"   \";\n   put ch.receiver;\n   put \"   msg: \";\n   printMsg(ch.msg);\n   put \"\\n\";\n" i  ^ *)
+  sprintf "   put \"role%s[i] in st%d\\n\";\n" rolename i ^
+  (* sprintf "   put \"recv%d. \";\n   put ch[%d].sender;\n   put \"   \";\n   put ch[%d].receiver;\n   put \"   msg: \";\n   printMsg(msg);\n   put \"\\n\";\n" i seq seq ^ *)
   commitStr ^
   sprintf "end;\n"
 
@@ -717,6 +717,7 @@ let genCodeOfIntruderGetMsg (seq,r,m) patList =
   sprintf "        pat%dSet.content[pat%dSet.length]:=msgNo;\n" j j^
   sprintf "        Spy_known[msgNo] := true;\n"^
   sprintf "      endif;\n" ^
+  sprintf "          put \"intruder get msg into ch[%d].\\n\";\n" seq ^
   sprintf "      ch[%d].empty := true;\n      clear ch[%d].msg;\n" seq seq^
   sprintf "    endif;\n" ^
   sprintf "  end;\n"
@@ -736,11 +737,13 @@ let genCodeOfIntruderEmitMsg (seq,r,m) patList=
   str1 ^ str2 ^ str3^ str4 ^ 
   sprintf "          ch[%d].empty:=false;\n" seq^
   sprintf "          emit[pat%dSet.content[i]] := true;\n" j^
-  sprintf "          put \"seq%d. \";\n          put ch[%d].sender;\n" seq seq^
+  sprintf "          put \"intruder emit msg into ch[%d].\\n\";\n" seq ^
+(* sprintf "          put \"seq%d. \";\n          put ch[%d].sender;\n" seq seq^
   sprintf "          put \"   \";\n          put ch[%d].receiver;\n" seq ^
   sprintf "          put \"   msg: \";\n"^
   sprintf "          printMsg(ch[%d].msg);\n" seq ^
-  sprintf "          put \"\\n\";\n"^
+  sprintf "          put \"\\n\";\n"^ 
+*)
   sprintf "        endif;\n"^
   sprintf "      end;\n"^
   sprintf "  endruleset;\n"^
@@ -841,7 +844,7 @@ let atoms2Parms atoms =
     |Some(`Pk role) ->let r = role^"Pk:AgentType" in
                       if listwithout !paraList r then 
                         paraList := !paraList@[r]
-    |Some(`Sk role )->let r = role^"SK:AgentType" in 
+    |Some(`Sk role )->let r = role^"Sk:AgentType" in 
                       if listwithout !paraList r then 
                         paraList := !paraList@[r]
     |Some(`K(r1,r2)) -> let symk1 = r1^"symk1:AgentType" in
@@ -871,7 +874,7 @@ let atoms2Parms1 atoms =
     |Some(`Pk role) ->let r ="Var "^ role^"Pk:AgentType" in
                       if listwithout !paraList r then 
                         paraList := !paraList@[r]
-    |Some(`Sk role )->let r ="Var "^ role^"SK:AgentType" in 
+    |Some(`Sk role )->let r ="Var "^ role^"Sk:AgentType" in 
                       if listwithout !paraList r then 
                         paraList := !paraList@[r]
     |Some(`K(r1,r2)) -> let symk1 ="Var "^ r1^"symk1:AgentType" in
@@ -899,7 +902,7 @@ let atom2Str atoms =
     |Some(`Pk role) ->let r = role^"Pk" in
                       if listwithout !paraList r then 
                         paraList := !paraList@[r]
-    |Some(`Sk role )->let r = role^"SK" in 
+    |Some(`Sk role )->let r = role^"Sk" in 
                       if listwithout !paraList r then 
                         paraList := !paraList@[r]
     |Some(`K(r1,r2)) -> let symk1 = r1^"symk1" in
@@ -1460,7 +1463,18 @@ let genDestruct m i patlist =
                            |_ -> "null"
                   in                  
                   match m1 with
-                  |`Concat msgs ->let msgNums = String.concat ~sep:"," (List.mapi ~f:(fun i m -> sprintf "msgNum%d" (i+1)) msgs) in
+                  |`Concat msgs ->let m1Atoms = getAtoms m1 in
+                                  let m1Num = getPatNum m1 patlist in
+                                  str1 ^
+                                  sprintf "  var k1:KeyType;\n" ^
+                                  sprintf "      aencMsg:Message;\n    begin\n" ^
+                                  sprintf "    clear aencMsg;\n" ^
+                                  sprintf "    k1:=msgs[msg.aencKey].k;\n" ^                                  
+                                  sprintf "    %s:=k1.ag;\n" keyAg ^
+                                  sprintf "    aencMsg:=msgs[msg.aencMsg];\n"^
+                                  sprintf "    destruct%d(aencMsg,%s);\n" m1Num (atom2Str m1Atoms) ^
+                                  sprintf "  end;\n"
+                                  (* let msgNums = String.concat ~sep:"," (List.mapi ~f:(fun i m -> sprintf "msgNum%d" (i+1)) msgs) in
                                   let str2 = sprintf "  var k1:KeyType;\n    aencMsg,%s:Message;\n" msgNums ^
                                              sprintf "  begin\n    clear aencMsg;\n    k1 := msgs[msg.aencKey].k;\n    %s := k1.ag;\n    aencMsg:=msgs[msg.aencMsg];\n" keyAg^
                                              String.concat ~sep:"\n" (List.mapi ~f:(fun i m -> sprintf "    msgNum%d:=msgs[aencMsg.concatPart[%d]];" (i+1) (i+1)) msgs)
@@ -1479,7 +1493,29 @@ let genDestruct m i patlist =
                                                                   sprintf "    destruct%d(msgNum%d,%s);\n" (getPatNum m' patlist) (i+1) (atom2Str atoms')                             
                                               |_ -> sprintf "" )msgs))
                                   in
-                                  str1 ^ str2^ "\n" ^str3 ^ "  end;\n"
+                                  str1 ^ str2^ "\n" ^str3 ^ "  end;\n" *)
+                  |`Aenc (m1',k1') -> let m1Atoms = getAtoms m1 in
+                                      let m1Num = getPatNum m1 patlist in
+                                      str1 ^
+                                      sprintf "  var k1:KeyType;\n" ^
+                                      sprintf "      aencMsg:Message;\n    begin\n" ^
+                                      sprintf "    clear aencMsg;\n" ^
+                                      sprintf "    k1:=msgs[msg.aencKey].k;\n" ^
+                                      sprintf "    %s:=k1.ag;\n" keyAg ^
+                                      sprintf "    aencMsg:=msgs[msg.aencMsg];\n"^
+                                      sprintf "    destruct%d(aencMsg,%s);\n" m1Num (atom2Str m1Atoms) ^
+                                      sprintf "  end;\n"
+                  |`Senc (m1',k1') -> let m1Atoms = getAtoms m1 in
+                                      let m1Num = getPatNum m1 patlist in
+                                      str1 ^
+                                      sprintf "  var k1:KeyType;\n" ^
+                                      sprintf "      aencMsg:Message;\n    begin\n" ^
+                                      sprintf "    clear aencMsg;\n" ^
+                                      sprintf "    k1:=msgs[msg.aencKey].k;\n" ^
+                                      sprintf "    %s:=k1.ag;\n" keyAg ^
+                                      sprintf "    aencMsg:=msgs[msg.aencMsg];\n"^
+                                      sprintf "    destruct%d(aencMsg,%s);\n" m1Num (atom2Str m1Atoms) ^
+                                      sprintf "  end;\n"
                   |`Var n ->str1 ^ 
                             sprintf "  var k1:KeyType;\n" ^
                             sprintf "      msg1:Message;\n   begin\n" ^ (*,msgNum1,msgNum2*)
@@ -1489,37 +1525,76 @@ let genDestruct m i patlist =
                             sprintf "      msg1:=msgs[msg.aencMsg];\n" ^
                             sprintf "      %s:=msg1.noncePart;\n" n ^
                             sprintf "   end;\n"
+                  |`Pk r -> str1 ^ 
+                            sprintf "  var k1:KeyType;\n" ^
+                            sprintf "      msg1:Message;\n   begin\n" ^ (*,msgNum1,msgNum2*)
+                            sprintf "      clear msg1;\n" ^
+                            sprintf "      k1 := msgs[msg.aencKey].k;\n"^
+                            sprintf "      %s := k1.ag;" keyAg ^
+                            sprintf "      msg1:=msgs[msg.aencMsg];\n" ^
+                            sprintf "      %sPk:=msg1.k.ag;\n" r ^
+                            sprintf "   end;\n"
+                  |`Sk r -> str1 ^ 
+                            sprintf "  var k1:KeyType;\n" ^
+                            sprintf "      msg1:Message;\n   begin\n" ^ 
+                            sprintf "      clear msg1;\n" ^
+                            sprintf "      k1 := msgs[msg.aencKey].k;\n"^
+                            sprintf "      %s := k1.ag;" keyAg ^
+                            sprintf "      msg1:=msgs[msg.aencMsg];\n" ^
+                            sprintf "      %sSk:=msg1.k.ag;\n" r ^
+                            sprintf "   end;\n"
+                  |`K (r1,r2) -> str1 ^ 
+                            sprintf "  var k1:KeyType;\n" ^
+                            sprintf "      msg1:Message;\n   begin\n" ^ 
+                            sprintf "      clear msg1;\n" ^
+                            sprintf "      k1 := msgs[msg.aencKey].k;\n"^
+                            sprintf "      %s := k1.ag;" keyAg ^
+                            sprintf "      msg1:=msgs[msg.aencMsg];\n" ^
+                            sprintf "      %ssymk1:=msg1.k.ag1;\n" r1 ^
+                            sprintf "      %ssymk2:=msg1.k.ag2;\n" r2 ^
+                            sprintf "   end;\n"
 
                   |_ -> ""     
   end 
   |`Senc (m1,`K(r1,r2)) ->begin
                           match m1 with
-                          |`Concat msgs ->let msgNums = String.concat ~sep:"," (List.mapi ~f:(fun i m -> sprintf "msgNum%d" (i+1)) msgs) in
-                                          let str2 = sprintf "  var sencMsg,%s:Message;\n" msgNums ^
-                                                     sprintf "      k1: KeyType;\n" ^
-                                                     sprintf "  begin\n"^
-                                                     sprintf "    clear sencMsg;\n" ^
-                                                     sprintf "    sencMsg:=msgs[msg.sencMsg];\n" ^
-                                                     sprintf "    k1:=msgs[msg.sencKey].k;\n" ^
-                                                     sprintf "    %ssymk1:=k1.ag1;\n" r1^
-                                                     sprintf "    %ssymk2:=k1.ag2;\n" r2^
-                                                     String.concat ~sep:"\n" (List.mapi ~f:(fun i m -> sprintf "    msgNum%d:=msgs[sencMsg.concatPart[%d]];" (i+1) (i+1)) msgs)
-                                          in
-                                          let str3 = (String.concat (List.mapi ~f:(fun i m'-> 
-                                                      match m' with
-                                                      |`Var n -> sprintf "    %s:=msgNum%d.noncePart;\n" n (i+1)
-                                                      |`Str r -> sprintf "    %s:=msgNum%d.ag;\n" r (i+1)
-                                                      |`Pk r -> sprintf "     %sPk:=msgNum%d.k.ag;\n" r (i+1)
-                                                      |`Sk r -> sprintf "     %sSk:=msgNum%d.k.ag;\n" r (i+1)
-                                                      |`K (r1,r2) ->sprintf "    %ssymk1:=msgNum%d.k.ag1;\n" r1 (i+1)^
-                                                                    sprintf "    %ssymk2:=msgNum%d.k.ag2;\n" r2 (i+1)
-                                                      |`Aenc (m1',k1') -> let atoms' = getAtoms m' in
-                                                                          sprintf "    destruct%d(msgNum%d,%s);\n" (getPatNum m' patlist) (i+1) (atom2Str atoms')   
-                                                      |`Senc (m1',k1') -> let atoms' = getAtoms m' in
-                                                                          sprintf "    destruct%d(msgNum%d,%s);\n" (getPatNum m' patlist) (i+1) (atom2Str atoms')  
-                                                      |_ -> sprintf "" )msgs))
-                                          in
-                                          str1 ^ str2^ "\n" ^str3 ^ "  end;\n"
+                          |`Concat msgs ->let m1Atoms = getAtoms m1 in
+                                          let m1Num = getPatNum m1 patlist in
+                                          str1 ^
+                                          sprintf "  var k1:KeyType;\n" ^
+                                          sprintf "      sencMsg:Message;\n    begin\n" ^
+                                          sprintf "    clear sencMsg;\n" ^
+                                          sprintf "    k1:=msgs[msg.sencKey].k;\n" ^                                  
+                                          sprintf "    %ssymk1:=k1.ag1;\n" r1 ^
+                                          sprintf "    %ssymk2:=k1.ag2;\n" r2 ^
+                                          sprintf "    sencMsg:=msgs[msg.sencMsg];\n"^
+                                          sprintf "    destruct%d(sencMsg,%s);\n" m1Num (atom2Str m1Atoms) ^
+                                          sprintf "  end;\n"    
+                          |`Aenc (m1',k1') -> let m1Atoms = getAtoms m1 in
+                                              let m1Num = getPatNum m1 patlist in
+                                              str1 ^
+                                              sprintf "  var k1:KeyType;\n" ^
+                                              sprintf "      sencMsg:Message;\n    begin\n" ^
+                                              sprintf "    clear sencMsg;\n" ^
+                                              sprintf "    k1:=msgs[msg.sencKey].k;\n" ^
+                                              sprintf "    %ssymk1:=k1.ag1;\n" r1 ^
+                                              sprintf "    %ssymk2:=k1.ag2;\n" r2 ^
+                                              sprintf "    sencMsg:=msgs[msg.sencMsg];\n"^
+                                              sprintf "    destruct%d(sencMsg,%s);\n" m1Num (atom2Str m1Atoms) ^
+                                              sprintf "  end;\n"
+                          |`Senc (m1',k1') -> let m1Atoms = getAtoms m1 in
+                                          let m1Num = getPatNum m1 patlist in
+                                          str1 ^
+                                          sprintf "  var k1:KeyType;\n" ^
+                                          sprintf "      sencMsg:Message;\n    begin\n" ^
+                                          sprintf "    clear sencMsg;\n" ^
+                                          sprintf "    k1:=msgs[msg.sencKey].k;\n" ^
+                                          sprintf "    %ssymk1:=k1.ag1;\n" r1^
+                                          sprintf "    %ssymk2:=k1.ag2;\n" r2^
+                                          sprintf "    sencMsg:=msgs[msg.sencMsg];\n"^
+                                          sprintf "    destruct%d(sencMsg,%s);\n" m1Num (atom2Str m1Atoms) ^
+                                          sprintf "  end;\n"
+                                                        
                           |`Var n ->str1 ^ 
                                     sprintf "  var k1:KeyType;\n" ^
                                     sprintf "      sencMsg:Message;\n   begin\n" ^ (*,msgNum1,msgNum2*)
@@ -1530,28 +1605,68 @@ let genDestruct m i patlist =
                                     sprintf "      sencMsg:=msgs[msg.sencMsg];\n" ^
                                     sprintf "      %s:=sencMsg.noncePart;\n" n ^
                                     sprintf "   end;\n"
+                          |`Pk r ->str1 ^ 
+                                    sprintf "  var k1:KeyType;\n" ^
+                                    sprintf "      sencMsg:Message;\n   begin\n" ^ (*,msgNum1,msgNum2*)
+                                    sprintf "      clear sencMsg;\n" ^
+                                    sprintf "      k1 := msgs[msg.sencKey].k;\n"^
+                                    sprintf "      %ssymk1 := k1.ag1;\n" r1 ^
+                                    sprintf "      %ssymk2 := k1.ag2;\n" r2 ^
+                                    sprintf "      sencMsg:=msgs[msg.sencMsg];\n" ^
+                                    sprintf "      %sPk:=sencMsg.k.ag;\n" r ^
+                                    sprintf "   end;\n"
+                          |`Sk r ->str1 ^ 
+                                    sprintf "  var k1:KeyType;\n" ^
+                                    sprintf "      sencMsg:Message;\n   begin\n" ^ (*,msgNum1,msgNum2*)
+                                    sprintf "      clear sencMsg;\n" ^
+                                    sprintf "      k1 := msgs[msg.sencKey].k;\n"^
+                                    sprintf "      %ssymk1 := k1.ag1;\n" r1 ^
+                                    sprintf "      %ssymk2 := k1.ag2;\n" r2 ^
+                                    sprintf "      sencMsg:=msgs[msg.sencMsg];\n" ^
+                                    sprintf "      %sSk:=sencMsg.k.ag;\n" r ^
+                                    sprintf "   end;\n"
+                          |`K (r1',r2') ->str1 ^ 
+                                          sprintf "  var k1:KeyType;\n" ^
+                                          sprintf "      sencMsg:Message;\n   begin\n" ^ (*,msgNum1,msgNum2*)
+                                          sprintf "      clear sencMsg;\n" ^
+                                          sprintf "      k1 := msgs[msg.sencKey].k;\n"^
+                                          sprintf "      %ssymk1 := k1.ag1;\n" r1 ^
+                                          sprintf "      %ssymk2 := k1.ag2;\n" r2 ^
+                                          sprintf "      sencMsg:=msgs[msg.sencMsg];\n" ^
+                                          sprintf "      %ssymk1:=sencMsg.k.ag1;\n" r1' ^
+                                          sprintf "      %ssymk2:=sencMsg.k.ag2;\n" r2' ^
+                                          sprintf "   end;\n"
                           |_ ->""
 
 
   end
   |`Concat msgs -> let msgNums = String.concat ~sep:"," (List.mapi ~f:(fun i m -> sprintf "msgNum%d" (i+1)) msgs) in
-                   let stats = String.concat ~sep:";\n" (List.mapi ~f:(fun i m -> match m with
+                   let stats = String.concat ~sep:";\n" (List.mapi ~f:(fun i m -> 
+                      match m with
                       |`Str r -> sprintf "    msgNum%d := msgs[msg.concatPart[%d]];\n" (i+1) (i+1) ^
                                  sprintf "    %s := msgNum%d.ag" r (i+1)
                       |`Var n -> sprintf "    msgNum%d := msgs[msg.concatPart[%d]];\n" (i+1) (i+1) ^
                                  sprintf "    %s := msgNum%d.noncePart" n (i+1)
-                      |`Aenc(m1,k1) -> let keyAg = match k1 with 
+                      |`Aenc(m1,k1) ->let atoms' = getAtoms m in
+                                      let mNum = getPatNum m patlist in
+                                      sprintf "    msgNum%d := msgs[msg.concatPart[%d]];\n" (i+1) (i+1)^
+                                      sprintf "    destruct%d(msgNum%d,%s)" mNum (i+1) (atom2Str atoms')
+                                      (* let keyAg = match k1 with 
                                                    |`Pk r -> r ^ "Pk"
                                                    |`Sk r -> r ^ "Sk"
                                                    |_ -> "" 
-                                        in
-                                        sprintf "    msgNum%d := msgs[msg.concatPart[%d]];\n" (i+1) (i+1)^
-                                        sprintf "    k := msgs[msgNum%d.aencKey].k;\n" (i+1) ^
-                                        sprintf "    %s := k.ag" keyAg
-                      |`Senc(m1,`K(r1,r2))->sprintf "    msgNum%d := msgs[msg.concatPart[%d]];\n" (i+1) (i+1)^
-                                              sprintf "    k := msgs[msgNum%d.aencKey].k;\n" (i+1) ^
-                                              sprintf "    %ssymk1 := k.ag1;\n" r1 ^
-                                              sprintf "    %ssymk2 := k.ag2" r2
+                                      in
+                                      sprintf "    msgNum%d := msgs[msg.concatPart[%d]];\n" (i+1) (i+1)^
+                                      sprintf "    k := msgs[msgNum%d.aencKey].k;\n" (i+1) ^
+                                      sprintf "    %s := k.ag" keyAg *)
+                      |`Senc(m1,`K(r1,r2))->let atoms' = getAtoms m in
+                                            let mNum = getPatNum m patlist in
+                                            sprintf "    msgNum%d := msgs[msg.concatPart[%d]];\n" (i+1) (i+1)^
+                                            sprintf "    destruct%d(msgNum%d,%s)" mNum (i+1) (atom2Str atoms')
+                                            (* sprintf "    msgNum%d := msgs[msg.concatPart[%d]];\n" (i+1) (i+1)^
+                                            sprintf "    k := msgs[msgNum%d.aencKey].k;\n" (i+1) ^
+                                            sprintf "    %ssymk1 := k.ag1;\n" r1 ^
+                                            sprintf "    %ssymk2 := k.ag2" r2 *)
                       |`Pk r -> sprintf "    msgNum%d := msgs[msg.concatPart[%d]];\n" (i+1) (i+1) ^
                                 sprintf "    %sPk := msgNum%d.k.ag" r (i+1)
                       |`Sk r -> sprintf "    msgNum%d := msgs[msg.concatPart[%d]];\n" (i+1) (i+1) ^

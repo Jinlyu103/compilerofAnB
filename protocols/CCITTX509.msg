@@ -11,7 +11,7 @@ Environment:{
 [agent2] B [1] : <Alice>
 }
 Goals:{
-[sec1] nonce(Y1);
-[auth1] B non-injectively agrees with A on nonce(Ya)
+[secrecy] nonce(Y1);
+[weakB] B non-injectively agrees with A on nonce(Ya)
 }
 end

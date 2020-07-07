@@ -881,19 +881,15 @@ procedure cons6(Asymk1:AgentType; Bsymk2:AgentType; A:AgentType; Bsymk1:AgentTyp
     clear num;    lookAddPat6(Asymk1, Bsymk2, A, Bsymk1, Ssymk2,msg,num);
   end;
 procedure destruct6(msg:Message; Var Asymk1:AgentType; Var Bsymk2:AgentType; Var A:AgentType; Var Bsymk1:AgentType; Var Ssymk2:AgentType);
-  var sencMsg,msgNum1,msgNum2:Message;
-      k1: KeyType;
-  begin
+  var k1:KeyType;
+      sencMsg:Message;
+    begin
     clear sencMsg;
-    sencMsg:=msgs[msg.sencMsg];
     k1:=msgs[msg.sencKey].k;
     Bsymk1:=k1.ag1;
     Ssymk2:=k1.ag2;
-    msgNum1:=msgs[sencMsg.concatPart[1]];
-    msgNum2:=msgs[sencMsg.concatPart[2]];
-    Asymk1:=msgNum1.k.ag1;
-    Bsymk2:=msgNum1.k.ag2;
-    A:=msgNum2.ag;
+    sencMsg:=msgs[msg.sencMsg];
+    destruct5(sencMsg,Asymk1, Bsymk2, A);
   end;
 procedure cons7(Na:NonceType; B:AgentType; Asymk1:AgentType; Bsymk2:AgentType; A:AgentType; Bsymk1:AgentType; Ssymk2:AgentType; Var msg:Message; Var num:indexType);
   begin
@@ -912,9 +908,7 @@ procedure destruct7(msg:Message; Var Na:NonceType; Var B:AgentType; Var Asymk1:A
     Asymk1 := msgNum3.k.ag1;
     Bsymk2 := msgNum3.k.ag2;
     msgNum4 := msgs[msg.concatPart[4]];
-    k := msgs[msgNum4.aencKey].k;
-    Bsymk1 := k.ag1;
-    Ssymk2 := k.ag2
+    destruct6(msgNum4,Asymk1, Bsymk2, A, Bsymk1, Ssymk2)
   end;
 procedure cons8(Na:NonceType; B:AgentType; Asymk1:AgentType; Bsymk2:AgentType; A:AgentType; Bsymk1:AgentType; Ssymk2:AgentType; Var msg:Message; Var num:indexType);
   begin
@@ -922,23 +916,15 @@ procedure cons8(Na:NonceType; B:AgentType; Asymk1:AgentType; Bsymk2:AgentType; A
     clear num;    lookAddPat8(Na, B, Asymk1, Bsymk2, A, Bsymk1, Ssymk2,msg,num);
   end;
 procedure destruct8(msg:Message; Var Na:NonceType; Var B:AgentType; Var Asymk1:AgentType; Var Bsymk2:AgentType; Var A:AgentType; Var Bsymk1:AgentType; Var Ssymk2:AgentType);
-  var sencMsg,msgNum1,msgNum2,msgNum3,msgNum4:Message;
-      k1: KeyType;
-  begin
+  var k1:KeyType;
+      sencMsg:Message;
+    begin
     clear sencMsg;
-    sencMsg:=msgs[msg.sencMsg];
     k1:=msgs[msg.sencKey].k;
     Asymk1:=k1.ag1;
     Ssymk2:=k1.ag2;
-    msgNum1:=msgs[sencMsg.concatPart[1]];
-    msgNum2:=msgs[sencMsg.concatPart[2]];
-    msgNum3:=msgs[sencMsg.concatPart[3]];
-    msgNum4:=msgs[sencMsg.concatPart[4]];
-    Na:=msgNum1.noncePart;
-    B:=msgNum2.ag;
-    Asymk1:=msgNum3.k.ag1;
-    Bsymk2:=msgNum3.k.ag2;
-    destruct6(msgNum4,Asymk1, Bsymk2, A, Bsymk1, Ssymk2);
+    sencMsg:=msgs[msg.sencMsg];
+    destruct7(sencMsg,Na, B, Asymk1, Bsymk2, A, Bsymk1, Ssymk2);
   end;
 procedure cons9(Nb:NonceType; Asymk1:AgentType; Bsymk2:AgentType; Var msg:Message; Var num:indexType);
   begin
@@ -1328,13 +1314,7 @@ begin
    ch[1].sender := roleA[i].A;
    ch[1].receiver := Intruder;
    roleA[i].st := A2;
-   put "send1. ";
-   put ch[1].sender;
-   put "   ";
-   put ch[1].receiver;
-   put "   msg: ";
-   printMsg(ch[1].msg);
-   put "\n";
+   put "roleA[i] in st1\n";
 end;
 rule " roleA2 "
 roleA[i].st = A2 & ch[2].empty = false & !roleA[i].commit
@@ -1354,13 +1334,7 @@ begin
        roleA[i].st := A3;
      endif;
    endif;
-   put "recv2. ";
-   put ch[2].sender;
-   put "   ";
-   put ch[2].receiver;
-   put "   msg: ";
-   printMsg(msg);
-   put "\n";
+   put "roleA[i] in st2\n";
 end;
 rule " roleA3 "
 roleA[i].st = A3 & ch[3].empty = true & !roleA[i].commit 
@@ -1375,13 +1349,7 @@ begin
    ch[3].sender := roleA[i].A;
    ch[3].receiver := Intruder;
    roleA[i].st := A4;
-   put "send3. ";
-   put ch[3].sender;
-   put "   ";
-   put ch[3].receiver;
-   put "   msg: ";
-   printMsg(ch[3].msg);
-   put "\n";
+   put "roleA[i] in st3\n";
 end;
 rule " roleA4 "
 roleA[i].st = A4 & ch[4].empty = false & !roleA[i].commit
@@ -1401,13 +1369,7 @@ begin
        roleA[i].st := A5;
      endif;
    endif;
-   put "recv4. ";
-   put ch[4].sender;
-   put "   ";
-   put ch[4].receiver;
-   put "   msg: ";
-   printMsg(msg);
-   put "\n";
+   put "roleA[i] in st4\n";
 end;
 rule " roleA5 "
 roleA[i].st = A5 & ch[5].empty = true & !roleA[i].commit 
@@ -1422,13 +1384,7 @@ begin
    ch[5].sender := roleA[i].A;
    ch[5].receiver := Intruder;
    roleA[i].st := A1;
-   put "send5. ";
-   put ch[5].sender;
-   put "   ";
-   put ch[5].receiver;
-   put "   msg: ";
-   printMsg(ch[5].msg);
-   put "\n";
+   put "roleA[i] in st5\n";
    roleA[i].commit := true;
 end;
 endruleset;
@@ -1452,13 +1408,7 @@ begin
        roleB[i].st := B2;
      endif;
    endif;
-   put "recv1. ";
-   put ch[3].sender;
-   put "   ";
-   put ch[3].receiver;
-   put "   msg: ";
-   printMsg(msg);
-   put "\n";
+   put "roleB[i] in st1\n";
 end;
 rule " roleB2 "
 roleB[i].st = B2 & ch[4].empty = true & !roleB[i].commit 
@@ -1473,13 +1423,7 @@ begin
    ch[4].sender := roleB[i].B;
    ch[4].receiver := Intruder;
    roleB[i].st := B3;
-   put "send2. ";
-   put ch[4].sender;
-   put "   ";
-   put ch[4].receiver;
-   put "   msg: ";
-   printMsg(ch[4].msg);
-   put "\n";
+   put "roleB[i] in st2\n";
 end;
 rule " roleB3 "
 roleB[i].st = B3 & ch[5].empty = false & !roleB[i].commit
@@ -1499,13 +1443,7 @@ begin
        roleB[i].st := B1;
      endif;
    endif;
-   put "recv3. ";
-   put ch[5].sender;
-   put "   ";
-   put ch[5].receiver;
-   put "   msg: ";
-   printMsg(msg);
-   put "\n";
+   put "roleB[i] in st3\n";
    roleB[i].commit := true;
 end;
 endruleset;
@@ -1529,13 +1467,7 @@ begin
        roleS[i].st := S2;
      endif;
    endif;
-   put "recv1. ";
-   put ch[1].sender;
-   put "   ";
-   put ch[1].receiver;
-   put "   msg: ";
-   printMsg(msg);
-   put "\n";
+   put "roleS[i] in st1\n";
 end;
 rule " roleS2 "
 roleS[i].st = S2 & ch[2].empty = true & !roleS[i].commit 
@@ -1550,13 +1482,7 @@ begin
    ch[2].sender := roleS[i].S;
    ch[2].receiver := Intruder;
    roleS[i].st := S1;
-   put "send2. ";
-   put ch[2].sender;
-   put "   ";
-   put ch[2].receiver;
-   put "   msg: ";
-   printMsg(ch[2].msg);
-   put "\n";
+   put "roleS[i] in st2\n";
    roleS[i].commit := true;
 end;
 endruleset;
@@ -1579,6 +1505,7 @@ rule "intruderGetMsgFromCh[1]"
         pat3Set.content[pat3Set.length]:=msgNo;
         Spy_known[msgNo] := true;
       endif;
+          put "intruder get msg into ch[1].\n";
       ch[1].empty := true;
       clear ch[1].msg;
     endif;
@@ -1601,6 +1528,7 @@ rule "intruderGetMsgFromCh[2]"
         pat8Set.content[pat8Set.length]:=msgNo;
         Spy_known[msgNo] := true;
       endif;
+          put "intruder get msg into ch[2].\n";
       ch[2].empty := true;
       clear ch[2].msg;
     endif;
@@ -1623,6 +1551,7 @@ rule "intruderGetMsgFromCh[3]"
         pat6Set.content[pat6Set.length]:=msgNo;
         Spy_known[msgNo] := true;
       endif;
+          put "intruder get msg into ch[3].\n";
       ch[3].empty := true;
       clear ch[3].msg;
     endif;
@@ -1645,6 +1574,7 @@ rule "intruderGetMsgFromCh[4]"
         pat9Set.content[pat9Set.length]:=msgNo;
         Spy_known[msgNo] := true;
       endif;
+          put "intruder get msg into ch[4].\n";
       ch[4].empty := true;
       clear ch[4].msg;
     endif;
@@ -1667,6 +1597,7 @@ rule "intruderGetMsgFromCh[5]"
         pat9Set.content[pat9Set.length]:=msgNo;
         Spy_known[msgNo] := true;
       endif;
+          put "intruder get msg into ch[5].\n";
       ch[5].empty := true;
       clear ch[5].msg;
     endif;
@@ -1686,13 +1617,7 @@ ruleset i: msgLen do
           ch[1].receiver:=roleS[j].S;
           ch[1].empty:=false;
           emit[pat3Set.content[i]] := true;
-          put "seq1. ";
-          put ch[1].sender;
-          put "   ";
-          put ch[1].receiver;
-          put "   msg: ";
-          printMsg(ch[1].msg);
-          put "\n";
+          put "intruder emit msg into ch[1].\n";
         endif;
       end;
   endruleset;
@@ -1712,13 +1637,7 @@ ruleset i: msgLen do
           ch[2].receiver:=roleA[j].A;
           ch[2].empty:=false;
           emit[pat8Set.content[i]] := true;
-          put "seq2. ";
-          put ch[2].sender;
-          put "   ";
-          put ch[2].receiver;
-          put "   msg: ";
-          printMsg(ch[2].msg);
-          put "\n";
+          put "intruder emit msg into ch[2].\n";
         endif;
       end;
   endruleset;
@@ -1738,13 +1657,7 @@ ruleset i: msgLen do
           ch[3].receiver:=roleB[j].B;
           ch[3].empty:=false;
           emit[pat6Set.content[i]] := true;
-          put "seq3. ";
-          put ch[3].sender;
-          put "   ";
-          put ch[3].receiver;
-          put "   msg: ";
-          printMsg(ch[3].msg);
-          put "\n";
+          put "intruder emit msg into ch[3].\n";
         endif;
       end;
   endruleset;
@@ -1764,13 +1677,7 @@ ruleset i: msgLen do
           ch[4].receiver:=roleA[j].A;
           ch[4].empty:=false;
           emit[pat9Set.content[i]] := true;
-          put "seq4. ";
-          put ch[4].sender;
-          put "   ";
-          put ch[4].receiver;
-          put "   msg: ";
-          printMsg(ch[4].msg);
-          put "\n";
+          put "intruder emit msg into ch[4].\n";
         endif;
       end;
   endruleset;
@@ -1790,13 +1697,7 @@ ruleset i: msgLen do
           ch[5].receiver:=roleB[j].B;
           ch[5].empty:=false;
           emit[pat9Set.content[i]] := true;
-          put "seq5. ";
-          put ch[5].sender;
-          put "   ";
-          put ch[5].receiver;
-          put "   msg: ";
-          printMsg(ch[5].msg);
-          put "\n";
+          put "intruder emit msg into ch[5].\n";
         endif;
       end;
   endruleset;
