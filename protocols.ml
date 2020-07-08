@@ -1711,6 +1711,14 @@ let genDestruct m i patlist =
   begin\n%s;
   end;\n" msgNums stats   2020-04-06: finished !!     
 *)
+  |`Var n ->str1^
+            sprintf "  begin\n" ^
+            sprintf "    %s:=msg.noncePart;\n" n ^
+            sprintf "  end;\n"
+  |`Str r ->str1^
+            sprintf "  begin\n" ^
+            sprintf "    %s:=msg.ag;\n" r ^
+            sprintf "  end;\n"
   |_ -> ""
 ;;
 
