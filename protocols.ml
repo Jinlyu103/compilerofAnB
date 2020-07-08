@@ -972,7 +972,33 @@ let genSynthCode m i patList =
                      sprintf "     msg_end := msg_end + 1 ;\n     index := msg_end;\n     msgs[index].msgType := senc;\n     msgs[index].sencMsg := i1; \n     msgs[index].sencKey := i2; \n     msgs[index].length := 1;\n"^
                      sprintf "   endif;\n"^
                      sprintf "   num:=index;\n   msg:=msgs[index];\n  end;\n\n";
-  |`Concat msgs -> begin  (* concat(Na,Nb), concat(Na,A), concat(Server, Na), concat(Server, Na, aenc{concat(Server, Na)}sk(Server))*)
+  |`Concat msgs ->let msgNoStr = String.concat ~sep:"," (List.mapi ~f:(fun i m' -> sprintf "msg%d" (i+1)) msgs) in
+                  let idxNoStr = String.concat ~sep:"," (List.mapi ~f:(fun i m' -> sprintf "i%d" (i+1)) msgs) in
+                  let lookAddPatStr = String.concat ~sep:";\n" (List.mapi ~f:(fun i m' -> 
+                                      let atoms1 = getAtoms m' in
+                                      sprintf "   lookAddPat%d(%s, msg%d, i%d)" (getPatNum m' patList) (atom2Str atoms1) (i+1) (i+1)) msgs) 
+                  in
+                  let guardStr = String.concat ~sep:" & " (List.mapi ~f:(fun i m' -> sprintf "msgs[i].concatPart[%d]=i%d" (i+1) (i+1)) msgs)
+                  in
+                  let stmtStr = String.concat ~sep:";\n" (List.mapi ~f:(fun i m' -> sprintf "     msgs[index].concatPart[%d]:=i%d" (i+1) (i+1)) msgs) in
+                  str1 ^
+                  sprintf "  Var %s: Message;\n     index,%s:indexType;\n  begin\n" msgNoStr idxNoStr ^
+                  sprintf "   index:=0;\n"^
+                  sprintf "%s;\n" lookAddPatStr ^
+                  sprintf "   for i : indexType do\n"^
+                  sprintf "     if (msgs[i].msgType = concat & msgs[i].length=%d) then\n" (List.length msgs)^
+                  sprintf "       if (%s) then\n" guardStr ^
+                  sprintf "          index:=i;\n"^
+                  sprintf "       endif;\n"^
+                  sprintf "     endif;\n"^
+                  sprintf "   endfor;\n"^
+                  sprintf "   if(index=0) then\n"^
+                  sprintf "     msg_end := msg_end + 1 ;\n     index := msg_end;\n     msgs[index].msgType := concat;\n"^
+                  sprintf "%s; \n" stmtStr ^
+                  sprintf "     msgs[index].length := %d;\n" (List.length msgs)^
+                  sprintf "   endif;\n"^
+                  sprintf "   num:=index;\n   msg:=msgs[index];\n  end;\n\n";
+    (* begin  (* concat(Na,Nb), concat(Na,A), concat(Server, Na), concat(Server, Na, aenc{concat(Server, Na)}sk(Server))*)
                   let patNumList = ref [] in
                   for i = 0 to ((List.length msgs) - 1) do
                       let (m, j) = match List.nth msgs i with
@@ -1017,7 +1043,7 @@ let genSynthCode m i patList =
                   done;
                   let str2 = "  Var " ^ String.concat ~sep:", " (List.mapi ~f:(fun k m -> sprintf "msg%d" (k+1)) msgs) ^ " : Message;\n"
                   in
-                  let str3 = "      index," ^ String.concat ~sep:"," (List.mapi ~f:(fun k m -> sprintf "i%d" (k+1)) msgs) ^ " : indexType;\n  begin\n   index:=0;\n"
+                  let str3 = "  Var index," ^ String.concat ~sep:"," (List.mapi ~f:(fun k m -> sprintf "i%d" (k+1)) msgs) ^ " : indexType;\n  begin\n   index:=0;\n"
                   in
                   let str4 = String.concat ~sep: ";\n" (List.mapi ~f:(fun i (m,j) -> sprintf "   lookAddPat%d(%s,msg%d,i%d)" j m (i+1) (i+1)) !patNumList) ^ ";\n"
                   in
@@ -1038,7 +1064,7 @@ let genSynthCode m i patList =
                   sprintf "%s; \n" str6 ^
                   sprintf "     msgs[index].length := %d;\n    endif;\n" (List.length msgs)^
                   sprintf "   num:=index;\n   msg:=msgs[index];\n  end;\n\n";
-                end
+                end *)
   |`Str s ->str1 ^ sprintf " Var index : indexType;\n begin
    index:=0;
    for i: indexType do
@@ -2304,6 +2330,7 @@ let rec printGoal2Murphi g =
   match g with
   |`Null -> sprintf "null\n"
   |`Secretgoal (seq,m) -> printSecGoal (seq,m)
+  |`Secretgoal1 (seq,m,r1,r2) -> printSecGoal1 (seq,m,r1,r2)
   |`Agreegoal (seq,r1,r2,m) -> printAgreeGoal (seq,r1,r2,m) 
   |`Goallist gols -> String.concat (List.map ~f:(fun g -> printGoal2Murphi g) gols)
 
@@ -2341,6 +2368,21 @@ and printSecGoal (seq,m) =
       ->
       Spy_known[i] = false
   end;\n" seq (output_msg m) *)
+
+and printSecGoal1 (seq,m,r1,r2) =
+  sprintf "\ninvariant \"%s\"" seq^
+  sprintf "  forall i:indexType do\n" ^
+  sprintf "    forall j:role%sNums do\n" r1 ^
+  sprintf "      forall k: role%sNums do\n" r2 ^
+  sprintf "        (msgs[i].msgType=nonce & msgs[i].noncePart = role%s[j].%s &\n" r1 (output_msg m)^ 
+  sprintf "         role%s[j].%s != Intruder & role%s[j].%s != Intruder &\n" r1 r1 r1 r2 ^
+  sprintf "         role%s[k].%s != Intruder) ---& role%s[k].%s != Intruder )\n" r2 r2 r2 r1 ^
+  sprintf "        ->\n" ^
+  sprintf "        Spy_known[i] = false\n" ^
+  sprintf "      endforall\n" ^
+  sprintf "    endforall\n" ^
+  sprintf "  endforall;\n" 
+
 and printAgreeGoal (seq,r1,r2,m) = 
   let mstr = (output_msg m) in
   sprintf "\ninvariant \"%s\"\n" seq ^

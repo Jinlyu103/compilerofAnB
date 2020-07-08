@@ -64,6 +64,8 @@ rule read =
   | "non-injectively agrees with" {NINJ}
   | "injectively agrees with" {INJ}
   | "on" {ON}
+  | "keep confidential between" {CONF}
+  | "and" {AND}
   | id { IDENT (Lexing.lexeme lexbuf) }
   | int {INT (int_of_string (Lexing.lexeme lexbuf)) }
   | _ { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }

@@ -34,6 +34,8 @@
 %token ON
 %token EOF
 %token ENVIRONMENT
+%token CONF
+%token AND
 
 %start <Protocols.protocols option> prog
 
@@ -77,6 +79,7 @@ goals:
 goal:
   (*| LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE ; m=message; SECRETOF ; rlist=role { `Secretgoal (seq,m,rlist)}*)
   | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE ; m=message { `Secretgoal (seq,m)}
+  | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE ; m=message; CONF; r1 = IDENT; AND; r2=IDENT { `Secretgoal1 (seq,m,r1,r2)}
   | LEFT_MIDBRACE; seq=IDENT; RIGHT_MIDBRACE ; r1=IDENT;NINJ;r2=IDENT;ON; m=message { `Agreegoal (seq,r1,r2,m)}
   | LEFT_BRACE; gols = goal_list; RIGHT_BRACE {`Goallist gols };
 
