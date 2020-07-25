@@ -1,7 +1,7 @@
 # how?
  终端输入：  
  $ corebuild -use-menhir test.native   
- $ ./test.native  test2.msg    
+ $ ./test.native  yourProtocol    
  Then a new file with name result.m will be generated in folder outputs.   
 # Murphi model checker:
  in outputs folder, terminal:  
